@@ -17,11 +17,28 @@ int	ft_strcmp(const char *s1, const char *s2)
 	int	i;
 
 	i = 0;
-	while (s1 && s2 && s1[i] != '\0' && s2[i] != '\0' && s1[i] == s2[i])
+	while (s1 && s2 && s1[i] && s2[i] && s1[i] == s2[i])
 	{
 		i++;
 	}
 	return (s1[i] - s2[i]);
+}
+int	my_strcmp(const char *s1, const char **s2)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	while (s2[j])
+	{
+        i = 0;
+        while (s2[j][i] && s1[i] && (s1[i] == s2[j][i]))
+            i++;
+        if(s1[i] - s2[j][i] == 0)
+            return s1[i] - s2[j][i];
+		j++;
+	}
+	return (-1);
 }
 
 int if_last_point(char *str)
