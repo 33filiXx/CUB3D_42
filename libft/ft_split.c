@@ -6,101 +6,101 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 14:36:09 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2024/11/16 21:26:25 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/08/28 16:57:49 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static char	*ft_checklenght(const char *s, char sep, int *j)
+int		is_separator(char c, char *charset)
 {
+	int	i;
+
+	i = 0;
+	while (charset[i])
+	{
+		if (c == charset[i])
+			return (1);
+		++i;
+	}
+	return (0);
+}
+
+int		is_word(char c, char cbefore, char *charset)
+{
+	return (!is_separator(c, charset) && is_separator(cbefore, charset));
+}
+
+int		get_words_count(char *str, char *charset)
+{
+	int	words_count;
+	int	i;
+
+	i = 0;
+	words_count = 0;
+	while (str[i] != '\0')
+	{
+		if (is_word(str[i], str[i - 1], charset) ||
+			(!is_separator(str[i], charset) && i == 0))
+			words_count++;
+		i++;
+	}
+	return (words_count);
+}
+
+int		*get_words_size(char *str, char *charset)
+{
+	int	index;
+	int	i;
+	int	words_count;
+	int	*words_size;
+
+	i = 0;
+	words_count = get_words_count(str, charset);
+	words_size = malloc(words_count * sizeof(int));
+	while (i <= words_count)
+	{
+		words_size[i] = 0;
+		i++;
+	}
+	i = 0;
+	index = 0;
+	while (str[i] != '\0')
+	{
+		if (!is_separator(str[i], charset))
+			words_size[index]++;
+		else if (i > 0 && !is_separator(str[i - 1], charset))
+			index++;
+		i++;
+	}
+	return (words_size);
+}
+
+char	**ft_split(char *str, char *charset)
+{
+	char	**words;
 	int		i;
-	char	*p;
-	int		k;
+	int		j;
+	int		index;
+	int		*words_size;
 
-	k = *j;
-	i = 0;
-	while (s[k] == sep && s[k])
-		k++;
-	while (s[i + k] && s[i + k] != sep)
-		i++;
-	p = (char *)malloc((i + 1) * sizeof(char));
-	if (!p)
-		return (NULL);
-	i = 0;
-	while (s[k] && s[k] != sep)
+	words = malloc((get_words_count(str, charset) + 1) * sizeof(char*));
+	words_size = get_words_size(str, charset);
+	index = 0;
+	j = 0;
+	i = -1;
+	while (str[++i] != '\0')
 	{
-		p[i] = s[k];
-		i++;
-		k++;
-	}
-	p[i] = '\0';
-	*j = k;
-	return (p);
-}
-
-static int	ft_countword(char const *str, char c)
-{
-	int	i;
-	int	count;
-	int	check;
-
-	i = 0;
-	count = 0;
-	check = 1;
-	while (str[i])
-	{
-		if (str[i] != c && check == 1)
+		if (!is_separator(str[i], charset))
 		{
-			count++;
-			check = 0;
+			if (i == 0 || is_word(str[i], str[i - 1], charset))
+				words[index] = malloc(words_size[index] * sizeof(char));
+			words[index][j] = str[i];
+			words[index][++j] = '\0';
 		}
-		else if (str[i] == c)
-			check = 1;
-		i++;
+		else if (i > 0 && !is_separator(str[i - 1], charset) && ++index)
+			j = 0;
 	}
-	return (count);
-}
-
-static void	ft_free(char **ptr)
-{
-	int	i;
-
-	i = 0;
-	while (ptr[i])
-	{
-		free(ptr[i]);
-		i++;
-	}
-	free(ptr);
-	ptr = NULL;
-}
-
-char	**ft_split(char const *s, char c)
-{
-	char	**splitted;
-	int		k;
-	int		count;
-	int		check;
-
-	if (!s)
-		return (NULL);
-	count = ft_countword(s, c);
-	splitted = (char **)malloc((count + 1) * sizeof(char *));
-	if (!splitted)
-		return (NULL);
-	k = 0;
-	check = 0;
-	while (k < count)
-	{
-		splitted[k] = ft_checklenght(s, c, &check);
-		if (!splitted[k])
-		{
-			ft_free(splitted);
-			return (NULL);
-		}
-		k++;
-	}
-	splitted[k] = NULL;
-	return (splitted);
+	words[get_words_count(str, charset)] = 0;
+	return (words);
 }

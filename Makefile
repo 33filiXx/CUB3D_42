@@ -1,12 +1,12 @@
 NAME = cub3D
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
-LIB = ./libft/libft.a
 
 
-SRCS =  
+SRCS =  src/main.c src/pars/parsing.c src/pars/store_data.c
 
 OBJS = $(SRCS:.c=.o)
+LIB = ./libft/libft.a
 
 all: $(NAME)
 
@@ -15,10 +15,10 @@ $(LIB):
 
 
 $(NAME): $(OBJS) $(LIB)
-	$(CC) $(OBJS) -L./minilibx-linux -lmlx -L/usr/lib -lXext -lX11 -lm -lz $(LIB)  -o $(NAME)
+	$(CC) $(OBJS) $(CFLAGS) $(LIB) -o $(NAME)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -Iminilibx-linux -O3 -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -f $(OBJS)

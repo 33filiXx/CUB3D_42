@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/02 16:23:34 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2024/11/17 20:09:27 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/08/28 17:01:53 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ static char	*ft_strcat(char const *s1, char const *s2, char *dest)
 	return (dest);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_strjoin(char *s1, char *s2)
 {
 	int		ls2;
 	int		ls1;
