@@ -3,7 +3,7 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
 
-SRCS =  src/main.c src/pars/parsing.c src/pars/store_data.c
+SRCS =  src/main.c src/pars/parsing.c src/pars/store_data.c 
 
 OBJS = $(SRCS:.c=.o)
 LIB = ./libft/libft.a
