@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:18:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/13 14:26:21 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/13 15:27:16 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,6 @@ int exists(char *str)
 int  punisher(char **av , t_file_data *file_data)
 {
     int fd;
-    file_data = NULL;
 
     fd = exists(*av);
     if (fd == -1)

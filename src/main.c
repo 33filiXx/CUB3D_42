@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:19:29 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/13 14:25:11 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/13 15:25:01 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int main(int ac , char **av)
     {
         if(!punisher(av + 1 , file_data))
         {
-            //print_file_data(*file_data);
+            print_file_data(*file_data);
             exit(22);
         }
         else
