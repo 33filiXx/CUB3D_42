@@ -26,6 +26,8 @@ typedef struct s_file_data
 	char	*ea_texture;
 	int		floor_color[3];
 	int		ceiling_color[3];
+	char *hexa_ceiling_color;
+	char *hexa_f_color;
 }			t_file_data;
 
 typedef struct s_cmp_data
@@ -36,7 +38,7 @@ typedef struct s_cmp_data
 
 // char	**ft_split(char *str, char *charset);
 int punisher(char **av , t_file_data *file_data);
-int set_data(int fd , t_file_data *file_data);
+int	set_data(int fd, t_file_data *file_data);
 int	ft_strcmp(const char *s1, const char *s2);
 // int	my_strcmp(const char *s1, const char **s2);
 

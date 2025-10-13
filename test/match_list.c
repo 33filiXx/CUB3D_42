@@ -124,9 +124,9 @@ int main()
     char *s1 = "walid";
     char *s3 = "amine";
     char *s4 = "kamal";
-    char  *already_checked[5] ={"wald" ,"amine", "kamal" ,"walid"};
-    char *s2[5] = {"wald" ,"amine", "kamal" ,"walid"};
+    char  **already_checked = calloc(7 , sizeof(char *));
+    char *s2[6] = {"wald" , "amine","amine", "kamal" ,"walid"};
     printf("%d \n%s\n" , match_in_list(s1 , s2 , already_checked) ,already_checked[0]);
     printf("%d \n%s\n" , match_in_list(s3 , s2 , already_checked) ,already_checked[1]);
-    printf("%d \n%s\n" , match_in_list(s4 , s2 , already_checked) ,already_checked[2]);
+    printf("%d \n%s\n" , match_in_list(s3 , s2 , already_checked) ,already_checked[2]);
 }
