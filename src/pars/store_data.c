@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/14 16:24:46 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/14 16:48:43 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,8 +191,8 @@ int is_color_dup(t_file_data *file_data)
 	while (file_data->floor_color[i])
 	{
 		if (file_data->floor_color[i] == file_data->ceiling_color[i])
-			check++;
 		i++;	
+			check++;
 	}
 	if (check == 3)
 		return 1;
