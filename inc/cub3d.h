@@ -8,7 +8,7 @@
 # include <sys/time.h>
 // #include "../../minilibx-linux/mlx.h"
 # include "../libft/libft.h"
-
+	
 #  define NO "NO"
 #  define SO "SO"
 #  define WE "WE"

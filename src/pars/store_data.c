@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/13 17:02:48 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/14 16:24:46 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,13 +80,13 @@ int comma_length_checker(char *str)
 	i = 0;
 	while (str[i])
 	{
-		if (str[i] != ',')
+		if (str[i] != ',' && str[i] != '\n')
 		{
 			counter ++;
 			if (counter > 3)
 				return 1;
 		}
-		else
+		else if (str[i] == ',')
 		{
 			counter = 0;
 			comma ++;
@@ -98,7 +98,7 @@ int comma_length_checker(char *str)
 	return 0;
 }
 
-void specific_store(char *str  , t_file_data *file_data , char who_know)
+int specific_store(char *str  , t_file_data *file_data , char who_know)
 {
 	int i;
 	int j;
@@ -128,11 +128,14 @@ void specific_store(char *str  , t_file_data *file_data , char who_know)
 			tmp[j] = '\0';
 			j = 0;
 			file_data->ceiling_color[array_length++] = ft_atoi(tmp);
+			if (ft_atoi(tmp) > 255 || ft_atoi(tmp) < 0)
+				return 1;
 			i++;
 			continue;
 		}
 	}
 	free(tmp);
+	return 0;
 }
 
 int store_in_the_right_place(char **to_be_splited , t_file_data *file_data)
@@ -141,8 +144,6 @@ int store_in_the_right_place(char **to_be_splited , t_file_data *file_data)
 	if (!strcmp(to_be_splited[0] , NO))
 		file_data->no_texture = ft_strdup(to_be_splited[1]);
 	else if(!strcmp(to_be_splited[0] , SO))
-		file_data->so_texture = ft_strdup(to_be_splited[1]);
-	else if (!strcmp(to_be_splited[0] , SO))
 		file_data->so_texture = ft_strdup(to_be_splited[1]);
 	else if (!strcmp(to_be_splited[0] , WE))
 		file_data->we_texture = ft_strdup(to_be_splited[1]);
@@ -158,12 +159,46 @@ int store_in_the_right_place(char **to_be_splited , t_file_data *file_data)
 	else if (!strcmp(to_be_splited[0] , C))
 	{
 		if (!comma_length_checker(to_be_splited[1]))
-			specific_store(to_be_splited[1] , file_data , 'C');
+		{
+			if(specific_store(to_be_splited[1] , file_data , 'C'))
+				return 1;	
+		}
 		else
 			return 1;
 	}
 	return 0;
 }
+
+int is_empty(char **arry)
+{
+	int i;
+
+	i = 0;
+	while (arry[i])
+		i++;
+	if (i != 6)
+		return 1;
+	return 0;
+}
+
+int is_color_dup(t_file_data *file_data)
+{
+	int i;
+	int check;
+
+	i = 0;
+	check = 0;
+	while (file_data->floor_color[i])
+	{
+		if (file_data->floor_color[i] == file_data->ceiling_color[i])
+			check++;
+		i++;	
+	}
+	if (check == 3)
+		return 1;
+	return 0;
+}
+
 
 int	set_data(int fd, t_file_data *file_data)
 {
@@ -200,5 +235,7 @@ int	set_data(int fd, t_file_data *file_data)
 		else
 			break;
 	}
+	if(is_empty(already_checked) || is_color_dup(file_data))
+		return 1;
 	return 0;
 }

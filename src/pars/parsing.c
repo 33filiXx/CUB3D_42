@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:18:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/13 15:27:16 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/14 15:53:09 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ int	ft_strcmp(const char *s1, const char *s2)
 
 int if_last_point(char *str)
 {
-    //printf("last  :   %s\n" , str);
     while (*str)
     {
         str++;
@@ -43,7 +42,6 @@ int valid_extantion(char *str)
     {
         if (str[i] == '.' && !if_last_point(str + i))
         {
-           // printf("valid :    %s\n" , str + i);
             if (!ft_strcmp(".cub" , str + i))
                 return 0;
         }
@@ -72,6 +70,7 @@ int  punisher(char **av , t_file_data *file_data)
         return 1;
     if(valid_extantion(*av))
         return 1;
-    set_data(fd , file_data);
+    if(set_data(fd , file_data))
+        return 1;
     return 0;
 }
