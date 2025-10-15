@@ -3,7 +3,7 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror #-fsanitize=address -g
 
 
-SRCS =  src/main.c src/pars/parsing.c src/pars/store_data.c 
+SRCS =  src/main.c src/pars/parsing.c src/pars/store_data.c src/pars/valid_map.c 
 SRCS_get =  libft/get_next_line/get_next_line.c libft/get_next_line/get_next_line_utils.c
 
 OBJS = $(SRCS:.c=.o)

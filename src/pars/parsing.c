@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:18:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/14 15:53:09 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/15 17:59:56 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ int  punisher(char **av , t_file_data *file_data)
         return 1;
     if(valid_extantion(*av))
         return 1;
-    if(set_data(fd , file_data))
+    if(map_store(fd , file_data))
         return 1;
     return 0;
 }
