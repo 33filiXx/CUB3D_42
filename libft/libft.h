@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 15:32:12 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2024/11/18 16:35:32 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/08/28 17:02:17 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 # include <stdlib.h>
 # include <string.h>
 # include <unistd.h>
+# include <stdint.h>
+# include "get_next_line/get_next_line.h"
 
 typedef struct s_list
 {
@@ -49,8 +51,8 @@ char				*ft_strchr(const char *s, int c);
 char				*ft_strdup(const char *s);
 char				*ft_strrchr(const char *s, int c);
 char				*ft_substr(char const *s, unsigned int start, size_t len);
-char				**ft_split(char const *s, char c);
-char				*ft_strjoin(char const *s1, char const *s2);
+char				**ft_split(char *str, char *charset);
+char				*ft_strjoin(char *s1, char *s2);
 char				*ft_strtrim(char const *s1, char const *set);
 void				ft_putstr_fd(char *s, int fd);
 void				ft_putchar_fd(char c, int fd);
