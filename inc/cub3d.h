@@ -11,6 +11,7 @@
 # include <X11/keysym.h>
 # include <X11/X.h>
 # include <mlx.h>
+# include "../src/vectorslib/vec.h"
 #  define NO "NO"
 #  define SO "SO"
 #  define WE "WE"

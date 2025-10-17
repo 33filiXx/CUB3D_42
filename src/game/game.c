@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/10/15 16:08:47 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/10/17 16:13:36 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,17 +254,17 @@ void	draw_env(t_mlx *mlx, t_map *map, t_file_data *file_data)
 }
 
 
-// int key_press(int keycode, void *param)
-// {
-//     t_game_data *data = (t_game_data *)param;
+int key_press(int keycode, void *param)
+{
+    t_game_data *data = (t_game_data *)param;
     
-//     if (keycode == XK_w)
-// 		move_forward(data);
-// 		else if (keycode == XK_d)
-// 		move_right(data);
-//     redraw_map(data);
-//     return (0);
-// }
+    if (keycode == XK_w)
+		move_forward(data);
+		else if (keycode == XK_d)
+		move_right(data);
+    redraw_map(data);
+    return (0);
+}
 
 int close_window(void *param)
 {
