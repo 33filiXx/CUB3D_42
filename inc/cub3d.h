@@ -38,12 +38,9 @@ typedef struct s_cmp_data
 
 typedef struct s_player
 {
-	double	pos_x;
-	double	pos_y;
-	double	dir_x;
-	double	dir_y;
-	double	plane_x;
-	double	plane_y;
+	t_vec2	pos;
+	t_vec2	dir;
+	t_vec2	plane;
 	double	move_speed;
 	double	rot_speed;
 }			t_player;

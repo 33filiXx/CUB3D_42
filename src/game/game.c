@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/10/17 16:13:36 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/10/21 22:54:26 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,12 +59,9 @@ void	init_example_player(t_player *player)
 {
     if (!player)
         return ;
-    player->pos_x = 13.5;  // Moved player to center area
-    player->pos_y = 13.5;
-    player->dir_x = -1.0;
-    player->dir_y = 0.0;
-    player->plane_x = 0.0;
-    player->plane_y = 0.66;
+    player->pos = vec2_new(13.5, 13.5);
+    player->dir = vec2_new(-1.0, 0.0);
+    player->plane = vec2_new(0.0, 0.66);
     player->move_speed = 0.08;
     player->rot_speed = 0.05;
 }
@@ -114,8 +111,8 @@ static void	print_example_summary(const t_file_data *file_data,
 	}
 	printf("\nPlayer:\n");
 	printf("  pos=(%.2f, %.2f) dir=(%.2f, %.2f) plane=(%.2f, %.2f)\n",
-		player->pos_x, player->pos_y, player->dir_x, player->dir_y,
-		player->plane_x, player->plane_y);
+		player->pos.x, player->pos.y, player->dir.x, player->dir.y,
+		player->plane.x, player->plane.y);
 	printf("  move_speed=%.2f rot_speed=%.2f\n", player->move_speed,
 		player->rot_speed);
 	printf("\nRaycast sample:\n");
@@ -133,7 +130,7 @@ void	initiate(t_mlx *mlx, t_game_data *game_data)
 	mlx->mlx_connection = mlx_init();
 	if (!mlx->mlx_connection)
 		exit(1);
-	mlx->mlx_win = mlx_new_window(mlx->mlx_connection,
+		mlx->mlx_win = mlx_new_window(mlx->mlx_connection,
 			game_data->map.width * TILE, game_data->map.height * TILE, "Cube3D");
 	if (!mlx->mlx_win)
 	{
@@ -149,15 +146,34 @@ void	initiate(t_mlx *mlx, t_game_data *game_data)
 		exit(1);
 	}
 	mlx->addr = mlx_get_data_addr(mlx->img, &mlx->bits_per_pixel,
-			&mlx->line_length, &mlx->endian);
-}
-
-void put_pixel(t_mlx *mlx, int x, int y, int color)
-{
-    int offset = y * mlx->line_length + x * (mlx->bits_per_pixel / 8);
-    *(unsigned int*)(mlx->addr + offset) = color;
-}  
-
+		&mlx->line_length, &mlx->endian);
+	}
+	
+	void put_pixel(t_mlx *mlx, int x, int y, int color)
+	{
+		int offset = y * mlx->line_length + x * (mlx->bits_per_pixel / 8);
+		*(unsigned int*)(mlx->addr + offset) = color;
+	}  
+	
+	void	draw_vecs(t_game_data *data)
+	{
+		int i = 0;
+		int curr_x;
+		int curr_y;
+		int start_x, end_x ,start_y,end_y;
+		
+		start_x = data->player.pos.x * TILE;
+		start_y = data->player.pos.y * TILE;
+		end_x = start_x + (data->player.dir.x * 1.5 * TILE);
+		end_y = start_y + (data->player.dir.y * 1.5 * TILE);
+		while(i <= 100)
+		{
+			curr_x = start_x + 100 * (end_x - start_x);
+			curr_y = start_y + 100 * (end_y - start_y);
+			put_pixel(&data->mlx, curr_x, curr_y, 0xFF0000);
+			i++;
+		}
+	}
 
 void calculate_scale_and_offset(t_map *map, int *scale, int *offset_x, int *offset_y)
 {
@@ -172,10 +188,11 @@ void calculate_scale_and_offset(t_map *map, int *scale, int *offset_x, int *offs
     *offset_x = ((map->width * TILE) - actual_width) / 2;
     *offset_y = ((map->height * TILE) - actual_height) / 2;
 }
-void	draw_player(int i, int j, int color, t_mlx *mlx, int floor_color)
+void	draw_player(int i, int j, int color, t_game_data *data, int floor_color)
 {
 	int c_x;
 	int c_y;
+	t_mlx *mlx = &data->mlx;
 	int ty = 0;
 	int tx = 0;
 	int r = 16;
@@ -196,9 +213,10 @@ void	draw_player(int i, int j, int color, t_mlx *mlx, int floor_color)
 		}
 		ty++;
 	}
+	
 }
 
-void	draw_env(t_mlx *mlx, t_map *map, t_file_data *file_data)
+void	draw_env(t_game_data *data)
 {
 	int	i;
 	int	j;
@@ -210,30 +228,30 @@ void	draw_env(t_mlx *mlx, t_map *map, t_file_data *file_data)
 
 	i = 0;
 	j = 0;
-	calculate_scale_and_offset(map, &scale, &off_x, &off_y);
-	floor_color = (file_data->floor_color[0] << 24 
-					|file_data->floor_color[1] << 16
-					|file_data->floor_color[2] << 8);
-	ceiling_color = (file_data->ceiling_color[0] << 24  
-				|file_data->ceiling_color[1] << 16
-				|file_data->ceiling_color[2] << 8);
-	while (i < map->height)
+	calculate_scale_and_offset(&data->map, &scale, &off_x, &off_y);
+	floor_color = (data->file_data.floor_color[0] << 24 
+					|data->file_data.floor_color[1] << 16
+					|data->file_data.floor_color[2] << 8);
+	ceiling_color = (data->file_data.ceiling_color[0] << 24  
+				|data->file_data.ceiling_color[1] << 16
+				|data->file_data.ceiling_color[2] << 8);
+	while (i < data->map.height)
 	{
 		j = 0;
-		while(j < map->width)
+		while(j < data->map.width)
 		{
-			if (map->grid[i][j] == '0')
+			if (data->map.grid[i][j] == '0')
 				color = floor_color;
-			else if (map->grid[i][j] == '1')
+			else if (data->map.grid[i][j] == '1')
 				color = ceiling_color;
-			else if (map->grid[i][j] == 'N')
+			else if (data->map.grid[i][j] == 'N')
 				color = 0xFF0000;
 			else
 				color = 0;
 			ty = 0;
 			tx = 0;
-			if (map->grid[i][j] == 'N')
-				draw_player(i, j , color, mlx, floor_color);
+			if (data->map.grid[i][j] == 'N')
+				draw_player(i, j , color, data, floor_color);
 			else
 			{
 				while (ty < TILE)
@@ -241,7 +259,7 @@ void	draw_env(t_mlx *mlx, t_map *map, t_file_data *file_data)
 					tx = 0;
 					while (tx < TILE)
 					{
-						put_pixel(mlx, j * TILE + tx, i * TILE + ty, color);
+						put_pixel(&data->mlx, j * TILE + tx, i * TILE + ty, color);
 						tx++;
 					}
 					ty++;
@@ -253,18 +271,23 @@ void	draw_env(t_mlx *mlx, t_map *map, t_file_data *file_data)
 	}
 }
 
+// void	move_forward(t_game_data *data)
+// {
+// 	t_player *p = data->player;
+	
+// }
 
-int key_press(int keycode, void *param)
-{
-    t_game_data *data = (t_game_data *)param;
+// int key_press(int keycode, void *param)
+// {
+//     t_game_data *data = (t_game_data *)param;
     
-    if (keycode == XK_w)
-		move_forward(data);
-		else if (keycode == XK_d)
-		move_right(data);
-    redraw_map(data);
-    return (0);
-}
+//     if (keycode == XK_w)
+// 		move_forward(data);
+// 	else if (keycode == XK_s)
+// 		move_backwards(data);
+//     redraw_map(data);
+//     return (0);
+// }
 
 int close_window(void *param)
 {
@@ -292,7 +315,8 @@ int	main(void)
 
     
     initiate(&game_data.mlx, &game_data);
-    draw_env(&game_data.mlx, &game_data.map, &game_data.file_data);
+    draw_env(&game_data);
+	draw_vecs(&game_data);
 	// mlx_key_hook(game_data.mlx.mlx_win, key_press, &game_data);
 	mlx_hook(game_data.mlx.mlx_win, DestroyNotify, StructureNotifyMask, close_window, &game_data);
     mlx_put_image_to_window(game_data.mlx.mlx_connection, game_data.mlx.mlx_win, game_data.mlx.img, 0, 0);

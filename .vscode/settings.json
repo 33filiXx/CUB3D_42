@@ -3,6 +3,7 @@
         "cub3d.h": "c",
         "libft.h": "c",
         "get_next_line.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "vec.h": "c"
     }
 }
