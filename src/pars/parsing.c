@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:18:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/15 17:59:56 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/17 02:25:54 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ int valid_extantion(char *str)
     return 1;
 }
 
-
 int exists(char *str)
 {
     int fd;
@@ -60,17 +59,38 @@ int exists(char *str)
         return -1;
     return fd; 
 }
+int get_size(int fd)
+{
+	int length;
+	char *buffer;
 
+	length = 0;
+	while (1)
+	{
+		buffer = get_next_line(fd);
+		length++;
+		if(!buffer)
+			break;
+	}
+    free(buffer);
+	return length;
+}
 int  punisher(char **av , t_file_data *file_data)
 {
     int fd;
+    int new_fd;
 
     fd = exists(*av);
     if (fd == -1)
         return 1;
     if(valid_extantion(*av))
         return 1;
-    if(map_store(fd , file_data))
+    file_data->map_size = get_size(fd);
+    close(fd);
+	new_fd = open(*av, O_RDONLY);
+	if(new_fd == -1)
+		return 1;
+    if(is_valid(new_fd , file_data))
         return 1;
     return 0;
 }

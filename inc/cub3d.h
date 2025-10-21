@@ -28,6 +28,7 @@ typedef struct s_file_data
 	int		ceiling_color[3];
 	char *hexa_ceiling_color;
 	char *hexa_f_color;
+	int map_size;
 	char **map;
 	int row;
 	int column;
@@ -41,9 +42,9 @@ typedef struct s_cmp_data
 
 // char	**ft_split(char *str, char *charset);
 int punisher(char **av , t_file_data *file_data);
+int is_valid(int fd, t_file_data *file_data);
 int	set_data(int fd, t_file_data *file_data);
 int	ft_strcmp(const char *s1, const char *s2);
-int map_store(int fd, t_file_data *file_data);
 // int	my_strcmp(const char *s1, const char **s2);
 
 
