@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/10/21 22:54:26 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/10/22 19:08:29 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,9 @@ void	init_example_player(t_player *player)
 {
     if (!player)
         return ;
-    player->pos = vec2_new(13.5, 13.5);
-    player->dir = vec2_new(-1.0, 0.0);
-    player->plane = vec2_new(0.0, 0.66);
+    player->pos = vec2_new(2.5, 13.5);
+    player->dir = vec2_new(0.0, -1.0);
+    player->plane = vec2_new(0.66, 0.0);
     player->move_speed = 0.08;
     player->rot_speed = 0.05;
 }
@@ -127,53 +127,75 @@ static void	print_example_summary(const t_file_data *file_data,
 
 void	initiate(t_mlx *mlx, t_game_data *game_data)
 {
-	mlx->mlx_connection = mlx_init();
-	if (!mlx->mlx_connection)
-		exit(1);
-		mlx->mlx_win = mlx_new_window(mlx->mlx_connection,
-			game_data->map.width * TILE, game_data->map.height * TILE, "Cube3D");
-	if (!mlx->mlx_win)
-	{
-		mlx_destroy_display(mlx->mlx_connection);
-		free(mlx->mlx_connection);
-		exit(1);
-	}
-	mlx->img = mlx_new_image(mlx->mlx_connection, game_data->map.width * TILE, game_data->map.height * TILE);
-	if (!mlx->img)
-	{
-		mlx_destroy_display(mlx->mlx_connection);
-		free(mlx->mlx_connection);
-		exit(1);
-	}
-	mlx->addr = mlx_get_data_addr(mlx->img, &mlx->bits_per_pixel,
-		&mlx->line_length, &mlx->endian);
-	}
+mlx->mlx_connection = mlx_init();
+if (!mlx->mlx_connection)
+	exit(1);
+	mlx->mlx_win = mlx_new_window(mlx->mlx_connection,
+		game_data->map.width * TILE, game_data->map.height * TILE, "Cube3D");
+if (!mlx->mlx_win)
+{
+	mlx_destroy_display(mlx->mlx_connection);
+	free(mlx->mlx_connection);
+	exit(1);
+}
+mlx->img = mlx_new_image(mlx->mlx_connection, game_data->map.width * TILE, game_data->map.height * TILE);
+if (!mlx->img)
+{
+	mlx_destroy_display(mlx->mlx_connection);
+	free(mlx->mlx_connection);
+	exit(1);
+}
+mlx->addr = mlx_get_data_addr(mlx->img, &mlx->bits_per_pixel,
+	&mlx->line_length, &mlx->endian);
+}
 	
-	void put_pixel(t_mlx *mlx, int x, int y, int color)
-	{
-		int offset = y * mlx->line_length + x * (mlx->bits_per_pixel / 8);
-		*(unsigned int*)(mlx->addr + offset) = color;
-	}  
+void put_pixel(t_mlx *mlx, int x, int y, int color)
+{
+	int offset = y * mlx->line_length + x * (mlx->bits_per_pixel / 8);
+	*(unsigned int*)(mlx->addr + offset) = color;
+}  
+
+void	draw_plane(t_game_data *data)
+{
+	int i = 0;
+	int curr_x;
+	int curr_y;
+	double start_x, end_x ,start_y,end_y;
 	
-	void	draw_vecs(t_game_data *data)
+	start_x = data->player.pos.x * TILE;
+	start_y = data->player.pos.y * TILE;
+	end_x = start_x + (data->player.plane.x * 1.5 * TILE);
+	end_y = start_y + (data->player.plane.y * 1.5 * TILE);
+	while(i <= 100)
 	{
-		int i = 0;
-		int curr_x;
-		int curr_y;
-		int start_x, end_x ,start_y,end_y;
-		
-		start_x = data->player.pos.x * TILE;
-		start_y = data->player.pos.y * TILE;
-		end_x = start_x + (data->player.dir.x * 1.5 * TILE);
-		end_y = start_y + (data->player.dir.y * 1.5 * TILE);
-		while(i <= 100)
-		{
-			curr_x = start_x + 100 * (end_x - start_x);
-			curr_y = start_y + 100 * (end_y - start_y);
-			put_pixel(&data->mlx, curr_x, curr_y, 0xFF0000);
-			i++;
-		}
+		double t = (double)(i / 100.0);
+		curr_x = start_x + t * (end_x - start_x);
+		curr_y = start_y + t * (end_y - start_y);
+		put_pixel(&data->mlx, curr_x, curr_y, 0xFF0000);
+		i++;
 	}
+}
+
+void	draw_dir(t_game_data *data)
+{
+	int i = 0;
+	int curr_x;
+	int curr_y;
+	double start_x, end_x ,start_y,end_y;
+	
+	start_x = data->player.pos.x * TILE;
+	start_y = data->player.pos.y * TILE;
+	end_x = start_x + (data->player.dir.x * 1.5 * TILE);
+	end_y = start_y + (data->player.dir.y * 1.5 * TILE);
+	while(i <= 100)
+	{
+		double t = (double)(i / 100.0);
+		curr_x = start_x + t * (end_x - start_x);
+		curr_y = start_y + t * (end_y - start_y);
+		put_pixel(&data->mlx, curr_x, curr_y, 0xFF0000);
+		i++;
+	}
+}
 
 void calculate_scale_and_offset(t_map *map, int *scale, int *offset_x, int *offset_y)
 {
@@ -193,22 +215,36 @@ void	draw_player(int i, int j, int color, t_game_data *data, int floor_color)
 	int c_x;
 	int c_y;
 	t_mlx *mlx = &data->mlx;
-	int ty = 0;
-	int tx = 0;
+	int ty;
+	int tx;
 	int r = 16;
 	
-	c_x = (j * TILE) + TILE / 2;
-	c_y = (i * TILE) + TILE / 2;
+	c_x = (int)(data->player.pos.x * TILE);
+	c_y = (int)(data->player.pos.y * TILE);
 	
-	while (ty < TILE)
+	ty = i * TILE;
+	while (ty < (i + 1) * TILE)
 	{
-		tx = 0;
-		while(tx < TILE)
+		tx = j * TILE;
+		while (tx < (j + 1) * TILE)
 		{
-			if ((pow((j * TILE + tx) - c_x, 2) + pow((i * TILE + ty) - c_y, 2)) <= pow(r, 2))
-				put_pixel(mlx, j * TILE + tx, i * TILE + ty, color);
-			else
-				put_pixel(mlx, j * TILE + tx, i * TILE + ty, floor_color);
+			put_pixel(mlx, tx, ty, floor_color);
+			tx++;
+		}
+		ty++;
+	}
+
+	ty = c_y - r;
+	while (ty <= c_y + r)
+	{
+		tx = c_x - r;
+		while(tx <= c_x + r)
+		{
+			if ((pow(tx - c_x, 2) + pow(ty - c_y, 2)) <= pow(r, 2))
+			{
+				if (tx >= 0 && ty >= 0 && tx < data->map.width * TILE && ty < data->map.height * TILE)
+					put_pixel(mlx, tx, ty, color);
+			}
 			tx++;
 		}
 		ty++;
@@ -271,29 +307,92 @@ void	draw_env(t_game_data *data)
 	}
 }
 
-// void	move_forward(t_game_data *data)
-// {
-// 	t_player *p = data->player;
-	
-// }
+void	redraw_map(t_game_data *data)
+{
+	draw_env(data);
+	draw_dir(data);
+	draw_plane(data);
+	mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
+}
 
-// int key_press(int keycode, void *param)
-// {
-//     t_game_data *data = (t_game_data *)param;
+void	move_forward(t_game_data *data)
+{
+	data->player.pos.x = data->player.pos.x + (data->player.dir.x * data->player.move_speed);
+	data->player.pos.y = data->player.pos.y + (data->player.dir.y * data->player.move_speed);
+}
+void	move_backwards(t_game_data *data)
+{
+	data->player.pos.x = data->player.pos.x - (data->player.dir.x * data->player.move_speed);
+	data->player.pos.y = data->player.pos.y - (data->player.dir.y * data->player.move_speed);
+}
+
+void	rotate_right(t_game_data *data)
+{
+	t_vec2 old_dir, old_plane;
+	
+	old_dir.x = data->player.dir.x;
+	old_dir.y = data->player.dir.y;
+	old_plane.x = data->player.plane.x;
+	old_plane.y = data->player.plane.y;
+	data->player.dir.x = old_dir.x * cos(30) - old_dir.y * sin(30);
+	data->player.dir.y = old_dir.x * sin(30) + old_dir.y * cos(30);
+	data->player.plane.x = old_plane.x * cos(30) - old_plane.y * sin(30);
+	data->player.plane.y = old_plane.x * sin(30) + old_plane.y * cos(30);
+}
+
+int key_press(int keycode, void *param)
+{
+    t_game_data *data = (t_game_data *)param;
     
-//     if (keycode == XK_w)
-// 		move_forward(data);
-// 	else if (keycode == XK_s)
-// 		move_backwards(data);
-//     redraw_map(data);
-//     return (0);
-// }
+    if (keycode == XK_w)
+		data->player.moving_forward = 1;
+	else if (keycode == XK_s)
+		data->player.moving_backward = 1;
+	else if (keycode == XK_d)
+		data->player.rotating_right = 1;
+	else if (keycode == XK_a)
+		data->player.rotating_left = 1;
+    return (0);
+}
+
+int key_release(int keycode, void *param)
+{
+    t_game_data *data = (t_game_data *)param;
+    
+    if (keycode == XK_w)
+		data->player.moving_forward = 0;
+	else if (keycode == XK_s)
+		data->player.moving_backward = 0;
+	else if (keycode == XK_d)
+		data->player.rotating_right = 0;
+	else if (keycode == XK_a)
+		data->player.rotating_left = 0;
+    return (0);
+}
+
+int game_loop(void *param)
+{
+    t_game_data *data = (t_game_data *)param;
+    
+    if (data->player.moving_forward)
+        move_forward(data);
+    if (data->player.moving_backward)
+        move_backwards(data);
+	if (data->player.rotating_right)
+		rotate_right(data);
+    
+    if (data->player.moving_forward || data->player.moving_backward)
+        redraw_map(data);
+    
+    return (0);
+}
 
 int close_window(void *param)
 {
     exit(0);
     return (0);
 }
+
 
 int	main(void)
 {
@@ -316,8 +415,11 @@ int	main(void)
     
     initiate(&game_data.mlx, &game_data);
     draw_env(&game_data);
-	draw_vecs(&game_data);
-	// mlx_key_hook(game_data.mlx.mlx_win, key_press, &game_data);
+	draw_dir(&game_data);
+	draw_plane(&game_data);
+	mlx_hook(game_data.mlx.mlx_win, KeyPress, KeyPressMask, key_press, &game_data);
+	mlx_hook(game_data.mlx.mlx_win, KeyRelease, KeyReleaseMask, key_release, &game_data);
+	mlx_loop_hook(game_data.mlx.mlx_connection, game_loop, &game_data);
 	mlx_hook(game_data.mlx.mlx_win, DestroyNotify, StructureNotifyMask, close_window, &game_data);
     mlx_put_image_to_window(game_data.mlx.mlx_connection, game_data.mlx.mlx_win, game_data.mlx.img, 0, 0);
     mlx_loop(game_data.mlx.mlx_connection);
