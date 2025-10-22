@@ -43,6 +43,10 @@ typedef struct s_player
 	t_vec2	plane;
 	double	move_speed;
 	double	rot_speed;
+	int moving_forward;
+	int moving_backward;
+	int rotating_left;
+	int rotating_right;
 }			t_player;
 
 typedef struct s_map
