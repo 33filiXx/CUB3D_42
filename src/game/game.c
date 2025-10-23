@@ -6,11 +6,12 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/10/22 23:23:04 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/10/23 21:48:27 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
+void	set_colors(t_game_data *data, int *floor_color, int * ceiling_color);
 
 static char	*g_example_grid[] = {
     "11111111111111111111",
@@ -153,6 +154,134 @@ void put_pixel(t_mlx *mlx, int x, int y, int color)
 {
 	int offset = y * mlx->line_length + x * (mlx->bits_per_pixel / 8);
 	*(unsigned int*)(mlx->addr + offset) = color;
+}
+void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height)
+{
+    int x = 0;
+    int floor_color, ceiling_color;
+    
+    set_colors(data, &floor_color, &ceiling_color);
+    
+    while (x < view_width)
+    {
+        // 1. Calculate ray direction for this screen column
+        data->rc.camera_x = 2 * x / (double)view_width - 1;
+        data->rc.ray_dir_x = data->player.dir.x + data->player.plane.x * data->rc.camera_x;
+        data->rc.ray_dir_y = data->player.dir.y + data->player.plane.y * data->rc.camera_x;
+        
+        // 2. Which box of the map we're in
+        data->rc.map_x = (int)data->player.pos.x;
+        data->rc.map_y = (int)data->player.pos.y;
+        
+        // 3. Length of ray from one x or y-side to next x or y-side
+        data->rc.delta_dist_x = (data->rc.ray_dir_x == 0) ? 1e30 : fabs(1 / data->rc.ray_dir_x);
+        data->rc.delta_dist_y = (data->rc.ray_dir_y == 0) ? 1e30 : fabs(1 / data->rc.ray_dir_y);
+        
+        // 4. Calculate step and initial sideDist
+        if (data->rc.ray_dir_x < 0)
+        {
+            data->rc.step_x = -1;
+            data->rc.side_dist_x = (data->player.pos.x - data->rc.map_x) * data->rc.delta_dist_x;
+        }
+        else
+        {
+            data->rc.step_x = 1;
+            data->rc.side_dist_x = (data->rc.map_x + 1.0 - data->player.pos.x) * data->rc.delta_dist_x;
+        }
+        
+        if (data->rc.ray_dir_y < 0)
+        {
+            data->rc.step_y = -1;
+            data->rc.side_dist_y = (data->player.pos.y - data->rc.map_y) * data->rc.delta_dist_y;
+        }
+        else
+        {
+            data->rc.step_y = 1;
+            data->rc.side_dist_y = (data->rc.map_y + 1.0 - data->player.pos.y) * data->rc.delta_dist_y;
+        }
+        
+        // 5. Perform DDA
+        data->rc.hit = 0;
+        while (data->rc.hit == 0)
+        {
+            // Jump to next map square
+            if (data->rc.side_dist_x < data->rc.side_dist_y)
+            {
+                data->rc.side_dist_x += data->rc.delta_dist_x;
+                data->rc.map_x += data->rc.step_x;
+                data->rc.side = 0;
+            }
+            else
+            {
+                data->rc.side_dist_y += data->rc.delta_dist_y;
+                data->rc.map_y += data->rc.step_y;
+                data->rc.side = 1;
+            }
+            
+            // Check if ray is out of bounds
+            if (data->rc.map_x < 0 || data->rc.map_x >= data->map.width ||
+                data->rc.map_y < 0 || data->rc.map_y >= data->map.height)
+                break;
+            
+            // Check if ray has hit a wall
+            if (data->map.grid[data->rc.map_y][data->rc.map_x] == '1')
+                data->rc.hit = 1;
+        }
+        
+        if (!data->rc.hit)
+        {
+            x++;
+            continue;
+        }
+        
+        // 6. Calculate distance projected on camera direction
+        if (data->rc.side == 0)
+            data->rc.perp_wall_dist = (data->rc.map_x - data->player.pos.x + 
+                (1 - data->rc.step_x) / 2) / data->rc.ray_dir_x;
+        else
+            data->rc.perp_wall_dist = (data->rc.map_y - data->player.pos.y + 
+                (1 - data->rc.step_y) / 2) / data->rc.ray_dir_y;
+        
+        // 7. Calculate height of line to draw on screen
+        int line_height = (int)(view_height / data->rc.perp_wall_dist);
+        
+        // Calculate lowest and highest pixel to fill in current stripe
+        int draw_start = -line_height / 2 + view_height / 2;
+        if (draw_start < 0)
+            draw_start = 0;
+        int draw_end = line_height / 2 + view_height / 2;
+        if (draw_end >= view_height)
+            draw_end = view_height - 1;
+        
+        // 8. Choose wall color (make Y-sides darker)
+        int color = (data->rc.side == 0) ? 0xFF0000 : 0x880000;
+        
+        // 9. Draw the pixels of the stripe as a vertical line
+        int y = 0;
+        
+        // Ceiling
+        while (y < draw_start)
+        {
+            put_pixel(&data->mlx, start_x + x, y, ceiling_color);
+            y++;
+        }
+        
+        // Wall
+        while (y <= draw_end)
+        {
+            put_pixel(&data->mlx, start_x + x, y, color);
+            y++;
+        }
+        
+        // Floor
+        while (y < view_height)
+        {
+            put_pixel(&data->mlx, start_x + x, y, floor_color);
+            y++;
+        }
+        
+        x++;
+    }
 }
 
 void	draw_plane(t_game_data *data)
@@ -340,6 +469,7 @@ void	draw_env(t_game_data *data)
 	draw_player(0xFF0000, data);
 }
 
+
 void	redraw_map(t_game_data *data)
 {
 	draw_env(data);
@@ -347,6 +477,12 @@ void	redraw_map(t_game_data *data)
 	draw_plane(data);
 	draw_cam_plane(data);
 	mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
+
+	// 3D view on right
+    int map_width = data->map.width * TILE;
+    render_3d_view(data, map_width / 2, map_width / 2, data->map.height * TILE);
+    
+    mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
 }
 int	valid_move(t_game_data *data, double new_x, double new_y)
 {
