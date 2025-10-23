@@ -153,7 +153,7 @@ void put_pixel(t_mlx *mlx, int x, int y, int color)
 {
 	int offset = y * mlx->line_length + x * (mlx->bits_per_pixel / 8);
 	*(unsigned int*)(mlx->addr + offset) = color;
-}  
+}
 
 void	draw_plane(t_game_data *data)
 {
@@ -197,6 +197,27 @@ void	draw_dir(t_game_data *data)
 	}
 }
 
+void	draw_cam_plane(t_game_data *data)
+{
+	int i = 0;
+	double left_p, right_p;
+	double plane_len = 0.65;
+	double curr_x, curr_y;
+
+	left_p = data->rc.camera_x - plane_len;
+	right_p = data->rc.camera_x + plane_len;
+	while (i < 90)
+	{
+		curr_x = data->player.pos.x + (data->player.dir.x + data->player.plane.x * left_p) * (i / 100.0);
+		curr_y = data->player.pos.y + (data->player.dir.y + data->player.plane.y * left_p) * (i / 100.0);
+		put_pixel(&data->mlx, curr_x * TILE, curr_y * TILE, 0x00FF00);
+		curr_x = data->player.pos.x + (data->player.dir.x + data->player.plane.x * right_p) * (i / 100.0);
+		curr_y = data->player.pos.y + (data->player.dir.y + data->player.plane.y * right_p) * (i / 100.0);
+		put_pixel(&data->mlx, curr_x * TILE, curr_y * TILE, 0x0000FF);
+		i++;
+	}
+}
+
 void calculate_scale_and_offset(t_map *map, int *scale, int *offset_x, int *offset_y)
 {
     int max_scale_x = (map->width * TILE) / map->width;
@@ -227,9 +248,10 @@ void	fill_outer_ppixel(t_game_data *data, int i, int j, int floor_color)
 		}
 		ty++;
 	}
+	// data->map.grid[i][j] = '0';
 }
 
-void	draw_player(int i, int j, int color, t_game_data *data, int floor_color)
+void	draw_player(int color, t_game_data *data)
 {
 	int c_x;
 	int c_y;
@@ -240,7 +262,6 @@ void	draw_player(int i, int j, int color, t_game_data *data, int floor_color)
 	
 	c_x = (int)(data->player.pos.x * TILE);
 	c_y = (int)(data->player.pos.y * TILE);
-	fill_outer_ppixel(data, i, j, floor_color);
 	(r = 16, ty = c_y - r);
 	while (ty <= c_y + r)
 	{
@@ -285,6 +306,7 @@ void	draw_tile(t_game_data *data, int i, int j, int color)
 		ty++;
 	}
 }
+
 void	draw_env(t_game_data *data)
 {
 	int	i;
@@ -304,22 +326,18 @@ void	draw_env(t_game_data *data)
 		j = 0;
 		while(j < data->map.width)
 		{
-			if (data->map.grid[i][j] == '0')
+			if (data->map.grid[i][j] == '0' || data->map.grid[i][j] == 'N' || data->map.grid[i][j] == 'S' || data->map.grid[i][j] == 'E' || data->map.grid[i][j] == 'W')
 				color = floor_color;
 			else if (data->map.grid[i][j] == '1')
 				color = ceiling_color;
-			else if (data->map.grid[i][j] == 'N')
-				color = 0xFF0000;
 			else
 				color = 0;
-			if (data->map.grid[i][j] == 'N')
-				draw_player(i, j , color, data, floor_color);
-			else
 			draw_tile(data, i, j , color);
 			j++;
 		}
 		i++;
 	}
+	draw_player(0xFF0000, data);
 }
 
 void	redraw_map(t_game_data *data)
@@ -327,6 +345,7 @@ void	redraw_map(t_game_data *data)
 	draw_env(data);
 	draw_dir(data);
 	draw_plane(data);
+	draw_cam_plane(data);
 	mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
 }
 int	valid_move(t_game_data *data, double new_x, double new_y)
@@ -474,6 +493,7 @@ int	main(void)
     draw_env(&game_data);
 	draw_dir(&game_data);
 	draw_plane(&game_data);
+	draw_cam_plane(&game_data);
 	mlx_hook(game_data.mlx.mlx_win, KeyPress, KeyPressMask, key_press, &game_data);
 	mlx_hook(game_data.mlx.mlx_win, KeyRelease, KeyReleaseMask, key_release, &game_data);
 	mlx_loop_hook(game_data.mlx.mlx_connection, game_loop, &game_data);
