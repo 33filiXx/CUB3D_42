@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/21 15:59:06 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/23 03:13:37 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ static void	reset_data(t_cmp_data *cmp_data)
 	cmp_data->compass[5] = ft_strdup(C);
 	cmp_data->compass[6] = NULL;
 }
-
 
 int	match_in_list(char *s1, char **s2, char **already_checked)
 {
@@ -192,23 +191,24 @@ int	is_color_dup(t_file_data *file_data)
 		i++;
 	}
 	if (check == 3)
-		return 1;
-	return 0;
+		return (1);
+	return (0);
 }
-void	fill_map(char *line, t_file_data *file_data, char **already_checked , int *update_map_arr)
+
+void	fill_map(char *line, t_file_data *file_data, int *update_map_arr)
 {
 	int	i;
 	int	check;
 
 	i = 0;
-	check = 0 ;
-	file_data->map[*update_map_arr] = malloc();
-	if (!is_empty(already_checked))
+	check = 0;
+	file_data->map[*update_map_arr] = malloc(ft_strlen(line));
+	while (line[i])
 	{
 		file_data->map[*update_map_arr][i] = line[i];
 		i++;
-		check = 1;
 	}
+	check = 1;
 	if (check)
 		(*update_map_arr)++;
 }
@@ -220,12 +220,16 @@ int	set_data(int fd, t_file_data *file_data)
 	t_cmp_data	*cmp_data;
 	int			i;
 	char		**already_checked;
-	int 		*update_map_arr;
+	int			value;
+	int			*update_map_arr;
+	int			fill_only_map;
 
 	cmp_data = malloc(sizeof(t_cmp_data));
 	reset_data(cmp_data);
 	i = 0;
-	update_map_arr = 0;
+	value = 0;
+	update_map_arr = &value;
+	fill_only_map = 0;
 	already_checked = ft_calloc(7, sizeof(char *));
 	file_data->map = malloc(file_data->map_size * sizeof(char *));
 	while (1)
@@ -238,17 +242,20 @@ int	set_data(int fd, t_file_data *file_data)
 					already_checked))
 			{
 				if (store_in_the_right_place(to_be_splited, file_data))
-					return 1;
+					return (1);
 			}
 			else if (match_in_list(to_be_splited[0], cmp_data->compass,
 					already_checked) == 2)
-				return 1;
-			fill_map(buffer, file_data, already_checked , update_map_arr);
+				return (1);
+			if (!is_empty(already_checked) && fill_only_map)
+				fill_map(buffer, file_data, update_map_arr);
+			if (!is_empty(already_checked))
+				fill_only_map = 1;
 		}
 		else
 			break ;
 	}
 	if (is_empty(already_checked) || is_color_dup(file_data))
-		return 1;
-	return 0;
+		return (1);
+	return (0);
 }

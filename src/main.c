@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:19:29 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/17 02:37:14 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/23 03:14:05 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void	print_file_data(t_file_data data)
 	// Print map
 	if (data.map)
 	{
-		printf("\nMap:\n");
+		printf("\nMap:");
 		i = 0;
 		while (data.map[i])
 		{
