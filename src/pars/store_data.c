@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/23 03:13:37 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/25 15:30:27 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,6 +195,29 @@ int	is_color_dup(t_file_data *file_data)
 	return (0);
 }
 
+
+int is_only_space(char *str)
+{
+	int i;
+	int just_space;
+
+	i = 0;
+	just_space = 1;
+    if (!str)
+	{
+        return 1;
+	}
+	while (str[i])
+	{
+		if(str[i] != ' ' || str[i] != '\n')
+		{
+			just_space = 0;
+		}
+		i++;	
+	}
+	return just_space;
+}
+
 void	fill_map(char *line, t_file_data *file_data, int *update_map_arr)
 {
 	int	i;
@@ -235,6 +258,7 @@ int	set_data(int fd, t_file_data *file_data)
 	while (1)
 	{
 		buffer = get_next_line(fd);
+		printf("%d\n" , is_only_space(buffer));
 		if (buffer)
 		{
 			to_be_splited = ft_split(buffer, " ");
