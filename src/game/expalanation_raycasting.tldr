@@ -357,9 +357,9 @@
 		{
 			"id": "pointer:pointer",
 			"typeName": "pointer",
-			"x": 2956.507928716019,
-			"y": 1308.066054405329,
-			"lastActivityTimestamp": 1761582432201,
+			"x": 4583.6558238705375,
+			"y": 1774.2700322031908,
+			"lastActivityTimestamp": 1761583306134,
 			"meta": {}
 		},
 		{
@@ -4248,9 +4248,9 @@
 			"typeName": "shape"
 		},
 		{
-			"x": -1058.0136882353404,
-			"y": -757.8748829077041,
-			"z": 0.3988771923028652,
+			"x": -2659.0895069043604,
+			"y": -1713.6354807631885,
+			"z": 0.45815158212749696,
 			"meta": {},
 			"id": "camera:page:page",
 			"typeName": "camera"
@@ -4378,6 +4378,241 @@
 			},
 			"parentId": "page:page",
 			"index": "aJkqZkOV",
+			"typeName": "shape"
+		},
+		{
+			"x": 2457.0633899859554,
+			"y": 2317.7582587689803,
+			"rotation": 0,
+			"isLocked": false,
+			"opacity": 1,
+			"meta": {},
+			"id": "shape:jQ6sWuWDBvfkWPED1sev5",
+			"type": "text",
+			"props": {
+				"color": "black",
+				"size": "m",
+				"w": 1128.1183366640662,
+				"font": "draw",
+				"textAlign": "start",
+				"autoSize": false,
+				"scale": 1,
+				"richText": {
+					"type": "doc",
+					"content": [
+						{
+							"type": "bulletList",
+							"content": [
+								{
+									"type": "listItem",
+									"content": [
+										{
+											"type": "paragraph",
+											"attrs": {
+												"dir": "auto"
+											}
+										}
+									]
+								},
+								{
+									"type": "listItem",
+									"content": [
+										{
+											"type": "paragraph",
+											"attrs": {
+												"dir": "auto"
+											},
+											"content": [
+												{
+													"type": "text",
+													"text": "Suppose the hit was at a vertical boundary. The x-coordinate of that boundary is "
+												},
+												{
+													"type": "text",
+													"marks": [
+														{
+															"type": "code"
+														}
+													],
+													"text": "map_x"
+												},
+												{
+													"type": "text",
+													"text": " if we stepped to the right ("
+												},
+												{
+													"type": "text",
+													"marks": [
+														{
+															"type": "code"
+														}
+													],
+													"text": "step_x = 1"
+												},
+												{
+													"type": "text",
+													"text": "), or "
+												},
+												{
+													"type": "text",
+													"marks": [
+														{
+															"type": "code"
+														}
+													],
+													"text": "map_x + 1"
+												},
+												{
+													"type": "text",
+													"text": " if we stepped left ("
+												},
+												{
+													"type": "text",
+													"marks": [
+														{
+															"type": "code"
+														}
+													],
+													"text": "step_x = −1"
+												},
+												{
+													"type": "text",
+													"text": ")."
+												}
+											]
+										},
+										{
+											"type": "bulletList",
+											"content": [
+												{
+													"type": "listItem",
+													"content": [
+														{
+															"type": "paragraph",
+															"attrs": {
+																"dir": "auto"
+															},
+															"content": [
+																{
+																	"type": "text",
+																	"text": "The formula "
+																},
+																{
+																	"type": "text",
+																	"marks": [
+																		{
+																			"type": "code"
+																		}
+																	],
+																	"text": "boundary_x = map_x + (1 − step_x) / 2"
+																},
+																{
+																	"type": "text",
+																	"text": " captures both cases:"
+																}
+															]
+														},
+														{
+															"type": "bulletList",
+															"content": [
+																{
+																	"type": "listItem",
+																	"content": [
+																		{
+																			"type": "paragraph",
+																			"attrs": {
+																				"dir": "auto"
+																			},
+																			"content": [
+																				{
+																					"type": "text",
+																					"text": "step_x = 1 → boundary_x = map_x (since "
+																				},
+																				{
+																					"type": "text",
+																					"marks": [
+																						{
+																							"type": "code"
+																						}
+																					],
+																					"text": "(1 − 1)/2 = 0"
+																				},
+																				{
+																					"type": "text",
+																					"text": ")."
+																				}
+																			]
+																		}
+																	]
+																},
+																{
+																	"type": "listItem",
+																	"content": [
+																		{
+																			"type": "paragraph",
+																			"attrs": {
+																				"dir": "auto"
+																			},
+																			"content": [
+																				{
+																					"type": "text",
+																					"text": "step_x = −1 → boundary_x = map_x + 1."
+																				}
+																			]
+																		}
+																	]
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"type": "listItem",
+									"content": [
+										{
+											"type": "paragraph",
+											"attrs": {
+												"dir": "auto"
+											},
+											"content": [
+												{
+													"type": "text",
+													"text": "Substitute this into the line equation "
+												},
+												{
+													"type": "text",
+													"marks": [
+														{
+															"type": "code"
+														}
+													],
+													"text": "px + t * R_dir_x = boundary_x"
+												},
+												{
+													"type": "text",
+													"text": " and solve for t:"
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							}
+						}
+					]
+				}
+			},
+			"parentId": "page:page",
+			"index": "b0iiAYV0V",
 			"typeName": "shape"
 		},
 		{
@@ -4541,12 +4776,12 @@
 			"typeName": "shape"
 		},
 		{
-			"editingShapeId": "shape:OLSzMK7TNehaNQajHvLsH",
+			"editingShapeId": "shape:VejfIMVIroue4r5LULrhw",
 			"croppingShapeId": null,
 			"selectedShapeIds": [
-				"shape:OLSzMK7TNehaNQajHvLsH"
+				"shape:VejfIMVIroue4r5LULrhw"
 			],
-			"hoveredShapeId": "shape:HjuXBTNPOIe5dyh8dgvdU",
+			"hoveredShapeId": null,
 			"erasingShapeIds": [],
 			"hintingShapeIds": [],
 			"focusedGroupId": null,
@@ -4957,6 +5192,57 @@
 			"typeName": "shape"
 		},
 		{
+			"x": 4057.771079018491,
+			"y": 2340.866543408762,
+			"rotation": 0,
+			"isLocked": false,
+			"opacity": 1,
+			"meta": {},
+			"id": "shape:VejfIMVIroue4r5LULrhw",
+			"type": "text",
+			"props": {
+				"color": "black",
+				"size": "m",
+				"w": 1295.2568359375,
+				"font": "draw",
+				"textAlign": "start",
+				"autoSize": true,
+				"scale": 1,
+				"richText": {
+					"type": "doc",
+					"content": [
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "for the little term (1 - step) / 2 :  beacuse we have only two cases either the hit point is at left or right"
+								}
+							]
+						},
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "\t\t\tleft is map_X of boundry_X and right is "
+								}
+							]
+						}
+					]
+				}
+			},
+			"parentId": "page:page",
+			"index": "b0mKNsijV",
+			"typeName": "shape"
+		},
+		{
 			"x": 2881.3625479789816,
 			"y": 1674.3992303496518,
 			"rotation": 0,
@@ -5290,6 +5576,45 @@
 			"typeName": "shape"
 		},
 		{
+			"x": 2610.5519899714186,
+			"y": 2904.359171467954,
+			"rotation": 0,
+			"isLocked": false,
+			"opacity": 1,
+			"meta": {},
+			"id": "shape:fXcleU-5DoHbHfgFrowBG",
+			"type": "text",
+			"props": {
+				"color": "black",
+				"size": "m",
+				"w": 542.2109985351562,
+				"font": "draw",
+				"textAlign": "start",
+				"autoSize": true,
+				"scale": 1.7782506741285005,
+				"richText": {
+					"type": "doc",
+					"content": [
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "t = (map_y − py + (1 − step_y)/2) / R_dir_y"
+								}
+							]
+						}
+					]
+				}
+			},
+			"parentId": "page:page",
+			"index": "b0lgCg7Ul",
+			"typeName": "shape"
+		},
+		{
 			"x": 2269.2602035982404,
 			"y": 512.3997335705673,
 			"rotation": 0,
@@ -5338,6 +5663,57 @@
 			},
 			"parentId": "page:page",
 			"index": "aeq5fDgV",
+			"typeName": "shape"
+		},
+		{
+			"x": 2611.1927802971873,
+			"y": 2608.81594897828,
+			"rotation": 0,
+			"isLocked": false,
+			"opacity": 1,
+			"meta": {},
+			"id": "shape:x0v9REtCJOxWaq2pFU_m6",
+			"type": "text",
+			"props": {
+				"color": "black",
+				"size": "m",
+				"w": 533.3853149414062,
+				"font": "draw",
+				"textAlign": "start",
+				"autoSize": true,
+				"scale": 1.7649592647829389,
+				"richText": {
+					"type": "doc",
+					"content": [
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "t = (boundary_x − px) / R_dir_x"
+								}
+							]
+						},
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "  = (map_x − px + (1 − step_x)/2) / R_dir_x"
+								}
+							]
+						}
+					]
+				}
+			},
+			"parentId": "page:page",
+			"index": "b0jUoHecG",
 			"typeName": "shape"
 		},
 		{
@@ -5963,6 +6339,45 @@
 			},
 			"parentId": "page:page",
 			"index": "aNNr4TTV",
+			"typeName": "shape"
+		},
+		{
+			"x": 2524.085795007122,
+			"y": 2314.0334152121263,
+			"rotation": 0,
+			"isLocked": false,
+			"opacity": 1,
+			"meta": {},
+			"id": "shape:ONp7J-PMYcxY0q8yKU3yq",
+			"type": "text",
+			"props": {
+				"color": "black",
+				"size": "m",
+				"w": 633.4219970703125,
+				"font": "draw",
+				"textAlign": "start",
+				"autoSize": true,
+				"scale": 1,
+				"richText": {
+					"type": "doc",
+					"content": [
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "boundary(x, y) a hit point of a wall or limit of map"
+								}
+							]
+						}
+					]
+				}
+			},
+			"parentId": "page:page",
+			"index": "b0hQDdwtV",
 			"typeName": "shape"
 		},
 		{
@@ -6801,6 +7216,84 @@
 			"typeName": "shape"
 		},
 		{
+			"x": 2456.101938056419,
+			"y": 2765.1478062460105,
+			"rotation": 0,
+			"isLocked": false,
+			"opacity": 1,
+			"meta": {},
+			"id": "shape:UUlKxnKmfWjSLeqkCLgz1",
+			"type": "text",
+			"props": {
+				"color": "black",
+				"size": "m",
+				"w": 707.192626953125,
+				"font": "draw",
+				"textAlign": "start",
+				"autoSize": true,
+				"scale": 1,
+				"richText": {
+					"type": "doc",
+					"content": [
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							}
+						},
+						{
+							"type": "bulletList",
+							"content": [
+								{
+									"type": "listItem",
+									"content": [
+										{
+											"type": "paragraph",
+											"attrs": {
+												"dir": "auto"
+											},
+											"content": [
+												{
+													"type": "text",
+													"text": "That t is the actual parametric distance to the wall."
+												}
+											]
+										}
+									]
+								},
+								{
+									"type": "listItem",
+									"content": [
+										{
+											"type": "paragraph",
+											"attrs": {
+												"dir": "auto"
+											},
+											"content": [
+												{
+													"type": "text",
+													"text": "Same logic for horizontal hit:"
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							}
+						}
+					]
+				}
+			},
+			"parentId": "page:page",
+			"index": "b0kDyr9bV",
+			"typeName": "shape"
+		},
+		{
 			"x": 2882.362775894562,
 			"y": 1676.9000894726842,
 			"rotation": 0,
@@ -7077,12 +7570,7 @@
 		{
 			"followingUserId": null,
 			"opacityForNextShape": 1,
-			"stylesForNextShape": {
-				"tldraw:color": "black",
-				"tldraw:geo": "rectangle",
-				"tldraw:size": "xl",
-				"tldraw:dash": "draw"
-			},
+			"stylesForNextShape": {},
 			"brush": null,
 			"scribbles": [],
 			"cursor": {
@@ -7097,7 +7585,7 @@
 				"x": 0,
 				"y": 0,
 				"w": 1392.146728515625,
-				"h": 774.4586791992188
+				"h": 752.146728515625
 			},
 			"insets": [
 				false,
@@ -7114,7 +7602,7 @@
 			"isFocused": true,
 			"devicePixelRatio": 1.703125,
 			"isCoarsePointer": false,
-			"isHoveringCanvas": true,
+			"isHoveringCanvas": false,
 			"openMenus": [],
 			"isChangingStyle": false,
 			"isReadonly": false,
@@ -8437,6 +8925,50 @@
 			"typeName": "shape"
 		},
 		{
+			"x": 2811.478657468665,
+			"y": 2147.8092740275797,
+			"rotation": 0,
+			"isLocked": false,
+			"opacity": 1,
+			"meta": {},
+			"id": "shape:C-9f8vFTlffoG5OVBG5o1",
+			"type": "text",
+			"props": {
+				"color": "black",
+				"size": "m",
+				"w": 701.1559448242188,
+				"font": "draw",
+				"textAlign": "start",
+				"autoSize": true,
+				"scale": 1,
+				"richText": {
+					"type": "doc",
+					"content": [
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"marks": [
+										{
+											"type": "bold"
+										}
+									],
+									"text": "Compute Perpendicular Wall Distance (Fish-Eye Proof)"
+								}
+							]
+						}
+					]
+				}
+			},
+			"parentId": "page:page",
+			"index": "b0gBqGSYV",
+			"typeName": "shape"
+		},
+		{
 			"x": 2883.172937861656,
 			"y": 1633.2444058271362,
 			"rotation": 0,
@@ -8580,6 +9112,169 @@
 			},
 			"parentId": "page:page",
 			"index": "b0N40nFNV",
+			"typeName": "shape"
+		},
+		{
+			"x": 3821.201045196518,
+			"y": 2460.043252846762,
+			"rotation": 0,
+			"isLocked": false,
+			"opacity": 1,
+			"meta": {},
+			"id": "shape:RFmzlmXsX0ZEFORtP9o6S",
+			"type": "text",
+			"props": {
+				"color": "black",
+				"size": "m",
+				"w": 1277.8277212520416,
+				"font": "draw",
+				"textAlign": "start",
+				"autoSize": false,
+				"scale": 1,
+				"richText": {
+					"type": "doc",
+					"content": [
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "That little term "
+								},
+								{
+									"type": "text",
+									"marks": [
+										{
+											"type": "code"
+										}
+									],
+									"text": "((1 - step_x) / 2)"
+								},
+								{
+									"type": "text",
+									"text": " is just a compact way to describe “which side of the grid cell we crossed” without writing separate formulas for “stepping right” versus “stepping left”."
+								}
+							]
+						},
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "Here’s what it encodes:"
+								}
+							]
+						},
+						{
+							"type": "bulletList",
+							"content": [
+								{
+									"type": "listItem",
+									"content": [
+										{
+											"type": "paragraph",
+											"attrs": {
+												"dir": "auto"
+											},
+											"content": [
+												{
+													"type": "text",
+													"text": "When the ray marches to the "
+												},
+												{
+													"type": "text",
+													"marks": [
+														{
+															"type": "bold"
+														}
+													],
+													"text": "right"
+												},
+												{
+													"type": "text",
+													"text": " ("
+												},
+												{
+													"type": "text",
+													"marks": [
+														{
+															"type": "code"
+														}
+													],
+													"text": "step_x = +1"
+												},
+												{
+													"type": "text",
+													"text": "), the boundary you just crossed has x–coordinate "
+												},
+												{
+													"type": "text",
+													"marks": [
+														{
+															"type": "code"
+														}
+													],
+													"text": "map_x"
+												},
+												{
+													"type": "text",
+													"text": " (because after the step you are inside the cell whose left wall has integer coordinate "
+												},
+												{
+													"type": "text",
+													"marks": [
+														{
+															"type": "code"
+														}
+													],
+													"text": "map_x"
+												},
+												{
+													"type": "text",
+													"text": "). Plugging "
+												},
+												{
+													"type": "text",
+													"marks": [
+														{
+															"type": "code"
+														}
+													],
+													"text": "step_x = +1"
+												},
+												{
+													"type": "text",
+													"text": ":"
+												}
+											]
+										},
+										{
+											"type": "paragraph",
+											"attrs": {
+												"dir": "auto"
+											}
+										}
+									]
+								}
+							]
+						},
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							}
+						}
+					]
+				}
+			},
+			"parentId": "page:page",
+			"index": "b0n2Zsgzl",
 			"typeName": "shape"
 		}
 	]
