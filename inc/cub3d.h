@@ -31,10 +31,30 @@ typedef struct s_file_data
 	int		ceiling_color[3];
 }			t_file_data;
 
+
+typedef struct s_texture
+{
+    void *img;
+	void *mlx_connection;
+    char *addr;
+    int width;
+    int height;
+    int bpp;
+    int line_len;
+    int endian;
+} t_texture;
+
 typedef struct s_cmp_data
 {
 	char **compass;
 }			t_cmp_data;
+
+typedef struct s_map
+{
+	char	**grid;
+	int		width;
+	int		height;
+}			t_map;
 
 typedef struct s_player
 {
@@ -48,13 +68,6 @@ typedef struct s_player
 	int rotating_left;
 	int rotating_right;
 }			t_player;
-
-typedef struct s_map
-{
-	char	**grid;
-	int		width;
-	int		height;
-}			t_map;
 
 typedef struct s_raycast
 {
@@ -72,6 +85,10 @@ typedef struct s_raycast
 	int		step_y;
 	int		hit;
 	int		side;
+	int		wall_x;
+	int		line_height;
+	int		draw_start;
+	int		draw_end;
 }			t_raycast;
 
 typedef struct s_mlx
