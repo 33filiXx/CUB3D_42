@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:18:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/17 02:25:54 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/25 17:33:07 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,21 +59,26 @@ int exists(char *str)
         return -1;
     return fd; 
 }
-int get_size(int fd)
+void get_size(int fd  , t_file_data *file_data)
 {
-	int length;
+	int map_length;
 	char *buffer;
+    int element_length; 
 
-	length = 0;
+	element_length = 0;
+    map_length = 0;
 	while (1)
 	{
 		buffer = get_next_line(fd);
-		length++;
+        if (buffer && ft_strlen(buffer) > element_length)
+            element_length = ft_strlen(buffer);
+		map_length++;
 		if(!buffer)
 			break;
 	}
     free(buffer);
-	return length;
+    file_data->map_size = map_length;
+    file_data->element_size = element_length + 1;
 }
 int  punisher(char **av , t_file_data *file_data)
 {
@@ -85,7 +90,8 @@ int  punisher(char **av , t_file_data *file_data)
         return 1;
     if(valid_extantion(*av))
         return 1;
-    file_data->map_size = get_size(fd);
+    get_size(fd , file_data);
+    file_data->s_element_size = 0;
     close(fd);
 	new_fd = open(*av, O_RDONLY);
 	if(new_fd == -1)

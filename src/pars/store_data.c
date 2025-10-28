@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/25 15:30:27 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/25 17:36:24 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,11 @@ int	specific_store(char *str, t_file_data *file_data, char who_know)
 		else if (who_know == 'C')
 		{
 			while (str[i] != ',' && str[i])
+			{
+				if (str[i] == ' ')
+					return 1;
 				tmp[j++] = str[i++];
+			}
 			tmp[j] = '\0';
 			j = 0;
 			file_data->ceiling_color[array_length++] = ft_atoi(tmp);
@@ -218,16 +222,35 @@ int is_only_space(char *str)
 	return just_space;
 }
 
+
+void update_line(char *line)
+{
+	int i ;
+
+	i = 0;
+	while (line[i])
+	{
+		if (line[i] == ' ' || line[i] == '\t')
+			line[i] = '1';
+		i++;
+	}	
+}
+
 void	fill_map(char *line, t_file_data *file_data, int *update_map_arr)
 {
 	int	i;
 	int	check;
+	int	size;
 
 	i = 0;
 	check = 0;
-	file_data->map[*update_map_arr] = malloc(ft_strlen(line));
+	size = 0;
+	file_data->map[*update_map_arr] = malloc(file_data->element_size);
 	while (line[i])
 	{
+		update_line(line);
+		if(line && ft_strlen(line) > file_data->s_element_size)
+			file_data->s_element_size = ft_strlen(line);
 		file_data->map[*update_map_arr][i] = line[i];
 		i++;
 	}
@@ -258,7 +281,6 @@ int	set_data(int fd, t_file_data *file_data)
 	while (1)
 	{
 		buffer = get_next_line(fd);
-		printf("%d\n" , is_only_space(buffer));
 		if (buffer)
 		{
 			to_be_splited = ft_split(buffer, " ");
@@ -277,7 +299,7 @@ int	set_data(int fd, t_file_data *file_data)
 				fill_only_map = 1;
 		}
 		else
-			break ;
+			break;
 	}
 	if (is_empty(already_checked) || is_color_dup(file_data))
 		return (1);

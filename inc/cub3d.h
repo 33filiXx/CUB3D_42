@@ -29,6 +29,8 @@ typedef struct s_file_data
 	char *hexa_ceiling_color;
 	char *hexa_f_color;
 	int map_size;
+	int element_size;
+	int s_element_size;
 	char **map;
 	int row;
 	int column;
