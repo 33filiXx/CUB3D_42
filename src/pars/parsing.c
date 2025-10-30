@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:18:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/25 17:33:07 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/30 21:01:03 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ int  punisher(char **av , t_file_data *file_data)
 	new_fd = open(*av, O_RDONLY);
 	if(new_fd == -1)
 		return 1;
-    if(is_valid(new_fd , file_data))
+    if(storing(new_fd , file_data))
         return 1;
     return 0;
 }

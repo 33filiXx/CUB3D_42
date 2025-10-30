@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/25 17:36:24 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/29 15:21:27 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,11 +239,9 @@ void update_line(char *line)
 void	fill_map(char *line, t_file_data *file_data, int *update_map_arr)
 {
 	int	i;
-	int	check;
 	int	size;
 
 	i = 0;
-	check = 0;
 	size = 0;
 	file_data->map[*update_map_arr] = malloc(file_data->element_size);
 	while (line[i])
@@ -254,9 +252,8 @@ void	fill_map(char *line, t_file_data *file_data, int *update_map_arr)
 		file_data->map[*update_map_arr][i] = line[i];
 		i++;
 	}
-	check = 1;
-	if (check)
-		(*update_map_arr)++;
+	file_data->map[*update_map_arr][i] = '\0';
+	(*update_map_arr)++;
 }
 
 int	set_data(int fd, t_file_data *file_data)
@@ -303,5 +300,6 @@ int	set_data(int fd, t_file_data *file_data)
 	}
 	if (is_empty(already_checked) || is_color_dup(file_data))
 		return (1);
+	file_data->s_element_size++;
 	return (0);
 }

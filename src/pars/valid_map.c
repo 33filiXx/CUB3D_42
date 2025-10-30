@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:34:51 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/28 10:38:15 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/10/30 22:38:38 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int	found_player(char s1, char *s2, int *checked)
 		}
 		i++;
 	}
-	return (3);
+	return (0);
 }
 
 void	add_characters(char *str, t_file_data *file_data, int j)
@@ -47,12 +47,58 @@ void	add_characters(char *str, t_file_data *file_data, int j)
 	int	i;
 
 	i = j;
-	while (i < file_data->s_element_size - 1)
-		str[i++] = '!';
-	str[i] = '\n';
+	while (i < file_data->s_element_size - 2)
+		str[i++] = '+';
+	str[i++] = '\n';
+	str[i] = '\0';
+}
+int last_floor(char *line , int j)
+{
+	int i ;
+	int check;
+
+	i = j + 1;
+	check = 0;
+	while (line[i] && line[i] != '+' && line[i] != '\n')
+	{
+		if (line[i] == '0')
+			return 1;
+		i++;
+	}
+	return 0;
 }
 
-int	is_valid(int fd, t_file_data *file_data)
+int is_valid(t_file_data *file_data)
+{
+	int i;
+	int j;
+	int last_index;
+
+	i = 0;
+	last_index = 0;
+	while (file_data->map[i])
+	{
+		j = 0;
+		while (file_data->map[i][j] && file_data->map[i][j] != '\n')
+		{
+			if (file_data->map[i][0] != '1')
+				return 1;
+			if(file_data->map[0][j] != '1' || file_data->map[0][j] != '+')
+				return 1;
+			if(file_data->map[i][j] == '0' && !last_floor(file_data->map[i] , j))
+			{
+				if(file_data->map[i][j + 1] == '+' || file_data->map[i][j + 1] == '\n')
+					return 1;
+			}
+			j++;
+		}
+		i++;
+	}
+	return 0;
+}
+
+
+int	storing(int fd, t_file_data *file_data)
 {
 	char	*map_info;
 	int		i;
@@ -76,14 +122,12 @@ int	is_valid(int fd, t_file_data *file_data)
 		while (file_data->map[i][j] && file_data->map[i][j] != '\n')
 		{
 			// bool = found_player(file_data->map[i][j], map_info ,checked);
-			if (*checked == 0 && found_player(file_data->map[i][j], map_info ,checked))
+			if (!(*checked) && found_player(file_data->map[i][j], map_info ,checked))
 			{
 				file_data->row = i;
 				file_data->column = j;
 			}
 			else if (found_player(file_data->map[i][j], map_info ,checked) && *checked)
-				return (1);
-			if (found_player(file_data->map[i][j], map_info ,checked) == 3)
 				return (1);
 			j++;
 		}
@@ -91,5 +135,9 @@ int	is_valid(int fd, t_file_data *file_data)
 			add_characters(file_data->map[i], file_data, j);
 		i++;
 	}
+	if(is_valid(file_data))
+		return 1;
+	if (!(*checked))
+		return 1;
 	return (0);
 }
