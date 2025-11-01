@@ -135,7 +135,7 @@ void    set_texture_coordinations(t_game_data *data)
     else  // horizontal wall
         data->rc.wall_x = data->player.pos.x + data->rc.perp_wall_dist * data->rc.ray_dir_x;
     // Extract fractional part [0, 1)
-    data->rc.wall_x -= floor(data->rc.wall_x);
+    data->rc.wall_x -= data->rc.wall_x - floor(data->rc.wall_x);
 }
 
 char    *get_the_right_texture(t_game_data *data)
@@ -164,7 +164,7 @@ void    load_texture(t_game_data *data, t_texture *tex, char *path)
     tex->img = mlx_xpm_file_to_image(tex->mlx_connection,
                                       path, &tex->width, &tex->height);
     if (!tex->img)
-        exit_error("Texture load failed");
+        (printf("Texture load failed"), exit(1));
     tex->addr = mlx_get_data_addr(tex->img, &tex->bpp, 
                                    &tex->line_len, &tex->endian);
 }
@@ -199,25 +199,56 @@ int    flip_text_horizontally(t_game_data *data, t_texture *current_tex)
     return (tex_x);
 }
 
-
-void    draw_walls(t_game_data *data, int view_height, int view_width)
+void    draw(t_game_data *data ,t_texture *tex, int view_height, int view_width, int x, int start_x)
 {
-    t_texture tex_no, tex_so, tex_we, tex_ea, current_tex;
-    int tex_x;
-    
+    double tex_step, tex_pos;
+    int y;
+    unsigned int color;
+
+    tex_step = (double )tex->height / data->rc.line_height;
+    tex_pos = (data->rc.draw_start - view_height / 2.0 + data->rc.line_height / 2.0) * tex_step;
+    y = data->rc.draw_start;
+    while( y <= data->rc.draw_end)
+    {
+        tex->tex_y = (int )tex_pos;
+        tex_pos += tex_step;
+        color = *(unsigned int *)(tex->addr + tex->tex_y * tex->line_len + tex->tex_x * (tex->bpp / 8));
+        put_pixel(&data->mlx, start_x + x, y, color);
+        y++;
+    }
+}
+
+
+void    draw_walls(t_game_data *data, int view_height, int view_width,
+            int x, int start_x, t_texture *current_tex)
+{
+    (void)view_width;
     get_perp_wall_distance(data);
     set_line_height(data, view_height);
     set_drawing_ends(data, view_height);
     set_texture_coordinations(data);
-    current_tex = *get_current_texture(data, &tex_no, &tex_so, &tex_we, &tex_ea);
-    load_texture(data, &current_tex, get_the_right_texture(data));
-    tex_x = flip_text_horizontally(data, &current_tex);
+    current_tex->tex_x = flip_text_horizontally(data, current_tex);
+    draw(data, current_tex, view_height, view_width, x, start_x);
 }
 
 void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height)
 {
     int x;
-    
+    static t_st tex;
+    static int textures_ready;
+
+    if (!textures_ready)
+    {
+        tex.tex_no.mlx_connection = data->mlx.mlx_connection;
+        tex.tex_so.mlx_connection = data->mlx.mlx_connection;
+        tex.tex_we.mlx_connection = data->mlx.mlx_connection;
+        tex.tex_ea.mlx_connection = data->mlx.mlx_connection;
+        load_texture(data, &tex.tex_no, data->file_data.no_texture);
+        load_texture(data, &tex.tex_so, data->file_data.so_texture);
+        load_texture(data, &tex.tex_we, data->file_data.we_texture);
+        load_texture(data, &tex.tex_ea, data->file_data.ea_texture);
+        textures_ready = 1;
+    }
     x = 0;
     while (x < view_width)
     {
@@ -237,7 +268,10 @@ void render_3d_view(t_game_data *data, int start_x, int view_width, int view_hei
         set_horizontal_line_dist(data);
         data->rc.hit = 0;
         dda(data);
-        draw_walls(data, view_height, view_width);
+        tex.current_tex = get_current_texture(data, &tex.tex_no, &tex.tex_so,
+                &tex.tex_we, &tex.tex_ea);
+        draw_walls(data, view_height, view_width, x, start_x,
+            tex.current_tex);
         x++;
     }
 }

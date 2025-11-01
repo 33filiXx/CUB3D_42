@@ -42,7 +42,18 @@ typedef struct s_texture
     int bpp;
     int line_len;
     int endian;
+	int tex_x;
+	int tex_y;
 } t_texture;
+
+typedef struct s_nt
+{
+	t_texture tex_no;
+	t_texture tex_so;
+	t_texture tex_we;
+	t_texture tex_ea;
+	t_texture *current_tex;
+}	t_st;
 
 typedef struct s_cmp_data
 {
@@ -116,7 +127,8 @@ int punisher(char **av , t_file_data *file_data);
 int set_data(int fd , t_file_data *file_data);
 int	ft_strcmp(const char *s1, const char *s2);
 // int	my_strcmp(const char *s1, const char **s2);
-
+void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height);
+void put_pixel(t_mlx *mlx, int x, int y, int color);
 
 
 #endif
