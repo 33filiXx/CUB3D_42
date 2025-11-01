@@ -236,14 +236,27 @@ void update_line(char *line)
 	}	
 }
 
+int skip_empty_line(char *line)
+{
+	int i;
+
+	i = 0;
+	while (line[i] && line[i] != '\n')
+	{
+		if(line[i] != ' ' || line[i] != '\t')
+			return 0;
+		i++;
+	}
+	return 1;
+}
 void	fill_map(char *line, t_file_data *file_data, int *update_map_arr)
 {
 	int	i;
-	int	size;
 
 	i = 0;
-	size = 0;
 	file_data->map[*update_map_arr] = malloc(file_data->element_size);
+	if (skip_empty_line(line))
+		return;
 	while (line[i])
 	{
 		update_line(line);
@@ -261,7 +274,6 @@ int	set_data(int fd, t_file_data *file_data)
 	char		*buffer;
 	char		**to_be_splited;
 	t_cmp_data	*cmp_data;
-	int			i;
 	char		**already_checked;
 	int			value;
 	int			*update_map_arr;
@@ -269,7 +281,6 @@ int	set_data(int fd, t_file_data *file_data)
 
 	cmp_data = malloc(sizeof(t_cmp_data));
 	reset_data(cmp_data);
-	i = 0;
 	value = 0;
 	update_map_arr = &value;
 	fill_only_map = 0;

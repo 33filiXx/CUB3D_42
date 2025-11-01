@@ -35,7 +35,7 @@ void	print_file_data(t_file_data data)
 	// Print map
 	if (data.map)
 	{
-		printf("\nMap;\n");
+		printf("\nMap:	\n");
 		i = 0;
 		while (data.map[i])
 		{
