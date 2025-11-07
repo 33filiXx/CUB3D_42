@@ -134,8 +134,8 @@ void    set_texture_coordinations(t_game_data *data)
         data->rc.wall_x = data->player.pos.y + data->rc.perp_wall_dist * data->rc.ray_dir_y;
     else  // horizontal wall
         data->rc.wall_x = data->player.pos.x + data->rc.perp_wall_dist * data->rc.ray_dir_x;
-    // Extract fractional part [0, 1)
-    data->rc.wall_x -= data->rc.wall_x - floor(data->rc.wall_x);
+    // Keep only the fractional part within [0, 1)
+    data->rc.wall_x -= floor(data->rc.wall_x);
 }
 
 char    *get_the_right_texture(t_game_data *data)
@@ -196,6 +196,10 @@ int    flip_text_horizontally(t_game_data *data, t_texture *current_tex)
     {
         tex_x = current_tex->width - tex_x - 1;
     }
+    if (tex_x < 0)
+        tex_x = 0;
+    else if (tex_x >= current_tex->width)
+        tex_x = current_tex->width - 1;
     return (tex_x);
 }
 
@@ -211,9 +215,29 @@ void    draw(t_game_data *data ,t_texture *tex, int view_height, int view_width,
     while( y <= data->rc.draw_end)
     {
         tex->tex_y = (int )tex_pos;
+        if (tex->tex_y < 0)
+            tex->tex_y = 0;
+        else if (tex->tex_y >= tex->height)
+            tex->tex_y = tex->height - 1;
         tex_pos += tex_step;
         color = *(unsigned int *)(tex->addr + tex->tex_y * tex->line_len + tex->tex_x * (tex->bpp / 8));
         put_pixel(&data->mlx, start_x + x, y, color);
+        y++;
+    }
+}
+
+void    color_floor_and_ceiling(t_game_data *data, int view_hieght, int view_width, int start_x, int x)
+{
+    int y = 0;
+    while (y < data->rc.draw_start)
+    {
+        put_pixel(&data->mlx, start_x + x, y, data->file_data.cc);
+        y++;
+    }
+    y = data->rc.draw_end;
+    while (y < view_hieght)
+    {
+        put_pixel(&data->mlx, start_x + x, y, data->file_data.fc);
         y++;
     }
 }
@@ -229,6 +253,23 @@ void    draw_walls(t_game_data *data, int view_height, int view_width,
     set_texture_coordinations(data);
     current_tex->tex_x = flip_text_horizontally(data, current_tex);
     draw(data, current_tex, view_height, view_width, x, start_x);
+    color_floor_and_ceiling(data, view_height, view_width, start_x, x);
+}
+
+void    tex_ready(int *textures_ready, t_st *tex, t_game_data *data)
+{
+    if (!*textures_ready)
+    {
+        tex->tex_no.mlx_connection = data->mlx.mlx_connection;
+        tex->tex_so.mlx_connection = data->mlx.mlx_connection;
+        tex->tex_we.mlx_connection = data->mlx.mlx_connection;
+        tex->tex_ea.mlx_connection = data->mlx.mlx_connection;
+        load_texture(data, &tex->tex_no, data->file_data.no_texture);
+        load_texture(data, &tex->tex_so, data->file_data.so_texture);
+        load_texture(data, &tex->tex_we, data->file_data.we_texture);
+        load_texture(data, &tex->tex_ea, data->file_data.ea_texture);
+        *textures_ready = 1;
+    }
 }
 
 void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height)
@@ -237,18 +278,7 @@ void render_3d_view(t_game_data *data, int start_x, int view_width, int view_hei
     static t_st tex;
     static int textures_ready;
 
-    if (!textures_ready)
-    {
-        tex.tex_no.mlx_connection = data->mlx.mlx_connection;
-        tex.tex_so.mlx_connection = data->mlx.mlx_connection;
-        tex.tex_we.mlx_connection = data->mlx.mlx_connection;
-        tex.tex_ea.mlx_connection = data->mlx.mlx_connection;
-        load_texture(data, &tex.tex_no, data->file_data.no_texture);
-        load_texture(data, &tex.tex_so, data->file_data.so_texture);
-        load_texture(data, &tex.tex_we, data->file_data.we_texture);
-        load_texture(data, &tex.tex_ea, data->file_data.ea_texture);
-        textures_ready = 1;
-    }
+    tex_ready(&textures_ready, &tex, data);
     x = 0;
     while (x < view_width)
     {

@@ -6,6 +6,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <sys/time.h>
+# include <stdbool.h>
 // #include "../../minilibx-linux/mlx.h"
 # include "../libft/libft.h"
 # include <X11/keysym.h>
@@ -29,6 +30,8 @@ typedef struct s_file_data
 	char	*ea_texture;
 	int		floor_color[3];
 	int		ceiling_color[3];
+	unsigned int fc;
+	unsigned int cc;
 }			t_file_data;
 
 
@@ -113,12 +116,20 @@ typedef struct s_mlx
 	int			endian;
 }			t_mlx;
 
+typedef struct s_mouse
+{
+	int last_mouse_x;
+	bool has_prev_pos;
+	double delta;
+}			t_mouse;
+
 typedef struct s_game_data
 {
     t_mlx       mlx;
     t_map       map;
     t_player    player;
     t_file_data file_data;
+	t_mouse		mouse;
 	t_raycast	rc;
 }   t_game_data;
 
@@ -129,6 +140,7 @@ int	ft_strcmp(const char *s1, const char *s2);
 // int	my_strcmp(const char *s1, const char **s2);
 void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height);
 void put_pixel(t_mlx *mlx, int x, int y, int color);
+int on_mouse_move(int x, int y, void *param);
 
 
 #endif

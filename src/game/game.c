@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
-void	set_colors(t_game_data *data, int *floor_color, int * ceiling_color);
+void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * ceiling_color);
 
 static char	*g_example_grid[] = {
     "11111111111111111111",
@@ -35,10 +35,13 @@ void	init_example_file_data(t_file_data *file_data)
 {
 	if (!file_data)
 		return ;
-	file_data->no_texture = ft_strdup("../textures/wall_north.xpm");
-	file_data->so_texture = ft_strdup("../textures/wall_south.xpm");
-	file_data->we_texture = ft_strdup("../textures/wall_west.xpm");
-	file_data->ea_texture = ft_strdup("../textures/wall_east.xpm");
+	file_data->no_texture = ft_strdup("textures/wall_north.xpm");
+	file_data->so_texture = ft_strdup("textures/wall_south.xpm");
+	file_data->we_texture = ft_strdup("textures/wall_west.xpm");
+	file_data->ea_texture = ft_strdup("textures/wall_east.xpm");
+	printf("init textures ptrs: NO=%p SO=%p WE=%p EA=%p\n",
+		(void *)file_data->no_texture, (void *)file_data->so_texture,
+		(void *)file_data->we_texture, (void *)file_data->ea_texture);
 	file_data->floor_color[0] = 220;
 	file_data->floor_color[1] = 100;
 	file_data->floor_color[2] = 0;
@@ -148,6 +151,8 @@ void	initiate(t_mlx *mlx, t_game_data *game_data)
 	}
 	mlx->addr = mlx_get_data_addr(mlx->img, &mlx->bits_per_pixel,
 	&mlx->line_length, &mlx->endian);
+	printf("framebuffer bpp=%d endian=%d line_len=%d\n",
+		mlx->bits_per_pixel, mlx->endian, mlx->line_length);
 }
 	
 void put_pixel(t_mlx *mlx, int x, int y, int color)
@@ -281,7 +286,7 @@ void	draw_player(int color, t_game_data *data)
 	}
 }
 
-void	set_colors(t_game_data *data, int *floor_color, int * ceiling_color)
+void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * ceiling_color)
 {
 	*floor_color = (data->file_data.floor_color[0] << 24 
 					|data->file_data.floor_color[1] << 16
@@ -317,21 +322,20 @@ void	draw_env(t_game_data *data)
 	int tx;
 	int ty;
 	int	scale , off_x, off_y;
-	int	floor_color, ceiling_color;
 
 	i = 0;
 	j = 0;
 	calculate_scale_and_offset(&data->map, &scale, &off_x, &off_y);
-	set_colors(data, &floor_color, &ceiling_color);
+	set_colors(data, &data->file_data.fc, &data->file_data.cc);
 	while (i < data->map.height)
 	{
 		j = 0;
 		while(j < data->map.width)
 		{
 			if (data->map.grid[i][j] == '0' || data->map.grid[i][j] == 'N' || data->map.grid[i][j] == 'S' || data->map.grid[i][j] == 'E' || data->map.grid[i][j] == 'W')
-				color = floor_color;
+				color = data->file_data.fc;
 			else if (data->map.grid[i][j] == '1')
-				color = ceiling_color;
+				color = data->file_data.cc;
 			else
 				color = 0;
 			draw_tile(data, i, j , color);
@@ -345,15 +349,15 @@ void	draw_env(t_game_data *data)
 
 void	redraw_map(t_game_data *data)
 {
-	draw_env(data);
-	draw_dir(data);
-	draw_plane(data);
-	draw_cam_plane(data);
-	mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
+	// draw_env(data);
+	// draw_dir(data);
+	// draw_plane(data);
+	// draw_cam_plane(data);
+	// mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
 
 	// 3D view on right
     int map_width = data->map.width * TILE;
-    render_3d_view(data, map_width / 2, map_width / 2, data->map.height * TILE);
+    render_3d_view(data, 0, map_width, data->map.height * TILE);
     
     mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
 }
@@ -478,6 +482,57 @@ int close_window(void *param)
     return (0);
 }
 
+static void rotate_player(t_game_data *data, double angle)
+{
+    double old_dir_x = data->player.dir.x;
+    double old_plane_x = data->player.plane.x;
+
+    data->player.dir.x = old_dir_x * cos(angle) - data->player.dir.y * sin(angle);
+    data->player.dir.y = old_dir_x * sin(angle) + data->player.dir.y * cos(angle);
+    data->player.plane.x = old_plane_x * cos(angle) - data->player.plane.y * sin(angle);
+    data->player.plane.y = old_plane_x * sin(angle) + data->player.plane.y * cos(angle);
+}
+
+int on_mouse_move(int x, int y, void *param)
+{
+	t_game_data *data = (t_game_data *)param;
+	double center_x;
+	int delta;
+
+	center_x = data->map.width * TILE / 2;
+	if (data->mouse.has_prev_pos == false)
+	{
+		data->mouse.last_mouse_x = center_x;
+		data->mouse.delta = (double )x - (double )data->mouse.last_mouse_x;
+		data->mouse.has_prev_pos = true;
+		return (0);
+	}
+	delta = (double )x - (double )data->mouse.last_mouse_x;
+	if (data->mouse.delta < delta && x > 0)
+		data->mouse.delta = -delta;
+	else if (data->mouse.delta > delta && x < 0)
+			data->mouse.delta = -delta;
+	rotate_player(data , data->mouse.delta * 0.0010);
+	redraw_map(data);
+	return (0);
+}
+
+void	init_mouse(t_game_data *data)
+{
+	int y;
+
+	if( mlx_mouse_get_pos(data->mlx.mlx_connection, data->mlx.mlx_win, &data->mouse.last_mouse_x, &y) == 1)
+	{
+		data->mouse.last_mouse_x = data->map.width * TILE / 2;
+		data->mouse.has_prev_pos = true;
+	}
+	else
+	{
+		data->mouse.last_mouse_x = -1;
+		data->mouse.has_prev_pos = false;
+	}
+	
+}
 
 int	main(void)
 {
@@ -504,6 +559,8 @@ int	main(void)
 	mlx_loop_hook(game_data.mlx.mlx_connection, game_loop, &game_data);
 	mlx_hook(game_data.mlx.mlx_win, DestroyNotify, StructureNotifyMask, close_window, &game_data);
     mlx_put_image_to_window(game_data.mlx.mlx_connection, game_data.mlx.mlx_win, game_data.mlx.img, 0, 0);
+	init_mouse(&game_data);
+	mlx_hook(game_data.mlx.mlx_win, MotionNotify, PointerMotionMask, on_mouse_move, &game_data);
     mlx_loop(game_data.mlx.mlx_connection);
 	return (0);
 }
