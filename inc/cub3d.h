@@ -49,6 +49,14 @@ typedef struct s_texture
 	int tex_y;
 } t_texture;
 
+typedef struct s_minimap
+{
+	int	mini_width;
+	int	mini_height;
+	int	padding;
+	int	mini_tile;
+}		t_minimap;
+
 typedef struct s_nt
 {
 	t_texture tex_no;
@@ -118,9 +126,9 @@ typedef struct s_mlx
 
 typedef struct s_mouse
 {
-	int last_mouse_x;
+	int c_x;
 	bool has_prev_pos;
-	double delta;
+	double prev_delta;
 }			t_mouse;
 
 typedef struct s_game_data

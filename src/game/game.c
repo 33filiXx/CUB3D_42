@@ -258,7 +258,7 @@ void	fill_outer_ppixel(t_game_data *data, int i, int j, int floor_color)
 	// data->map.grid[i][j] = '0';
 }
 
-void	draw_player(int color, t_game_data *data)
+void		draw_player(int color, t_game_data *data, t_minimap *minimap)
 {
 	int c_x;
 	int c_y;
@@ -267,17 +267,24 @@ void	draw_player(int color, t_game_data *data)
 	int tx;
 	int r;
 	
-	c_x = (int)(data->player.pos.x * TILE);
-	c_y = (int)(data->player.pos.y * TILE);
-	(r = 16, ty = c_y - r);
+	c_x = minimap->padding + (int)(data->player.pos.x * minimap->mini_tile);
+	c_y = minimap->padding + (int)(data->player.pos.y * minimap->mini_tile);
+	r = minimap->mini_tile / 2;
+	if (r < 2)
+		r = 2;
+	ty = c_y - r;
 	while (ty <= c_y + r)
 	{
 		tx = c_x - r;
-		while(tx <= c_x + r)
+		while (tx <= c_x + r)
 		{
-			if ((pow(tx - c_x, 2) + pow(ty - c_y, 2)) <= pow(r, 2))
+			int dx = tx - c_x;
+			int dy = ty - c_y;
+			if ((dx * dx + dy * dy) <= r * r)
 			{
-				if (tx >= 0 && ty >= 0 && tx < data->map.width * TILE && ty < data->map.height * TILE)
+				if (tx >= minimap->padding && ty >= minimap->padding
+					&& tx < minimap->padding + minimap->mini_width
+					&& ty < minimap->padding + minimap->mini_height)
 					put_pixel(mlx, tx, ty, color);
 			}
 			tx++;
@@ -296,22 +303,44 @@ void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * cei
 				|data->file_data.ceiling_color[2] << 8);
 }
 
-void	draw_tile(t_game_data *data, int i, int j, int color)
+void	draw_tile(t_game_data *data, int i, int j, int color, t_minimap *minimap)
 {
 	int tx;
 	int ty;
-	
+
+
 	ty = 0;
-	while (ty < TILE)
+	while (ty < minimap->mini_tile)
 	{
 		tx = 0;
-		while (tx < TILE)
+		while (tx < minimap->mini_tile)
 		{
-			put_pixel(&data->mlx, j * TILE + tx, i * TILE + ty, color);
+			put_pixel(&data->mlx, minimap->padding +j * minimap->mini_tile + tx,
+				 minimap->padding + i * minimap->mini_tile + ty, color);
 			tx++;
 		}
 		ty++;
 	}
+}
+
+void	adjust_dimensions(t_minimap *minimap, t_game_data *data)
+{
+	double	usable_w;
+	double	usable_h;
+
+	minimap->mini_width = (data->map.width * TILE) / 4;
+	minimap->mini_height = (data->map.height * TILE) / 3;
+	minimap->padding = 16;
+	usable_w = minimap->mini_width - 2 * minimap->padding;
+	usable_h = minimap->mini_height - 2 * minimap->padding;
+	if (usable_w < 0)
+		usable_w = 0;
+	if (usable_h < 0)
+		usable_h = 0;
+	minimap->mini_tile = (int)fmin(usable_w / data->map.width,
+		usable_h / data->map.height);
+	if (minimap->mini_tile < 1)
+		minimap->mini_tile = 1;
 }
 
 void	draw_env(t_game_data *data)
@@ -319,13 +348,11 @@ void	draw_env(t_game_data *data)
 	int	i;
 	int	j;
 	int	color;
-	int tx;
-	int ty;
-	int	scale , off_x, off_y;
+	t_minimap	minimap;
 
 	i = 0;
 	j = 0;
-	calculate_scale_and_offset(&data->map, &scale, &off_x, &off_y);
+	adjust_dimensions(&minimap, data);
 	set_colors(data, &data->file_data.fc, &data->file_data.cc);
 	while (i < data->map.height)
 	{
@@ -338,26 +365,22 @@ void	draw_env(t_game_data *data)
 				color = data->file_data.cc;
 			else
 				color = 0;
-			draw_tile(data, i, j , color);
+			draw_tile(data, i, j , color, &minimap);
 			j++;
 		}
 		i++;
 	}
-	draw_player(0xFF0000, data);
+	draw_player(0xFF0000, data, &minimap);
 }
 
 
 void	redraw_map(t_game_data *data)
 {
-	// draw_env(data);
-	// draw_dir(data);
-	// draw_plane(data);
-	// draw_cam_plane(data);
-	// mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
+	int map_width;
 
-	// 3D view on right
-    int map_width = data->map.width * TILE;
-    render_3d_view(data, 0, map_width, data->map.height * TILE);
+	map_width = data->map.width * TILE;
+	render_3d_view(data, 0, map_width, data->map.height * TILE);
+	draw_env(data);
     
     mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
 }
@@ -496,42 +519,42 @@ static void rotate_player(t_game_data *data, double angle)
 int on_mouse_move(int x, int y, void *param)
 {
 	t_game_data *data = (t_game_data *)param;
-	double center_x;
-	int delta;
+	double	angle;
+	int		delta;
 
-	center_x = data->map.width * TILE / 2;
+	(void)y;
 	if (data->mouse.has_prev_pos == false)
 	{
-		data->mouse.last_mouse_x = center_x;
-		data->mouse.delta = (double )x - (double )data->mouse.last_mouse_x;
+		data->mouse.prev_delta = x;
 		data->mouse.has_prev_pos = true;
 		return (0);
 	}
-	delta = (double )x - (double )data->mouse.last_mouse_x;
-	if (data->mouse.delta < delta && x > 0)
-		data->mouse.delta = -delta;
-	else if (data->mouse.delta > delta && x < 0)
-			data->mouse.delta = -delta;
-	rotate_player(data , data->mouse.delta * 0.0010);
+	delta = x - (int)data->mouse.prev_delta;
+	if (delta == 0)
+		return (0);
+	if (delta > 200)
+		delta = 200;
+	else if (delta < -200)
+		delta = -200;
+	angle = (double)delta * 0.045;
+	rotate_player(data, angle);
 	redraw_map(data);
+	data->mouse.prev_delta = x;
 	return (0);
 }
 
 void	init_mouse(t_game_data *data)
 {
 	int y;
-
-	if( mlx_mouse_get_pos(data->mlx.mlx_connection, data->mlx.mlx_win, &data->mouse.last_mouse_x, &y) == 1)
+	int last_mouse_x;
+	
+	if( mlx_mouse_get_pos(data->mlx.mlx_connection, data->mlx.mlx_win, &last_mouse_x, &y) == 1)
 	{
-		data->mouse.last_mouse_x = data->map.width * TILE / 2;
+		data->mouse.prev_delta = last_mouse_x;
 		data->mouse.has_prev_pos = true;
 	}
 	else
-	{
-		data->mouse.last_mouse_x = -1;
 		data->mouse.has_prev_pos = false;
-	}
-	
 }
 
 int	main(void)
@@ -549,11 +572,12 @@ int	main(void)
 	print_example_summary(&game_data.file_data, &game_data.map, &game_data.player, &game_data.rc);
 
     
-    initiate(&game_data.mlx, &game_data);
-    draw_env(&game_data);
-	draw_dir(&game_data);
-	draw_plane(&game_data);
-	draw_cam_plane(&game_data);
+	initiate(&game_data.mlx, &game_data);
+	render_3d_view(&game_data, 0, game_data.map.width * TILE, game_data.map.height * TILE);
+	draw_env(&game_data);
+	// draw_dir(&game_data);
+	// draw_plane(&game_data);
+	// draw_cam_plane(&game_data);
 	mlx_hook(game_data.mlx.mlx_win, KeyPress, KeyPressMask, key_press, &game_data);
 	mlx_hook(game_data.mlx.mlx_win, KeyRelease, KeyReleaseMask, key_release, &game_data);
 	mlx_loop_hook(game_data.mlx.mlx_connection, game_loop, &game_data);
