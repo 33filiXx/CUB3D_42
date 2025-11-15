@@ -6,26 +6,29 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/10/23 21:48:27 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/15 17:49:36 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
+
+#define HALF_PI 1.5707963267948966
+
 void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * ceiling_color);
 
 static char	*g_example_grid[] = {
     "11111111111111111111",
     "10000000001000000001",
     "10110000101000111101",
-    "10100000101000100001",
+    "10100000D01000100001",
     "10111110101110101101",
     "10000010000010100001",
-    "11110010111010111111",
+    "111100101D1010111111",
     "10000010100010000001",
     "10111110101110111101",
     "10100000101000100001",
-    "10101111101011101011",
-    "10100000001010001001",
+    "101011D1101011101011",
+    "101D0000001010001001",
     "10111111111010111101",
     "10N00000000000000001",
     "11111111111111111111",
@@ -42,12 +45,18 @@ void	init_example_file_data(t_file_data *file_data)
 	printf("init textures ptrs: NO=%p SO=%p WE=%p EA=%p\n",
 		(void *)file_data->no_texture, (void *)file_data->so_texture,
 		(void *)file_data->we_texture, (void *)file_data->ea_texture);
-	file_data->floor_color[0] = 220;
-	file_data->floor_color[1] = 100;
-	file_data->floor_color[2] = 0;
-	file_data->ceiling_color[0] = 150;
-	file_data->ceiling_color[1] = 150;
-	file_data->ceiling_color[2] = 255;
+	file_data->floor_color[0] = 150;
+	file_data->floor_color[1] = 75;
+	file_data->floor_color[2] = 60;
+	file_data->ceiling_color[0] = 135;
+	file_data->ceiling_color[1] = 206;
+	file_data->ceiling_color[2] = 250;
+}
+
+void	init_doors(t_game_data *data)
+{
+	data->door_count = 0;
+	data->doors = NULL;
 }
 
 void	init_example_map(t_map *map)
@@ -66,7 +75,7 @@ void	init_example_player(t_player *player)
     player->pos = vec2_new(2.5, 13.5);
     player->dir = vec2_new(0.0, -1.0);
     player->plane = vec2_new(0.66, 0.0);
-    player->move_speed = 0.05;
+    player->move_speed = 0.02;
     player->rot_speed = 0.05;
 }
 
@@ -295,12 +304,72 @@ void		draw_player(int color, t_game_data *data, t_minimap *minimap)
 
 void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * ceiling_color)
 {
-	*floor_color = (data->file_data.floor_color[0] << 24 
-					|data->file_data.floor_color[1] << 16
-					|data->file_data.floor_color[2] << 8);
-	*ceiling_color = (data->file_data.ceiling_color[0] << 24  
-				|data->file_data.ceiling_color[1] << 16
-				|data->file_data.ceiling_color[2] << 8);
+	*floor_color = (data->file_data.floor_color[0] << 16)
+		| (data->file_data.floor_color[1] << 8)
+		| data->file_data.floor_color[2];
+	*ceiling_color = (data->file_data.ceiling_color[0] << 16)
+		| (data->file_data.ceiling_color[1] << 8)
+		| data->file_data.ceiling_color[2];
+}
+
+static void draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door)
+{
+	t_vec2 span;
+	double scale;
+	double pivot_x;
+	double pivot_y;
+	double step;
+	double t;
+	int	steps;
+	int	k;
+
+	if (!door || !door->has_geom)
+		return ;
+	span = vec2_rotate(door->span_closed,
+		door->rot_sign * door->progress * HALF_PI);
+	scale = minimap->mini_tile;
+	pivot_x = minimap->padding + door->pivot.x * scale;
+	pivot_y = minimap->padding + door->pivot.y * scale;
+	span = vec2_scale(span, scale);
+	steps = minimap->mini_tile * 2;
+	if (steps < 4)
+		steps = 4;
+	step = 1.0 / (double)steps;
+	k = 0;
+	while (k <= steps)
+	{
+		t_vec2 pt;
+		int	px;
+		int	py;
+		int	dy;
+		int	dx;
+
+		t = (double)k * step;
+		pt = vec2_add(vec2_new(pivot_x, pivot_y), vec2_scale(span, t));
+		px = (int)round(pt.x);
+		py = (int)round(pt.y);
+		dy = -1;
+		while (dy <= 1)
+		{
+			dx = -1;
+			while (dx <= 1)
+			{
+				int draw_x;
+				int draw_y;
+
+				draw_x = px + dx;
+				draw_y = py + dy;
+				if (draw_x >= minimap->padding
+					&& draw_y >= minimap->padding
+					&& draw_x < minimap->padding + minimap->mini_width
+					&& draw_y < minimap->padding + minimap->mini_height)
+					put_pixel(&data->mlx, draw_x, draw_y, 0x553311);
+				dx++;
+			}
+			dy++;
+		}
+		k++;
+	}
 }
 
 void	draw_tile(t_game_data *data, int i, int j, int color, t_minimap *minimap)
@@ -320,6 +389,14 @@ void	draw_tile(t_game_data *data, int i, int j, int color, t_minimap *minimap)
 			tx++;
 		}
 		ty++;
+	}
+	if (data->map.grid[i][j] == 'D')
+	{
+		t_door *door;
+
+		door = find_door(data, i, j);
+		if (door)
+			draw_minimap_door(data, minimap, door);
 	}
 }
 
@@ -384,6 +461,7 @@ void	redraw_map(t_game_data *data)
     
     mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
 }
+
 int	valid_move(t_game_data *data, double new_x, double new_y)
 {
 	int map_x = (int ) new_x;
@@ -392,7 +470,9 @@ int	valid_move(t_game_data *data, double new_x, double new_y)
 	if (map_x < 0 || map_x >= data->map.width || map_y < 0 || map_y >= data->map.height)
 		return (0);
 	if (data->map.grid[map_y][map_x] == '1')
-		return(0);
+		return (0);
+	if (door_is_blocking(data, map_x, map_y))
+		return (0);
 	return (1);
 }
 
@@ -463,6 +543,8 @@ int key_press(int keycode, void *param)
 		data->player.rotating_right = 1;
 	else if (keycode == XK_a)
 		data->player.rotating_left = 1;
+	else if (keycode == XK_e)
+		door_toggle(data);
     return (0);
 }
 
@@ -484,7 +566,10 @@ int key_release(int keycode, void *param)
 int game_loop(void *param)
 {
     t_game_data *data = (t_game_data *)param;
-    
+	double now = get_now_seconds();
+	double dt = now - data->last_time;
+	data->last_time = now;
+	door_update(data, dt);
     if (data->player.moving_forward)
         move_forward(data);
     if (data->player.moving_backward)
@@ -536,7 +621,7 @@ int on_mouse_move(int x, int y, void *param)
 		delta = 200;
 	else if (delta < -200)
 		delta = -200;
-	angle = (double)delta * 0.045;
+	angle = (double)delta * 0.03;
 	rotate_player(data, angle);
 	redraw_map(data);
 	data->mouse.prev_delta = x;
@@ -569,10 +654,13 @@ int	main(void)
 	init_example_map(&game_data.map);
 	init_example_player(&game_data.player);
 	init_example_raycast(&game_data.rc);
+	init_doors(&game_data);
+	game_data.last_time = get_now_seconds();
 	print_example_summary(&game_data.file_data, &game_data.map, &game_data.player, &game_data.rc);
 
     
 	initiate(&game_data.mlx, &game_data);
+	door_load_map(&game_data);
 	render_3d_view(&game_data, 0, game_data.map.width * TILE, game_data.map.height * TILE);
 	draw_env(&game_data);
 	// draw_dir(&game_data);

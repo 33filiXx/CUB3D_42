@@ -13,6 +13,7 @@
 # include <X11/X.h>
 # include <mlx.h>
 # include "../src/vectorslib/vec.h"
+# include "door.h"
 #  define NO "NO"
 #  define SO "SO"
 #  define WE "WE"
@@ -21,6 +22,19 @@
 #  define C "C"
 
 #  define TILE 64
+/*
+void func(your struct , my struct)
+{
+	my struct map 
+}
+*/
+
+typedef enum s_hit_kind
+{
+	HIT_NONE,
+	HIT_WALL,
+	HIT_DOOR
+}			t_hit_kind;
 
 typedef struct s_file_data
 {
@@ -63,6 +77,7 @@ typedef struct s_nt
 	t_texture tex_so;
 	t_texture tex_we;
 	t_texture tex_ea;
+	t_texture door_tex;
 	t_texture *current_tex;
 }	t_st;
 
@@ -107,10 +122,14 @@ typedef struct s_raycast
 	int		step_y;
 	int		hit;
 	int		side;
-	int		wall_x;
+	double		wall_x;
 	int		line_height;
 	int		draw_start;
 	int		draw_end;
+	int draw_start_raw;
+	t_hit_kind kind;
+	t_door *hit_door;
+	double door_progress;
 }			t_raycast;
 
 typedef struct s_mlx
@@ -139,6 +158,9 @@ typedef struct s_game_data
     t_file_data file_data;
 	t_mouse		mouse;
 	t_raycast	rc;
+	t_door		*doors;
+	size_t		door_count;
+	double		last_time;
 }   t_game_data;
 
 // char	**ft_split(char *str, char *charset);
@@ -149,6 +171,7 @@ int	ft_strcmp(const char *s1, const char *s2);
 void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height);
 void put_pixel(t_mlx *mlx, int x, int y, int color);
 int on_mouse_move(int x, int y, void *param);
+void	redraw_map(t_game_data *data);
 
 
 #endif

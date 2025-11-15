@@ -6,11 +6,62 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/24 16:57:41 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/10/25 20:56:10 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/14 19:06:24 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
+
+#define HALF_PI 1.5707963267948966
+
+static t_vec2   ray_origin(t_game_data *data)
+{
+    return (data->player.pos);
+}
+
+static t_vec2   ray_direction(t_game_data *data)
+{
+    return (vec2_new(data->rc.ray_dir_x, data->rc.ray_dir_y));
+}
+
+static t_vec2   door_current_span(const t_door *door)
+{
+    double  angle;
+
+    angle = door->rot_sign * door->progress * HALF_PI;
+    return (vec2_rotate(door->span_closed, angle));
+}
+
+static int  door_ray_intersection(t_game_data *data, t_door *door,
+        double *hit_dist, double *u)
+{
+    t_vec2  origin;
+    t_vec2  dir;
+    t_vec2  span;
+    t_vec2  diff;
+    double  denom;
+    double  t;
+    double  s;
+
+    if (!door || !door->has_geom)
+        return (0);
+    origin = ray_origin(data);
+    dir = ray_direction(data);
+    span = door_current_span(door);
+    denom = vec2_cross(dir, span);
+    if (fabs(denom) < 1e-8)
+        return (0);
+    diff = vec2_sub(door->pivot, origin);
+    t = vec2_cross(diff, span) / denom;
+    s = vec2_cross(diff, dir) / denom;
+    if (t <= 1e-4 || s < 0.0 || s > 1.0)
+        return (0);
+    if (hit_dist)
+        *hit_dist = t;
+    if (u)
+        *u = s;
+    return (1);
+}
 
 
 
@@ -92,12 +143,38 @@ void    dda(t_game_data *data)
         if (check_bounds(data))
             break ;
         if (data->map.grid[data->rc.map_y][data->rc.map_x] == '1')
+        {
             data->rc.hit = 1;
+            data->rc.kind = HIT_WALL;
+        }
+        if (data->map.grid[data->rc.map_y][data->rc.map_x] == 'D')
+        {
+            t_door *door;
+            double  dist;
+            double  tex_u;
+
+            door = find_door(data, data->rc.map_y, data->rc.map_x);
+            if (!door || door->progress >= 0.99)
+                continue;
+            if (!door_ray_intersection(data, door, &dist, &tex_u))
+                continue;
+            data->rc.hit = 1;
+            data->rc.kind = HIT_DOOR;
+            data->rc.hit_door = door;
+            data->rc.door_progress = door->progress;
+            data->rc.perp_wall_dist = dist;
+            data->rc.wall_x = tex_u;
+            data->rc.side = 0;
+        }
     }
 }
 
 void    get_perp_wall_distance(t_game_data *data)
 {
+    double offset;
+
+    if (data->rc.kind == HIT_DOOR)
+        return ;
     if (data->rc.side == 0)  // vertical wall
     {
         data->rc.perp_wall_dist = (data->rc.map_x - data->player.pos.x 
@@ -109,6 +186,13 @@ void    get_perp_wall_distance(t_game_data *data)
         data->rc.perp_wall_dist = (data->rc.map_y - data->player.pos.y 
                                 + (1 - data->rc.step_y) / 2.0) 
                                 / data->rc.ray_dir_y;
+    }
+    //wall adjustement for wall height
+    if (data->rc.kind == HIT_DOOR)
+    {
+        offset = data->rc.perp_wall_dist;
+        if (offset < 0.001)
+            data->rc.perp_wall_dist = 0.001;
     }
 }
 
@@ -130,6 +214,8 @@ void    set_drawing_ends(t_game_data *data, int view_height)
 }
 void    set_texture_coordinations(t_game_data *data)
 {
+    if (data->rc.kind == HIT_DOOR)
+        return ;
     if (data->rc.side == 0)  // vertical wall
         data->rc.wall_x = data->player.pos.y + data->rc.perp_wall_dist * data->rc.ray_dir_y;
     else  // horizontal wall
@@ -251,7 +337,19 @@ void    draw_walls(t_game_data *data, int view_height, int view_width,
     set_line_height(data, view_height);
     set_drawing_ends(data, view_height);
     set_texture_coordinations(data);
-    current_tex->tex_x = flip_text_horizontally(data, current_tex);
+    if (data->rc.kind == HIT_DOOR)
+    {
+        int tex_x;
+
+        tex_x = (int)(data->rc.wall_x * current_tex->width);
+        if (tex_x < 0)
+            tex_x = 0;
+        else if (tex_x >= current_tex->width)
+            tex_x = current_tex->width - 1;
+        current_tex->tex_x = tex_x;
+    }
+    else
+        current_tex->tex_x = flip_text_horizontally(data, current_tex);
     draw(data, current_tex, view_height, view_width, x, start_x);
     color_floor_and_ceiling(data, view_height, view_width, start_x, x);
 }
@@ -264,6 +362,8 @@ void    tex_ready(int *textures_ready, t_st *tex, t_game_data *data)
         tex->tex_so.mlx_connection = data->mlx.mlx_connection;
         tex->tex_we.mlx_connection = data->mlx.mlx_connection;
         tex->tex_ea.mlx_connection = data->mlx.mlx_connection;
+        tex->door_tex.mlx_connection = data->mlx.mlx_connection;
+        load_texture(data, &tex->door_tex, "textures/door.xpm");
         load_texture(data, &tex->tex_no, data->file_data.no_texture);
         load_texture(data, &tex->tex_so, data->file_data.so_texture);
         load_texture(data, &tex->tex_we, data->file_data.we_texture);
@@ -297,8 +397,14 @@ void render_3d_view(t_game_data *data, int start_x, int view_width, int view_hei
             data->rc.delta_dist_y = 1e30;
         set_horizontal_line_dist(data);
         data->rc.hit = 0;
+        data->rc.kind = HIT_NONE;
+        data->rc.hit_door = NULL;
+        data->rc.door_progress = 0.0;
         dda(data);
-        tex.current_tex = get_current_texture(data, &tex.tex_no, &tex.tex_so,
+        if (data->rc.kind == HIT_DOOR)
+            tex.current_tex = &tex.door_tex;
+        else
+            tex.current_tex = get_current_texture(data, &tex.tex_no, &tex.tex_so,
                 &tex.tex_we, &tex.tex_ea);
         draw_walls(data, view_height, view_width, x, start_x,
             tex.current_tex);
