@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/29 15:21:27 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/17 17:11:09 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,8 +254,9 @@ void	fill_map(char *line, t_file_data *file_data, int *update_map_arr)
 	int	i;
 
 	i = 0;
+	// printf("%s" , line);
 	file_data->map[*update_map_arr] = malloc(file_data->element_size);
-	if (skip_empty_line(line))
+	if (skip_empty_line(line) && *update_map_arr == 0)
 		return;
 	while (line[i])
 	{
@@ -292,6 +293,7 @@ int	set_data(int fd, t_file_data *file_data)
 		if (buffer)
 		{
 			to_be_splited = ft_split(buffer, " ");
+			// printf("%s\n" , to_be_splited[2]);
 			if (!match_in_list(to_be_splited[0], cmp_data->compass,
 					already_checked))
 			{
