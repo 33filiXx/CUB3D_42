@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/17 17:11:09 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/17 17:16:52 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -293,7 +293,6 @@ int	set_data(int fd, t_file_data *file_data)
 		if (buffer)
 		{
 			to_be_splited = ft_split(buffer, " ");
-			// printf("%s\n" , to_be_splited[2]);
 			if (!match_in_list(to_be_splited[0], cmp_data->compass,
 					already_checked))
 			{
