@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 15:08:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/22 17:12:16 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/22 17:28:48 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,14 +140,19 @@ void    sprite_animate(t_sprite *sprite, double dt)
 
 void    sprite_try_move(t_game_data *data, t_sprite *sprite, t_vec2 step)
 {
+    t_vec2 target;
     t_vec2 test_x;
     t_vec2 test_y;
 
-    test_x.x = step.x;
-    test_x.y = 0;
-    test_y.x = 0;
-    test_y.y = step.y;    
-    test_x = vec2_add(sprite->position, test_x);
+    target = vec2_add(sprite->position, step);
+    if (valid_move(data, target.x, target.y))
+    {
+        sprite->position = target;
+        sprite->map_x = (int)floor(sprite->position.x);
+        sprite->map_y = (int)floor(sprite->position.y);
+        return ;
+    }
+    test_x = vec2_add(sprite->position, vec2_new(step.x, 0));
     if (valid_move(data, test_x.x, test_x.y))
     {
         sprite->position = test_x;
@@ -155,7 +160,7 @@ void    sprite_try_move(t_game_data *data, t_sprite *sprite, t_vec2 step)
         sprite->map_y = (int)floor(sprite->position.y);
         return ;
     }
-    test_y = vec2_add(sprite->position, test_y);
+    test_y = vec2_add(sprite->position, vec2_new(0, step.y));
     if (valid_move(data, test_y.x, test_y.y))
     {
         sprite->position = test_y;

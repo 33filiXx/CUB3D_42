@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 15:08:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/14 19:06:24 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/22 17:23:25 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -283,6 +283,7 @@ void    door_update(t_game_data *data, double dt)
 {
     bool    changed;
     size_t  i;
+    t_door  *door;
 
     if (dt < 0)
         dt = 0;
@@ -290,8 +291,6 @@ void    door_update(t_game_data *data, double dt)
     i = 0;
     while (i < data->door_count)
     {
-        t_door  *door;
-
         door = &data->doors[i];
         if (door->state == DOOR_OPENING)
         {
