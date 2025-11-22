@@ -12,7 +12,7 @@
 
 #include "../../inc/cub3d.h"
 
-static	reset_data(t_cmp_data *cmp_data)
+static void	reset_data(t_cmp_data *cmp_data)
 {
 	cmp_data->compass = malloc(6 * sizeof(char *));
 	cmp_data->compass[0] = ft_strdup(NO);
@@ -49,6 +49,7 @@ int	set_data(int fd, t_file_data *file_data)
 	t_cmp_data	*cmp_data;
 	int			i;
 
+	(void)file_data;
 	cmp_data = malloc(sizeof(t_cmp_data));
 	reset_data(cmp_data);
 	i = 0;

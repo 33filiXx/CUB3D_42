@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/24 16:57:41 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/14 19:06:24 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/21 22:51:30 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,8 +133,23 @@ int check_bounds(t_game_data *data)
     return (0);
 }
 
+void    set_door_data(t_game_data *data, t_door *door, double dist, double tex_u)
+{
+     data->rc.hit = 1;
+    data->rc.kind = HIT_DOOR;
+    data->rc.hit_door = door;
+    data->rc.door_progress = door->progress;
+    data->rc.perp_wall_dist = dist;
+    data->rc.wall_x = tex_u;
+    data->rc.side = 0;
+}
+
 void    dda(t_game_data *data)
 {
+    t_door *door;
+    double  dist;
+    double  tex_u;
+
     while (!data->rc.hit)
     {
         if (check_bounds(data))
@@ -149,22 +164,12 @@ void    dda(t_game_data *data)
         }
         if (data->map.grid[data->rc.map_y][data->rc.map_x] == 'D')
         {
-            t_door *door;
-            double  dist;
-            double  tex_u;
-
             door = find_door(data, data->rc.map_y, data->rc.map_x);
             if (!door || door->progress >= 0.99)
                 continue;
             if (!door_ray_intersection(data, door, &dist, &tex_u))
                 continue;
-            data->rc.hit = 1;
-            data->rc.kind = HIT_DOOR;
-            data->rc.hit_door = door;
-            data->rc.door_progress = door->progress;
-            data->rc.perp_wall_dist = dist;
-            data->rc.wall_x = tex_u;
-            data->rc.side = 0;
+            set_door_data(data, door, dist, tex_u);
         }
     }
 }
@@ -247,6 +252,7 @@ char    *get_the_right_texture(t_game_data *data)
 
 void    load_texture(t_game_data *data, t_texture *tex, char *path)
 {
+    (void)data;
     tex->img = mlx_xpm_file_to_image(tex->mlx_connection,
                                       path, &tex->width, &tex->height);
     if (!tex->img)
@@ -291,6 +297,7 @@ int    flip_text_horizontally(t_game_data *data, t_texture *current_tex)
 
 void    draw(t_game_data *data ,t_texture *tex, int view_height, int view_width, int x, int start_x)
 {
+    (void)view_width;
     double tex_step, tex_pos;
     int y;
     unsigned int color;
@@ -314,6 +321,7 @@ void    draw(t_game_data *data ,t_texture *tex, int view_height, int view_width,
 
 void    color_floor_and_ceiling(t_game_data *data, int view_hieght, int view_width, int start_x, int x)
 {
+    (void)view_width;
     int y = 0;
     while (y < data->rc.draw_start)
     {
@@ -328,6 +336,15 @@ void    color_floor_and_ceiling(t_game_data *data, int view_hieght, int view_wid
     }
 }
 
+bool ensure_z_buffer(t_game_data *data, int width)
+{
+    if (data->z_buffer && data->z_buffer_size == width)
+        return true;
+    free(data->z_buffer);
+    data->z_buffer = malloc(sizeof(double) * width);
+    data->z_buffer_size = width;
+    return (data->z_buffer != NULL);
+}
 
 void    draw_walls(t_game_data *data, int view_height, int view_width,
             int x, int start_x, t_texture *current_tex)
@@ -363,7 +380,7 @@ void    tex_ready(int *textures_ready, t_st *tex, t_game_data *data)
         tex->tex_we.mlx_connection = data->mlx.mlx_connection;
         tex->tex_ea.mlx_connection = data->mlx.mlx_connection;
         tex->door_tex.mlx_connection = data->mlx.mlx_connection;
-        load_texture(data, &tex->door_tex, "textures/door.xpm");
+        load_texture(data, &tex->door_tex, "../../textures/door.xpm");
         load_texture(data, &tex->tex_no, data->file_data.no_texture);
         load_texture(data, &tex->tex_so, data->file_data.so_texture);
         load_texture(data, &tex->tex_we, data->file_data.we_texture);
@@ -379,6 +396,7 @@ void render_3d_view(t_game_data *data, int start_x, int view_width, int view_hei
     static int textures_ready;
 
     tex_ready(&textures_ready, &tex, data);
+    ensure_z_buffer(data, start_x + view_width);
     x = 0;
     while (x < view_width)
     {
@@ -408,6 +426,7 @@ void render_3d_view(t_game_data *data, int start_x, int view_width, int view_hei
                 &tex.tex_we, &tex.tex_ea);
         draw_walls(data, view_height, view_width, x, start_x,
             tex.current_tex);
+        data->z_buffer[start_x + x] = data->rc.perp_wall_dist;
         x++;
     }
 }

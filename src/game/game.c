@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/15 19:55:31 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/21 22:51:30 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ static char	*g_example_grid[] = {
     "101011D1101011101011",
     "101D0000001010001001",
     "10111111111010111101",
-    "10N00000000000000001",
+    "10N000000S0000000001",
     "11111111111111111111",
     NULL
 };
@@ -38,10 +38,10 @@ void	init_example_file_data(t_file_data *file_data)
 {
 	if (!file_data)
 		return ;
-	file_data->no_texture = ft_strdup("textures/wall_north.xpm");
-	file_data->so_texture = ft_strdup("textures/wall_south.xpm");
-	file_data->we_texture = ft_strdup("textures/wall_west.xpm");
-	file_data->ea_texture = ft_strdup("textures/wall_east.xpm");
+	file_data->no_texture = ft_strdup("../../textures/wall_north.xpm");
+	file_data->so_texture = ft_strdup("../../textures/wall_south.xpm");
+	file_data->we_texture = ft_strdup("../../textures/wall_west.xpm");
+	file_data->ea_texture = ft_strdup("../../textures/wall_east.xpm");
 	printf("init textures ptrs: NO=%p SO=%p WE=%p EA=%p\n",
 		(void *)file_data->no_texture, (void *)file_data->so_texture,
 		(void *)file_data->we_texture, (void *)file_data->ea_texture);
@@ -143,8 +143,8 @@ void	initiate(t_mlx *mlx, t_game_data *game_data)
 	mlx->mlx_connection = mlx_init();
 	if (!mlx->mlx_connection)
 		exit(1);
-		mlx->mlx_win = mlx_new_window(mlx->mlx_connection,
-			game_data->map.width * TILE, game_data->map.height * TILE, "Cube3D");
+	mlx->mlx_win = mlx_new_window(mlx->mlx_connection,
+		game_data->map.width * TILE, game_data->map.height * TILE, "Cube3D");
 	if (!mlx->mlx_win)
 	{
 		mlx_destroy_display(mlx->mlx_connection);
@@ -459,6 +459,7 @@ void	redraw_map(t_game_data *data)
 
 	map_width = data->map.width * TILE;
 	render_3d_view(data, 0, map_width, data->map.height * TILE);
+	sprite_render_all(data, 0, map_width, data->map.height * TILE);
 	draw_env(data);
     
     mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
@@ -570,24 +571,39 @@ int game_loop(void *param)
     t_game_data *data = (t_game_data *)param;
 	double now = get_now_seconds();
 	double dt = now - data->last_time;
+	bool moved = false;
 	data->last_time = now;
 	door_update(data, dt);
+	sprite_update_all(data, dt);
     if (data->player.moving_forward)
-        move_forward(data);
+	{
+		move_forward(data);
+		moved = true;
+	}
     if (data->player.moving_backward)
-        move_backwards(data);
+	{
+		move_backwards(data);
+		moved = true;
+	}
 	if (data->player.rotating_right)
+	{
 		rotate_right(data);
+		moved = true;
+	}
     if (data->player.rotating_left)
+	{
 		rotate_left(data);
-    if (data->player.moving_forward || data->player.moving_backward || data->player.rotating_left || data->player.rotating_right)
-        redraw_map(data);
+		moved = true;
+	}
+	if (moved || data->sprite_count > 0)
+		redraw_map(data);
     
     return (0);
 }
 
 int close_window(void *param)
 {
+	(void)param;
     exit(0);
     return (0);
 }
@@ -650,6 +666,7 @@ int	main(void)
 {
 	t_game_data game_data;
 	
+	ft_bzero(&game_data, sizeof(game_data));
 	ft_bzero(&game_data.file_data, sizeof(game_data.file_data));
 	ft_bzero(&game_data.map, sizeof(game_data.map));
 	ft_bzero(&game_data.player, sizeof(game_data.player));
@@ -664,9 +681,11 @@ int	main(void)
 
     
 	initiate(&game_data.mlx, &game_data);
+	
 	door_load_map(&game_data);
-	render_3d_view(&game_data, 0, game_data.map.width * TILE, game_data.map.height * TILE);
-	draw_env(&game_data);
+	sprite_load_map(&game_data);
+	sprite_update_all(&game_data, 0.0);
+	redraw_map(&game_data);
 	// draw_dir(&game_data);
 	// draw_plane(&game_data);
 	// draw_cam_plane(&game_data);
@@ -678,6 +697,7 @@ int	main(void)
 	init_mouse(&game_data);
 	mlx_hook(game_data.mlx.mlx_win, MotionNotify, PointerMotionMask, on_mouse_move, &game_data);
     mlx_loop(game_data.mlx.mlx_connection);
+
 	return (0);
 }
 

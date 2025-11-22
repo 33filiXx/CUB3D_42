@@ -4,6 +4,7 @@
         "libft.h": "c",
         "get_next_line.h": "c",
         "stdio.h": "c",
-        "vec.h": "c"
+        "vec.h": "c",
+        "sprite.h": "c"
     }
 }

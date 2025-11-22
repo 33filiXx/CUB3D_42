@@ -1,25 +1,26 @@
 #ifndef CUBE3D_H
 # define CUBE3D_H
 
-# include <fcntl.h>
-# include <math.h>
-# include <stdio.h>
-# include <stdlib.h>
-# include <sys/time.h>
-# include <stdbool.h>
-// #include "../../minilibx-linux/mlx.h"
-# include "../libft/libft.h"
-# include <X11/keysym.h>
-# include <X11/X.h>
-# include <mlx.h>
-# include "../src/vectorslib/vec.h"
-# include "door.h"
-#  define NO "NO"
-#  define SO "SO"
-#  define WE "WE"
-#  define EA "EA"
-#  define F "F"
-#  define C "C"
+#	include <fcntl.h>
+#	include <math.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#	include <sys/time.h>
+#	include <stdbool.h>
+//	 #include "../../minilibx-linux/mlx.h"
+#	include "../libft/libft.h"
+#	include <X11/keysym.h>
+#	include <X11/X.h>
+#	include <mlx.h>
+#	include "../src/vectorslib/vec.h"
+#	include "door.h"
+# 	include "sprite.h"
+#	define NO "NO"
+#	define SO "SO"
+#	define WE "WE"
+#	define EA "EA"
+#	define F "F"
+#	define C "C"
 
 #  define TILE 64
 /*
@@ -161,6 +162,11 @@ typedef struct s_game_data
 	t_door		*doors;
 	size_t		door_count;
 	double		last_time;
+	int          sprite_count;
+	int			v_sprite_counter;
+	t_sprite	*sprite;
+	double		*z_buffer;
+	int		z_buffer_size;
 }   t_game_data;
 
 // char	**ft_split(char *str, char *charset);
@@ -172,6 +178,18 @@ void render_3d_view(t_game_data *data, int start_x, int view_width, int view_hei
 void put_pixel(t_mlx *mlx, int x, int y, int color);
 int on_mouse_move(int x, int y, void *param);
 void	redraw_map(t_game_data *data);
-
+void    load_texture(t_game_data *data, t_texture *tex, char *path);
+int	valid_move(t_game_data *data, double new_x, double new_y);
+void    get_z_buffer(t_game_data *data);
+void    free_z_buffer(t_game_data *data);
+t_sprite    **sort_sprites(t_game_data *data);
+void    sprite_camera_transform(t_game_data *data, t_sprite *sprite);
+void    sprite_update_one(t_game_data *data, t_sprite *sprite, double dt);
+void    sprite_animate(t_sprite *sprite, double dt);
+void sprite_load_map(t_game_data *data);
+void    sprite_sheet_init(t_game_data *data, t_sprite *sprite);
+void sprite_update_all(t_game_data *data, double dt);
+void sprite_render_all(t_game_data *data, int start_x, int view_w, int view_h);
+void	sprite_draw(t_game_data *data, t_sprite *sprite, int start_x, int v_w, int v_h);
 
 #endif
