@@ -6,14 +6,43 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 15:08:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/21 22:51:30 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/22 17:12:16 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
 
-#define SPRITE_FRAME_SIZE 52
-#define SPRITE_FRAME_COUNT 25
+#define SPRITE_FRAME_SIZE 32
+#define SPRITE_FRAME_COUNT 3
+
+static unsigned int texel(t_texture *tex, int x, int y)
+{
+    char    *addr;
+
+    if (!tex || !tex->addr || x < 0 || y < 0
+        || x >= tex->width || y >= tex->height)
+        return (0);
+    addr = tex->addr + y * tex->line_len + x * (tex->bpp / 8);
+    return (*(unsigned int *)addr);
+}
+
+static bool texture_is_transparent(t_texture *tex, unsigned int color)
+{
+    unsigned int    masked_color;
+
+    masked_color = color & 0x00FFFFFF;
+    if (!tex || !tex->addr)
+        return (masked_color == 0);
+    if (tex->has_transparency)
+    {
+        unsigned int masked_ref;
+
+        masked_ref = tex->transparent_color & 0x00FFFFFF;
+        if (masked_color == masked_ref)
+            return (true);
+    }
+    return (masked_color == 0);
+}
 
 void    sprite_sheet_init(t_game_data *data, t_sprite *sprite)
 {
@@ -26,6 +55,11 @@ void    sprite_sheet_init(t_game_data *data, t_sprite *sprite)
     {
         sheet.mlx_connection = data->mlx.mlx_connection;
         load_texture(data, &sheet, "../../textures/spritesheet.xpm");
+        if (sheet.width > 0 && sheet.height > 0)
+        {
+            sheet.transparent_color = texel(&sheet, 0, 0);
+            sheet.has_transparency = true;
+        }
         loaded = true;
     }
     sprite->sp_tex = &sheet;
@@ -265,19 +299,6 @@ void sprite_update_all(t_game_data *data, double dt)
         i++;
     }
 }
-unsigned int texel(t_texture *tex, int x, int y)
-{
-    char *addr;
-
-    if (!tex || !tex->addr)
-        return (0);
-    addr = tex->addr + y * tex->line_len + x * (tex->bpp / 8);
-    return *(unsigned int *)addr;
-}
-bool is_transparent(unsigned int color)
-{
-    return ((color & 0xFF000000U) == 0);
-}
 void    sprite_draw(t_game_data *data, t_sprite *sprite, int start_x, int v_w, int v_h)
 {
     int span_x;
@@ -366,7 +387,7 @@ void    sprite_draw(t_game_data *data, t_sprite *sprite, int start_x, int v_w, i
             if (tex_y >= sprite->sp_tex->height)
                 tex_y = sprite->sp_tex->height - 1;
             color = texel(sprite->sp_tex, tex_x, tex_y);
-            if (!is_transparent(color))
+            if (!texture_is_transparent(sprite->sp_tex, color))
                 put_pixel(&data->mlx, x , y, color);
             y++;
         }
