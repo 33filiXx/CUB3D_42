@@ -23,6 +23,8 @@
 #	define C "C"
 
 #  define TILE 64
+#	define HALF_PI 1.5707963267948966
+
 /*
 void func(your struct , my struct)
 {
@@ -255,5 +257,31 @@ void    sprite_sheet_init(t_game_data *data, t_sprite *sprite);
 void sprite_update_all(t_game_data *data, double dt);
 void sprite_render_all(t_game_data *data, int start_x, int view_w, int view_h);
 void	sprite_draw(t_game_data *data, t_sprite *sprite, int start_x, int v_w, int v_h);
-
+void    set_current_tex(t_game_data *data, t_st *tex);
+void    init_hit_data(t_game_data *data);
+void    set_ray_dir_xy(t_game_data *data);
+void    tex_ready(int *textures_ready, t_st *tex, t_game_data *data);
+int    flip_text_horizontally(t_game_data *data, t_texture *current_tex);
+void    draw(t_game_data *data ,t_texture *tex, int view_height, int view_width, int x, int start_x);
+void    color_floor_and_ceiling(t_game_data *data, int view_hieght, int view_width, int start_x, int x);
+bool ensure_z_buffer(t_game_data *data, int width);
+void    draw_walls(t_game_data *data, int view_height, int view_width,
+            int x, int start_x, t_texture *current_tex);
+void    set_drawing_ends(t_game_data *data, int view_height);
+void    set_texture_coordinations(t_game_data *data);
+char    *get_the_right_texture(t_game_data *data);
+t_texture *get_current_texture(t_game_data *data, t_texture *tex_no, t_texture *tex_so, t_texture *tex_we, t_texture *tex_ea);
+void    get_perp_wall_distance(t_game_data *data);
+void    set_horizontal_line_dist(t_game_data *data);
+void    set_next_line(t_game_data *data);
+int check_bounds(t_game_data *data);
+void    set_door_data(t_game_data *data, t_door *door, double dist, double tex_u);
+void    dda(t_game_data *data);
+void    set_ray_dir(t_game_data *data);
+void    set_player_position(t_game_data *data);
+void    set_steps(t_game_data *data);
+void    set_vertical_line_dist(t_game_data *data);
+void    set_line_height(t_game_data *data, int view_height);
+int  door_ray_intersection(t_game_data *data, t_door *door,
+        double *hit_dist, double *u);
 #endif

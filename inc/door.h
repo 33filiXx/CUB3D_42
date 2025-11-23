@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 15:08:30 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/14 19:06:24 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/23 19:25:50 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,4 +45,13 @@ void    door_update(struct s_game_data *data, double dt);
 bool    door_is_blocking(struct s_game_data *data, int map_x, int map_y);
 double	get_now_seconds(void);
 t_door *find_door(struct s_game_data *data, int m_y, int m_x);
+int  map_in_bounds(struct s_game_data *data, int y, int x);
+int  map_is_wall(struct s_game_data *data, int y, int x);
+int  map_is_walkable(struct s_game_data *data, int y, int x);
+int  point_hits_wall(struct s_game_data *data, t_vec2 point);
+void set_candidate(t_vec2 center, t_vec2 span_dir, int hinge_sign,
+        t_vec2 *pivot, t_vec2 *span);
+bool get_front_cell(struct s_game_data *data, int *out_y, int *out_x);
+bool append_to_doors(struct s_game_data *data, int map_y, int map_x);
+void configure_door_geometry(struct s_game_data *data, t_door *door);
 #endif
