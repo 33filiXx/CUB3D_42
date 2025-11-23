@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/24 16:57:41 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/22 17:12:16 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/23 18:45:24 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -390,6 +390,35 @@ void    tex_ready(int *textures_ready, t_st *tex, t_game_data *data)
         *textures_ready = 1;
     }
 }
+void    set_ray_dir_xy(t_game_data *data)
+{
+    if(data->rc.ray_dir_x)
+        data->rc.delta_dist_x = fabs(1.0 / data->rc.ray_dir_x);
+    else
+        data->rc.delta_dist_x = 1e30;
+    set_vertical_line_dist(data);
+    if(data->rc.ray_dir_y)
+        data->rc.delta_dist_y = fabs(1.0 / data->rc.ray_dir_y);
+    else
+        data->rc.delta_dist_y = 1e30;
+}
+
+void    init_hit_data(t_game_data *data)
+{
+    data->rc.hit = 0;
+    data->rc.kind = HIT_NONE;
+    data->rc.hit_door = NULL;
+    data->rc.door_progress = 0.0;
+}
+
+void    set_current_tex(t_game_data *data, t_st *tex)
+{
+    if (data->rc.kind == HIT_DOOR)
+        tex->current_tex = &tex->door_tex;
+    else
+        tex->current_tex = get_current_texture(data, &tex->tex_no, &tex->tex_so,
+            &tex->tex_we, &tex->tex_ea);
+}
 
 void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height)
 {
@@ -406,26 +435,11 @@ void render_3d_view(t_game_data *data, int start_x, int view_width, int view_hei
         set_ray_dir(data);
         set_player_position(data);
         set_steps(data);
-        if(data->rc.ray_dir_x)
-            data->rc.delta_dist_x = fabs(1.0 / data->rc.ray_dir_x);
-        else
-            data->rc.delta_dist_x = 1e30;
-        set_vertical_line_dist(data);
-        if(data->rc.ray_dir_y)
-            data->rc.delta_dist_y = fabs(1.0 / data->rc.ray_dir_y);
-        else
-            data->rc.delta_dist_y = 1e30;
+        set_ray_dir_xy(data);
         set_horizontal_line_dist(data);
-        data->rc.hit = 0;
-        data->rc.kind = HIT_NONE;
-        data->rc.hit_door = NULL;
-        data->rc.door_progress = 0.0;
+        init_hit_data(data);
         dda(data);
-        if (data->rc.kind == HIT_DOOR)
-            tex.current_tex = &tex.door_tex;
-        else
-            tex.current_tex = get_current_texture(data, &tex.tex_no, &tex.tex_so,
-                &tex.tex_we, &tex.tex_ea);
+        set_current_tex(data, &tex);
         draw_walls(data, view_height, view_width, x, start_x,
             tex.current_tex);
         data->z_buffer[start_x + x] = data->rc.perp_wall_dist;

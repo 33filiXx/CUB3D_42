@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 15:08:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/22 17:28:48 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/23 18:39:25 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,20 @@ static bool texture_is_transparent(t_texture *tex, unsigned int color)
     }
     return (masked_color == 0);
 }
+void    set_frame(t_sprite *sprite)
+{
+    sprite->frame_w = SPRITE_FRAME_SIZE;
+    sprite->frame_h = SPRITE_FRAME_SIZE;
+    sprite->frame_cols = sprite->sp_tex->width / sprite->frame_w;
+    if (sprite->frame_cols <= 0)
+        sprite->frame_cols = 1;
+    sprite->frame_rows = sprite->sp_tex->height / sprite->frame_h;
+    if (sprite->frame_rows <= 0)
+        sprite->frame_rows = 1;
+    sprite->frame_count = sprite->frame_cols * sprite->frame_rows;
+    if (sprite->frame_count <= 0)
+        sprite->frame_count = 1;
+}
 
 void    sprite_sheet_init(t_game_data *data, t_sprite *sprite)
 {
@@ -63,17 +77,7 @@ void    sprite_sheet_init(t_game_data *data, t_sprite *sprite)
         loaded = true;
     }
     sprite->sp_tex = &sheet;
-    sprite->frame_w = SPRITE_FRAME_SIZE;
-    sprite->frame_h = SPRITE_FRAME_SIZE;
-    sprite->frame_cols = sprite->sp_tex->width / sprite->frame_w;
-    if (sprite->frame_cols <= 0)
-        sprite->frame_cols = 1;
-    sprite->frame_rows = sprite->sp_tex->height / sprite->frame_h;
-    if (sprite->frame_rows <= 0)
-        sprite->frame_rows = 1;
-    sprite->frame_count = sprite->frame_cols * sprite->frame_rows;
-    if (sprite->frame_count <= 0)
-        sprite->frame_count = 1;
+    set_frame(sprite);
 }
 
 void    append_to_sprite(t_game_data *data, int x , int y)
@@ -138,11 +142,9 @@ void    sprite_animate(t_sprite *sprite, double dt)
     }
 }
 
-void    sprite_try_move(t_game_data *data, t_sprite *sprite, t_vec2 step)
+int    move_to_target(t_game_data *data, t_sprite *sprite, t_vec2 step)
 {
     t_vec2 target;
-    t_vec2 test_x;
-    t_vec2 test_y;
 
     target = vec2_add(sprite->position, step);
     if (valid_move(data, target.x, target.y))
@@ -150,8 +152,19 @@ void    sprite_try_move(t_game_data *data, t_sprite *sprite, t_vec2 step)
         sprite->position = target;
         sprite->map_x = (int)floor(sprite->position.x);
         sprite->map_y = (int)floor(sprite->position.y);
-        return ;
+        return (1);
     }
+    return (0);
+}
+
+
+void    sprite_try_move(t_game_data *data, t_sprite *sprite, t_vec2 step)
+{
+    t_vec2 test_x;
+    t_vec2 test_y;
+
+    if (move_to_target(data, sprite, step) == 1)
+        return ;
     test_x = vec2_add(sprite->position, vec2_new(step.x, 0));
     if (valid_move(data, test_x.x, test_x.y))
     {
@@ -187,20 +200,31 @@ void    sprite_update_one(t_game_data *data, t_sprite *sprite, double dt)
         sprite_try_move(data, sprite, step);
     }
 }
-
-int    collect_visible_sprites(t_game_data *data, t_sprite ***visible_sprites)
+int get_visible_s_len(t_game_data *data)
 {
-    int i = 0;
-    int len = 0;
-    int incr = 0;
+    int i;
+    int len;
 
+    i = 0;
+    len = 0;
     while(i < data->sprite_count)
     {
         if(data->sprite[i].visible == true)
             len++;
         i++;
     }
+    return (len);
+}
+
+int    collect_visible_sprites(t_game_data *data, t_sprite ***visible_sprites)
+{
+    int i;
+    int len;
+    int incr;
+
+    len = get_visible_s_len(data);
     i = 0;
+    incr = 0;
     if (!len)
     {
         *visible_sprites = NULL;
@@ -258,6 +282,19 @@ t_sprite    **sort_sprites(t_game_data *data)
     }
     return (visible_sprites);
 }
+void    set_cam_z(t_sprite *sprite, t_vec2 rel)
+{
+    if (sprite->cam_z > 0.1)
+    {
+        sprite->dist_cam = sqrt(vec2_dot(rel, rel));
+        sprite->visible = true;
+    }
+    else
+    {
+        sprite->dist_cam = 0.0;
+        sprite->visible = false;
+    }
+}
 
 void    sprite_camera_transform(t_game_data *data, t_sprite *sprite)
 {
@@ -278,16 +315,7 @@ void    sprite_camera_transform(t_game_data *data, t_sprite *sprite)
             - data->player.dir.x * rel.y);
     sprite->cam_z = inv_det * (-data->player.plane.y * rel.x
             + data->player.plane.x * rel.y);
-    if (sprite->cam_z > 0.1)
-    {
-        sprite->dist_cam = sqrt(vec2_dot(rel, rel));
-        sprite->visible = true;
-    }
-    else
-    {
-        sprite->dist_cam = 0.0;
-        sprite->visible = false;
-    }
+    set_cam_z(sprite, rel);
 }
 
 void sprite_update_all(t_game_data *data, double dt)
@@ -304,31 +332,16 @@ void sprite_update_all(t_game_data *data, double dt)
         i++;
     }
 }
-void    sprite_draw(t_game_data *data, t_sprite *sprite, int start_x, int v_w, int v_h)
+void    project_to_screen(t_sprite *sprite, int start_x, int v_w, int v_h)
 {
-    int span_x;
-    int span_y;
-    int cols;
-    int rows;
-    int x;
-    int y;
-    int tex_x;
-    int tex_y;
-    double u;
-    double v;
-    unsigned int color;
-
-    if (!sprite || sprite->cam_z <= 0.1 || !sprite->sp_tex || !sprite->sp_tex->addr)
-        return ;
-    sprite->draw.inv_z = 1.0 / sprite->cam_z;
-    // project to screen
     sprite->draw.screen_x = start_x + (int)((v_w / 2.0)
             * (1.0 + sprite->cam_x * sprite->draw.inv_z));
     sprite->draw.sprite_height = (int)fabs(v_h * sprite->draw.inv_z);
     sprite->draw.sprite_width = sprite->draw.sprite_height;
-    if (sprite->draw.sprite_height <= 0 || sprite->draw.sprite_width <= 0)
-        return ;
-    // clamp_drawing_bounds
+}
+
+void    clamp_drawing_bounds(t_sprite *sprite, int start_x, int v_w, int v_h)
+{
     sprite->draw.draw_start_y = -sprite->draw.sprite_height / 2 + v_h / 2;
     sprite->draw.draw_end_y = sprite->draw.sprite_height / 2 + v_h / 2;
     if (sprite->draw.draw_start_y < 0)
@@ -341,63 +354,94 @@ void    sprite_draw(t_game_data *data, t_sprite *sprite, int start_x, int v_w, i
         sprite->draw.draw_start_x = start_x;
     if (sprite->draw.draw_end_x >= start_x + v_w)
         sprite->draw.draw_end_x = start_x + v_w - 1;
-    if (sprite->draw.draw_start_x > sprite->draw.draw_end_x)
-        return ;
-    // get_frame_within_sheet
-    cols = (sprite->frame_cols > 0) ? sprite->frame_cols : 1;
-    rows = (sprite->frame_rows > 0) ? sprite->frame_rows : 1;
-    sprite->draw.frame_col = sprite->frame % cols;
-    sprite->draw.frame_row = sprite->frame / cols;
-    if (sprite->draw.frame_row >= rows)
-        sprite->draw.frame_row = rows - 1;
+}
+
+t_frame    get_frame_within_sheet(t_sprite *sprite)
+{
+    t_frame frame;
+
+    frame.cols = (sprite->frame_cols > 0) ? sprite->frame_cols : 1;
+    frame.rows = (sprite->frame_rows > 0) ? sprite->frame_rows : 1;
+    sprite->draw.frame_col = sprite->frame % frame.cols;
+    sprite->draw.frame_row = sprite->frame / frame.cols;
+    if (sprite->draw.frame_row >= frame.rows)
+        sprite->draw.frame_row = frame.rows - 1;
     sprite->draw.origin_x = sprite->draw.frame_col * sprite->frame_w;
     sprite->draw.origin_y = sprite->draw.frame_row * sprite->frame_h;
-    span_x = sprite->draw.draw_end_x - sprite->draw.draw_start_x;
-    if (span_x < 1)
-        span_x = 1;
-    span_y = sprite->draw.draw_end_y - sprite->draw.draw_start_y;
-    if (span_y < 1)
-        span_y = 1;
-    // render sprites
-    x = sprite->draw.draw_start_x;
-    while (x <= sprite->draw.draw_end_x)
+    frame.span_x = sprite->draw.draw_end_x - sprite->draw.draw_start_x;
+    if (frame.span_x < 1)
+        frame.span_x = 1;
+    frame.span_y = sprite->draw.draw_end_y - sprite->draw.draw_start_y;
+    if (frame.span_y < 1)
+        frame.span_y = 1;
+    return (frame);
+}
+
+void    render_helper(t_sprite *sprite, t_frame *frame, t_game_data *data, t_render_sprite *render_s)
+{
+    while (render_s->y <= sprite->draw.draw_end_y)
     {
-        if (!data->z_buffer || x < 0 || x >= data->z_buffer_size
-            || data->z_buffer[x] <= 0.0 || sprite->cam_z >= data->z_buffer[x])
+        render_s->v = (double)(render_s->y - sprite->draw.draw_start_y) / (double)frame->span_y;
+        if (render_s->v < 0.0)
+            render_s->v = 0.0;
+        if (render_s->v > 1.0)
+            render_s->v = 1.0;
+        render_s->tex_y = sprite->draw.origin_y + (int)(render_s->v * sprite->frame_h);
+        if (render_s->tex_y >= sprite->draw.origin_y + sprite->frame_h)
+            render_s->tex_y = sprite->draw.origin_y + sprite->frame_h - 1;
+        if (render_s->tex_y >= sprite->sp_tex->height)
+            render_s->tex_y = sprite->sp_tex->height - 1;
+        render_s->color = texel(sprite->sp_tex, render_s->tex_x, render_s->tex_y);
+        if (!texture_is_transparent(sprite->sp_tex, render_s->color))
+            put_pixel(&data->mlx, render_s->x , render_s->y, render_s->color);
+        render_s->y++;
+    }
+}
+
+void    render_sprites(t_sprite *sprite, t_frame *frame, t_game_data *data)
+{
+    t_render_sprite render_s;
+
+    render_s.x = sprite->draw.draw_start_x;
+    while (render_s.x <= sprite->draw.draw_end_x)
+    {
+        if (!data->z_buffer || render_s.x < 0 || render_s.x >= data->z_buffer_size
+            || data->z_buffer[render_s.x] <= 0.0 || sprite->cam_z >= data->z_buffer[render_s.x])
         {
-            x++;
+            render_s.x++;
             continue;
         }
-        u = (double)(x - sprite->draw.draw_start_x) / (double)span_x;
-        if (u < 0.0)
-            u = 0.0;
-        if (u > 1.0)
-            u = 1.0;
-        tex_x = sprite->draw.origin_x + (int)(u * sprite->frame_w);
-        if (tex_x >= sprite->draw.origin_x + sprite->frame_w)
-            tex_x = sprite->draw.origin_x + sprite->frame_w - 1;
-        if (tex_x >= sprite->sp_tex->width)
-            tex_x = sprite->sp_tex->width - 1;
-        y = sprite->draw.draw_start_y;
-        while (y <= sprite->draw.draw_end_y)
-        {
-            v = (double)(y - sprite->draw.draw_start_y) / (double)span_y;
-            if (v < 0.0)
-                v = 0.0;
-            if (v > 1.0)
-                v = 1.0;
-            tex_y = sprite->draw.origin_y + (int)(v * sprite->frame_h);
-            if (tex_y >= sprite->draw.origin_y + sprite->frame_h)
-                tex_y = sprite->draw.origin_y + sprite->frame_h - 1;
-            if (tex_y >= sprite->sp_tex->height)
-                tex_y = sprite->sp_tex->height - 1;
-            color = texel(sprite->sp_tex, tex_x, tex_y);
-            if (!texture_is_transparent(sprite->sp_tex, color))
-                put_pixel(&data->mlx, x , y, color);
-            y++;
-        }
-        x++;
+        render_s.u = (double)(render_s.x - sprite->draw.draw_start_x) / (double)frame->span_x;
+        if (render_s.u < 0.0)
+            render_s.u = 0.0;
+        if (render_s.u > 1.0)
+            render_s.u = 1.0;
+        render_s.tex_x = sprite->draw.origin_x + (int)(render_s.u * sprite->frame_w);
+        if (render_s.tex_x >= sprite->draw.origin_x + sprite->frame_w)
+            render_s.tex_x = sprite->draw.origin_x + sprite->frame_w - 1;
+        if (render_s.tex_x >= sprite->sp_tex->width)
+            render_s.tex_x = sprite->sp_tex->width - 1;
+        render_s.y = sprite->draw.draw_start_y;
+        render_helper(sprite, frame, data, &render_s);
+        render_s.x++;
     }
+}
+
+void    sprite_draw(t_game_data *data, t_sprite *sprite, int start_x, int v_w, int v_h)
+{
+    t_frame frame;
+
+    if (!sprite || sprite->cam_z <= 0.1 || !sprite->sp_tex || !sprite->sp_tex->addr)
+        return ;
+    sprite->draw.inv_z = 1.0 / sprite->cam_z;
+    project_to_screen(sprite, start_x, v_w, v_h);
+    if (sprite->draw.sprite_height <= 0 || sprite->draw.sprite_width <= 0)
+        return ;
+    clamp_drawing_bounds(sprite, start_x, v_w, v_h);
+    if (sprite->draw.draw_start_x > sprite->draw.draw_end_x)
+        return ;
+    frame = get_frame_within_sheet(sprite);
+    render_sprites(sprite, &frame, data);
 }
 
 void sprite_render_all(t_game_data *data, int start_x, int view_w, int view_h)

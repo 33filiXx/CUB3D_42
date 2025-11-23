@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/22 17:29:03 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/23 19:08:22 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,30 +268,32 @@ void	fill_outer_ppixel(t_game_data *data, int i, int j, int floor_color)
 	}
 	// data->map.grid[i][j] = '0';
 }
+void	set_cercle_data(t_game_data *data, t_minimap *minimap, t_cercle *cercle)
+{
+	cercle->c_x = minimap->padding + (int)(data->player.pos.x * minimap->mini_tile);
+	cercle->c_y = minimap->padding + (int)(data->player.pos.y * minimap->mini_tile);
+	cercle->r = minimap->mini_tile / 2;
+	if (cercle->r < 2)
+		cercle->r = 2;
+}
 
 void		draw_player(int color, t_game_data *data, t_minimap *minimap)
 {
-	int c_x;
-	int c_y;
 	t_mlx *mlx = &data->mlx;
 	int ty;
+	t_cercle cercle;
 	int tx;
-	int r;
 	
-	c_x = minimap->padding + (int)(data->player.pos.x * minimap->mini_tile);
-	c_y = minimap->padding + (int)(data->player.pos.y * minimap->mini_tile);
-	r = minimap->mini_tile / 2;
-	if (r < 2)
-		r = 2;
-	ty = c_y - r;
-	while (ty <= c_y + r)
+	set_cercle_data(data, minimap, &cercle);
+	ty = cercle.c_y - cercle.r;
+	while (ty <= cercle.c_y + cercle.r)
 	{
-		tx = c_x - r;
-		while (tx <= c_x + r)
+		tx = cercle.c_x - cercle.r;
+		while (tx <= cercle.c_x + cercle.r)
 		{
-			int dx = tx - c_x;
-			int dy = ty - c_y;
-			if ((dx * dx + dy * dy) <= r * r)
+			int dx = tx - cercle.c_x;
+			int dy = ty - cercle.c_y;
+			if ((dx * dx + dy * dy) <= cercle.r * cercle.r)
 			{
 				if (tx >= minimap->padding && ty >= minimap->padding
 					&& tx < minimap->padding + minimap->mini_width
@@ -313,65 +315,67 @@ void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * cei
 		| (data->file_data.ceiling_color[1] << 8)
 		| data->file_data.ceiling_color[2];
 }
+void	init_mini_draw(t_mini_draw *mini, t_minimap *minimap, t_door *door)
+{
+	
+	mini->span = vec2_rotate(door->span_closed,
+		door->rot_sign * door->progress * HALF_PI);
+	mini->scale = minimap->mini_tile;
+	mini->pivot_x = minimap->padding + door->pivot.x * mini->scale;
+	mini->pivot_y = minimap->padding + door->pivot.y * mini->scale;
+	mini->span = vec2_scale(mini->span, mini->scale);
+	mini->steps = minimap->mini_tile * 2;
+	if (mini->steps < 4)
+		mini->steps = 4;
+	mini->step = 1.0 / (double)mini->steps;
+	mini->k = 0;
+}
+void	drawin_miniDoors_helper(t_mini_draw *mini, t_game_data *data, t_minimap *minimap)
+{
+	int draw_x;
+	int draw_y;
+
+	while (mini->dy <= 1)
+	{
+		mini->dx = -1;
+		while (mini->dx <= 1)
+		{
+			draw_x = mini->px + mini->dx;
+			draw_y = mini->py + mini->dy;
+			if (draw_x >= minimap->padding
+				&& draw_y >= minimap->padding
+				&& draw_x < minimap->padding + minimap->mini_width
+				&& draw_y < minimap->padding + minimap->mini_height)
+				put_pixel(&data->mlx, draw_x, draw_y, 0x553311);
+			mini->dx++;
+		}
+		mini->dy++;
+	}
+}
+
+void	drawing_mini_doors(t_mini_draw *mini, t_game_data *data, t_minimap *minimap)
+{
+	while (mini->k <= mini->steps)
+	{
+
+		mini->t = (double)mini->k * mini->step;
+		mini->pt = vec2_add(vec2_new(mini->pivot_x, mini->pivot_y), vec2_scale(mini->span, mini->t));
+		mini->px = (int)round(mini->pt.x);
+		mini->py = (int)round(mini->pt.y);
+		mini->dy = -1;
+		drawin_miniDoors_helper(mini, data, minimap);
+		mini->k++;
+	}
+}
 
 static void draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door)
 {
-	t_vec2 span;
-	double scale;
-	double pivot_x;
-	double pivot_y;
-	double step;
-	double t;
-	int	steps;
-	int	k;
+	t_mini_draw mini;
 
 	if (!door || !door->has_geom)
 		return ;
-	span = vec2_rotate(door->span_closed,
-		door->rot_sign * door->progress * HALF_PI);
-	scale = minimap->mini_tile;
-	pivot_x = minimap->padding + door->pivot.x * scale;
-	pivot_y = minimap->padding + door->pivot.y * scale;
-	span = vec2_scale(span, scale);
-	steps = minimap->mini_tile * 2;
-	if (steps < 4)
-		steps = 4;
-	step = 1.0 / (double)steps;
-	k = 0;
-	while (k <= steps)
-	{
-		t_vec2 pt;
-		int	px;
-		int	py;
-		int	dy;
-		int	dx;
-
-		t = (double)k * step;
-		pt = vec2_add(vec2_new(pivot_x, pivot_y), vec2_scale(span, t));
-		px = (int)round(pt.x);
-		py = (int)round(pt.y);
-		dy = -1;
-		while (dy <= 1)
-		{
-			dx = -1;
-			while (dx <= 1)
-			{
-				int draw_x;
-				int draw_y;
-
-				draw_x = px + dx;
-				draw_y = py + dy;
-				if (draw_x >= minimap->padding
-					&& draw_y >= minimap->padding
-					&& draw_x < minimap->padding + minimap->mini_width
-					&& draw_y < minimap->padding + minimap->mini_height)
-					put_pixel(&data->mlx, draw_x, draw_y, 0x553311);
-				dx++;
-			}
-			dy++;
-		}
-		k++;
-	}
+	init_mini_draw(&mini, minimap, door);
+	drawing_mini_doors(&mini, data, minimap);
 }
 
 void	draw_tile(t_game_data *data, int i, int j, int color, t_minimap *minimap)
@@ -421,6 +425,15 @@ void	adjust_dimensions(t_minimap *minimap, t_game_data *data)
 	if (minimap->mini_tile < 1)
 		minimap->mini_tile = 1;
 }
+void	set_right_color(t_game_data *data, int i , int j , int *color)
+{
+	if (data->map.grid[i][j] == '0' || data->map.grid[i][j] == 'N' || data->map.grid[i][j] == 'S' || data->map.grid[i][j] == 'E' || data->map.grid[i][j] == 'W')
+		(*color) = data->file_data.fc;
+	else if (data->map.grid[i][j] == '1')
+		(*color) = data->file_data.cc;
+	else
+		(*color) = 0;
+}
 
 void	draw_env(t_game_data *data)
 {
@@ -438,12 +451,7 @@ void	draw_env(t_game_data *data)
 		j = 0;
 		while(j < data->map.width)
 		{
-			if (data->map.grid[i][j] == '0' || data->map.grid[i][j] == 'N' || data->map.grid[i][j] == 'S' || data->map.grid[i][j] == 'E' || data->map.grid[i][j] == 'W')
-				color = data->file_data.fc;
-			else if (data->map.grid[i][j] == '1')
-				color = data->file_data.cc;
-			else
-				color = 0;
+			set_right_color(data, i , j , &color);
 			draw_tile(data, i, j , color, &minimap);
 			j++;
 		}
@@ -565,6 +573,29 @@ int key_release(int keycode, void *param)
 		data->player.rotating_left = 0;
     return (0);
 }
+void	set_moved_flag(t_game_data *data, bool *moved)
+{
+	if (data->player.moving_forward)
+	{
+		move_forward(data);
+		(*moved) = true;
+	}
+    if (data->player.moving_backward)
+	{
+		move_backwards(data);
+		(*moved) = true;
+	}
+	if (data->player.rotating_right)
+	{
+		rotate_right(data);
+		(*moved) = true;
+	}
+    if (data->player.rotating_left)
+	{
+		rotate_left(data);
+		(*moved) = true;
+	}
+}
 
 int game_loop(void *param)
 {
@@ -575,29 +606,9 @@ int game_loop(void *param)
 	data->last_time = now;
 	door_update(data, dt);
 	sprite_update_all(data, dt);
-    if (data->player.moving_forward)
-	{
-		move_forward(data);
-		moved = true;
-	}
-    if (data->player.moving_backward)
-	{
-		move_backwards(data);
-		moved = true;
-	}
-	if (data->player.rotating_right)
-	{
-		rotate_right(data);
-		moved = true;
-	}
-    if (data->player.rotating_left)
-	{
-		rotate_left(data);
-		moved = true;
-	}
+    set_moved_flag(data, &moved);
 	if (moved || data->sprite_count > 0)
 		redraw_map(data);
-    
     return (0);
 }
 

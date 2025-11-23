@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 15:08:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/22 17:23:25 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/23 18:10:49 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,89 +73,90 @@ static int  evaluate_geometry(t_game_data *data, t_vec2 pivot, t_vec2 span,
     return (1);
 }
 
-static void configure_door_geometry(t_game_data *data, t_door *door)
+void    init_door_geo(t_game_data *data, t_door *door, t_door_geo *geo)
 {
-    t_vec2      center;
-    t_vec2      span_dir;
-    int         vertical_open;
-    int         horizontal_open;
-    int         best_score;
-    t_vec2      best_pivot;
-    t_vec2      best_span;
-    int         best_rot;
-    int         hinge_signs[2];
-    int         rot_signs[2];
-    int         i;
-    int         j;
-
-    center = vec2_new(door->map_x + 0.5, door->map_y + 0.5);
-    vertical_open = map_is_walkable(data, door->map_y - 1, door->map_x)
+    geo->center = vec2_new(door->map_x + 0.5, door->map_y + 0.5);
+    geo->vertical_open = map_is_walkable(data, door->map_y - 1, door->map_x)
         + map_is_walkable(data, door->map_y + 1, door->map_x);
-    horizontal_open = map_is_walkable(data, door->map_y, door->map_x - 1)
+    geo->horizontal_open = map_is_walkable(data, door->map_y, door->map_x - 1)
         + map_is_walkable(data, door->map_y, door->map_x + 1);
-    if (vertical_open > horizontal_open)
-        span_dir = vec2_new(1.0, 0.0);
-    else if (horizontal_open > vertical_open)
-        span_dir = vec2_new(0.0, 1.0);
+    if (geo->vertical_open > geo->horizontal_open)
+        geo->span_dir = vec2_new(1.0, 0.0);
+    else if (geo->horizontal_open > geo->vertical_open)
+        geo->span_dir = vec2_new(0.0, 1.0);
     else
-        span_dir = vec2_new(1.0, 0.0);
-    hinge_signs[0] = -1;
-    hinge_signs[1] = 1;
-    rot_signs[0] = 1;
-    rot_signs[1] = -1;
-    best_score = -1;
-    best_rot = 1;
-    best_pivot = center;
-    best_span = span_dir;
+        geo->span_dir = vec2_new(1.0, 0.0);
+    geo->hinge_signs[0] = -1;
+    geo->hinge_signs[1] = 1;
+    geo->rot_signs[0] = 1;
+    geo->rot_signs[1] = -1;
+    geo->best_score = -1;
+    geo->best_rot = 1;
+    geo->best_pivot = geo->center;
+    geo->best_span = geo->span_dir;
+}
+
+void    rot_sign_handler(t_game_data *data, t_door_geo *geo, int *j)
+{
+    while ((*j) < 2)
+    {
+        int rot_sign;
+        int score;
+        rot_sign = geo->rot_signs[(*j)];
+        if (!evaluate_geometry(data, geo->pivot, geo->span, rot_sign))
+        {
+            (*j)++;
+            continue;
+        }
+        score = geo->wall_bonus;
+        if (score > geo->best_score)
+        {
+            geo->best_score = score;
+            geo->best_pivot = geo->pivot;
+            geo->best_span = geo->span;
+            geo->best_rot = rot_sign;
+        }
+        (*j)++;
+    }
+}
+
+void    hinge_sign_handler(t_game_data *data, t_door *door, t_door_geo *geo)
+{
+    int i;
+    int j;
+
     i = 0;
     while (i < 2)
     {
-        t_vec2  pivot;
-        t_vec2  span;
-        int     hinge_sign;
-        int     wall_bonus;
-
-        hinge_sign = hinge_signs[i];
-        set_candidate(center, span_dir, hinge_sign, &pivot, &span);
-        wall_bonus = 0;
-        if (span_dir.x != 0.0 && map_is_wall(data, door->map_y,
-                door->map_x + hinge_sign))
-            wall_bonus = 1;
-        if (span_dir.y != 0.0 && map_is_wall(data, door->map_y + hinge_sign,
+        geo->hinge_sign = geo->hinge_signs[i];
+        set_candidate(geo->center, geo->span_dir, geo->hinge_sign, &geo->pivot, &geo->span);
+        geo->wall_bonus = 0;
+        if (geo->span_dir.x != 0.0 && map_is_wall(data, door->map_y,
+                door->map_x + geo->hinge_sign))
+            geo->wall_bonus = 1;
+        if (geo->span_dir.y != 0.0 && map_is_wall(data, door->map_y + geo->hinge_sign,
                 door->map_x))
-            wall_bonus = 1;
+            geo->wall_bonus = 1;
         j = 0;
-        while (j < 2)
-        {
-            int rot_sign;
-            int score;
-
-            rot_sign = rot_signs[j];
-            if (!evaluate_geometry(data, pivot, span, rot_sign))
-            {
-                j++;
-                continue;
-            }
-            score = wall_bonus;
-            if (score > best_score)
-            {
-                best_score = score;
-                best_pivot = pivot;
-                best_span = span;
-                best_rot = rot_sign;
-            }
-            j++;
-        }
+        rot_sign_handler(data, geo, &j);
         i++;
     }
-    if (best_score < 0)
+}
+
+static void configure_door_geometry(t_game_data *data, t_door *door)
+{
+    t_door_geo  geo;
+
+    init_door_geo(data, door, &geo);
+    hinge_sign_handler(data, door, &geo);
+    if (geo.best_score < 0)
     {
-        set_candidate(center, span_dir, -1, &best_pivot, &best_span);
-        best_rot = 1;
+        set_candidate(geo.center, geo.span_dir, -1, &geo.best_pivot, &geo.best_span);
+        geo.best_rot = 1;
     }
-    door->pivot = best_pivot;
-    door->span_closed = best_span;
-    door->rot_sign = best_rot;
+    door->pivot = geo.best_pivot;
+    door->span_closed = geo.best_span;
+    door->rot_sign = geo.best_rot;
     door->has_geom = true;
 }
 
@@ -279,6 +280,30 @@ void door_toggle(t_game_data *data)
     }
 }
 
+void    update(double dt, t_door *door, bool *changed)
+{
+    if (door->state == DOOR_OPENING)
+    {
+        door->progress += door->speed * dt;
+        if (door->progress >= 1.0)
+        {
+            door->progress = 1.0;
+            door->state = DOOR_OPEN;
+        }
+        *changed = true;
+    }
+    else if (door->state == DOOR_CLOSING)
+    {
+        door->progress -= door->speed * dt;
+        if (door->progress <= 0.0)
+        {
+            door->progress = 0.0;
+            door->state = DOOR_CLOSED;
+        }
+        *changed = true;
+    }
+}
+
 void    door_update(t_game_data *data, double dt)
 {
     bool    changed;
@@ -292,26 +317,7 @@ void    door_update(t_game_data *data, double dt)
     while (i < data->door_count)
     {
         door = &data->doors[i];
-        if (door->state == DOOR_OPENING)
-        {
-            door->progress += door->speed * dt;
-            if (door->progress >= 1.0)
-            {
-                door->progress = 1.0;
-                door->state = DOOR_OPEN;
-            }
-            changed = true;
-        }
-        else if (door->state == DOOR_CLOSING)
-        {
-            door->progress -= door->speed * dt;
-            if (door->progress <= 0.0)
-            {
-                door->progress = 0.0;
-                door->state = DOOR_CLOSED;
-            }
-            changed = true;
-        }
+        update(dt, door, &changed);
         i++;
     }
     if (changed)
