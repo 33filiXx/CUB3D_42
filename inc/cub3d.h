@@ -37,6 +37,13 @@ typedef enum s_hit_kind
 	HIT_DOOR
 }			t_hit_kind;
 
+
+typedef struct s_cercle
+{
+	int c_x;
+	int c_y;
+	int	r;
+}			t_cercle;
 typedef struct s_file_data
 {
 	char	*no_texture;
@@ -62,6 +69,8 @@ typedef struct s_texture
     int endian;
 	int tex_x;
 	int tex_y;
+	bool            has_transparency;
+	unsigned int    transparent_color;
 } t_texture;
 
 typedef struct s_minimap
@@ -93,6 +102,24 @@ typedef struct s_map
 	int		width;
 	int		height;
 }			t_map;
+
+typedef struct s_door_geo
+{
+	t_vec2      center;
+    t_vec2      span_dir;
+    int         vertical_open;
+    int         horizontal_open;
+    int         best_score;
+    t_vec2      best_pivot;
+    t_vec2      best_span;
+    int         best_rot;
+    int         hinge_signs[2];
+    int         rot_signs[2];
+	t_vec2  pivot;
+    t_vec2  span;
+    int     hinge_sign;
+    int     wall_bonus;
+}				t_door_geo;
 
 typedef struct s_player
 {
@@ -150,6 +177,43 @@ typedef struct s_mouse
 	bool has_prev_pos;
 	double prev_delta;
 }			t_mouse;
+
+typedef struct s_frame
+{
+	int span_x;
+    int span_y;
+	int cols;
+    int rows;
+}			t_frame;
+
+typedef struct s_render_sprite
+{
+	int x;
+    int y;
+    int tex_x;
+    int tex_y;
+    double u;
+    double v;
+    unsigned int color;
+}			t_render_sprite;
+
+typedef struct s_minimap_draw
+{
+	t_vec2 span;
+	double scale;
+	double pivot_x;
+	double pivot_y;
+	double step;
+	double t;
+	int	steps;
+	int	k;
+	t_vec2 pt;
+	int	px;
+	int	py;
+	int	dy;
+	int	dx;
+}				t_mini_draw;
+
 
 typedef struct s_game_data
 {
