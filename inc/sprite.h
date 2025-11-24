@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/15 20:17:17 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/19 18:06:02 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/24 20:52:27 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,15 @@
 
 # include <stdbool.h>
 # include "../src/vectorslib/vec.h"
+# include "../inc/cub3d.h"
+
+#define SPRITE_FRAME_SIZE 32
+#define SPRITE_FRAME_COUNT 3
 
 typedef struct s_texture		 t_texture;
+struct s_game_data;
+struct s_frame;
+struct s_render_sprite;
 
 typedef struct s_draw_sprite
 {
@@ -64,6 +71,32 @@ typedef struct s_sprite
     bool            visible;
 }       t_sprite;
 
-
+struct s_frame    get_frame_within_sheet(t_sprite *sprite);
+void    render_helper(t_sprite *sprite, struct s_frame *frame, struct s_game_data *data, struct s_render_sprite *render_s);
+void    render_sprites(t_sprite *sprite, struct s_frame *frame, struct s_game_data *data);
+void    set_cam_z(t_sprite *sprite, t_vec2 rel);
+void    project_to_screen(t_sprite *sprite, int start_x, int v_w, int v_h);
+void    clamp_drawing_bounds(t_sprite *sprite, int start_x, int v_w, int v_h);
+int get_visible_s_len(struct s_game_data *data);
+int    collect_visible_sprites(struct s_game_data *data, t_sprite ***visible_sprites);
+void    swap(t_sprite **v_sprites, int i, int j);
+void    free_sprites(t_sprite **visible_sprites , int len);
+void    sprite_try_move(struct s_game_data *data, t_sprite *sprite, t_vec2 step);
+int    move_to_target(struct s_game_data *data, t_sprite *sprite, t_vec2 step);
+unsigned int texel(t_texture *tex, int x, int y);
+bool texture_is_transparent(t_texture *tex, unsigned int color);
+void    set_frame(t_sprite *sprite);
+void    append_to_sprite(struct s_game_data *data, int x , int y);
+void    get_z_buffer(struct s_game_data *data);
+void    free_z_buffer(struct s_game_data *data);
+t_sprite    **sort_sprites(struct s_game_data *data);
+void    sprite_camera_transform(struct s_game_data *data, t_sprite *sprite);
+void    sprite_update_one(struct s_game_data *data, t_sprite *sprite, double dt);
+void    sprite_animate(t_sprite *sprite, double dt);
+void sprite_load_map(struct s_game_data *data);
+void    sprite_sheet_init(struct s_game_data *data, t_sprite *sprite);
+void sprite_update_all(struct s_game_data *data, double dt);
+void sprite_render_all(struct s_game_data *data, int start_x, int view_w, int view_h);
+void	sprite_draw(struct s_game_data *data, t_sprite *sprite, int start_x, int v_w, int v_h);
 #endif
 

@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/23 19:08:22 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/24 20:44:06 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,299 +166,70 @@ void	initiate(t_mlx *mlx, t_game_data *game_data)
 
 // init mlx
 
-void put_pixel(t_mlx *mlx, int x, int y, int color)
-{
-	int offset = y * mlx->line_length + x * (mlx->bits_per_pixel / 8);
-	*(unsigned int*)(mlx->addr + offset) = color;
-}
-
-
-void	draw_plane(t_game_data *data)
-{
-	int i = 0;
-	int curr_x;
-	int curr_y;
-	double start_x, end_x ,start_y,end_y;
+// void	draw_plane(t_game_data *data)
+// {
+// 	int i = 0;
+// 	int curr_x;
+// 	int curr_y;
+// 	double start_x, end_x ,start_y,end_y;
 	
-	start_x = data->player.pos.x * TILE;
-	start_y = data->player.pos.y * TILE;
-	end_x = start_x + (data->player.plane.x  * TILE);
-	end_y = start_y + (data->player.plane.y  * TILE);
-	while(i <= 100)
-	{
-		double t = (double)(i / 100.0);
-		curr_x = start_x + t * (end_x - start_x);
-		curr_y = start_y + t * (end_y - start_y);
-		put_pixel(&data->mlx, curr_x, curr_y, 0xFF0000);
-		i++;
-	}
-}
+// 	start_x = data->player.pos.x * TILE;
+// 	start_y = data->player.pos.y * TILE;
+// 	end_x = start_x + (data->player.plane.x  * TILE);
+// 	end_y = start_y + (data->player.plane.y  * TILE);
+// 	while(i <= 100)
+// 	{
+// 		double t = (double)(i / 100.0);
+// 		curr_x = start_x + t * (end_x - start_x);
+// 		curr_y = start_y + t * (end_y - start_y);
+// 		put_pixel(&data->mlx, curr_x, curr_y, 0xFF0000);
+// 		i++;
+// 	}
+// }
 
-void	draw_dir(t_game_data *data)
-{
-	int i = 0;
-	int curr_x;
-	int curr_y;
-	double start_x, end_x ,start_y,end_y;
+// void	draw_dir(t_game_data *data)
+// {
+// 	int i = 0;
+// 	int curr_x;
+// 	int curr_y;
+// 	double start_x, end_x ,start_y,end_y;
 	
-	start_x = data->player.pos.x * TILE;
-	start_y = data->player.pos.y * TILE;
-	end_x = start_x + (data->player.dir.x * TILE);
-	end_y = start_y + (data->player.dir.y * TILE);
-	while(i <= 100)
-	{
-		double t = (double)(i / 100.0);
-		curr_x = start_x + t * (end_x - start_x);
-		curr_y = start_y + t * (end_y - start_y);
-		put_pixel(&data->mlx, curr_x, curr_y, 0xFF0000);
-		i++;
-	}
-}
+// 	start_x = data->player.pos.x * TILE;
+// 	start_y = data->player.pos.y * TILE;
+// 	end_x = start_x + (data->player.dir.x * TILE);
+// 	end_y = start_y + (data->player.dir.y * TILE);
+// 	while(i <= 100)
+// 	{
+// 		double t = (double)(i / 100.0);
+// 		curr_x = start_x + t * (end_x - start_x);
+// 		curr_y = start_y + t * (end_y - start_y);
+// 		put_pixel(&data->mlx, curr_x, curr_y, 0xFF0000);
+// 		i++;
+// 	}
+// }
 
-void	draw_cam_plane(t_game_data *data)
-{
-	int i = 0;
-	double left_p, right_p;
-	double plane_len = 0.65;
-	double curr_x, curr_y;
+// void	draw_cam_plane(t_game_data *data)
+// {
+// 	int i = 0;
+// 	double left_p, right_p;
+// 	double plane_len = 0.65;
+// 	double curr_x, curr_y;
 
-	left_p = data->rc.camera_x - plane_len;
-	right_p = data->rc.camera_x + plane_len;
-	while (i < 90)
-	{
-		curr_x = data->player.pos.x + (data->player.dir.x + data->player.plane.x * left_p) * (i / 100.0);
-		curr_y = data->player.pos.y + (data->player.dir.y + data->player.plane.y * left_p) * (i / 100.0);
-		put_pixel(&data->mlx, curr_x * TILE, curr_y * TILE, 0x00FF00);
-		curr_x = data->player.pos.x + (data->player.dir.x + data->player.plane.x * right_p) * (i / 100.0);
-		curr_y = data->player.pos.y + (data->player.dir.y + data->player.plane.y * right_p) * (i / 100.0);
-		put_pixel(&data->mlx, curr_x * TILE, curr_y * TILE, 0x0000FF);
-		i++;
-	}
-}
-
-void calculate_scale_and_offset(t_map *map, int *scale, int *offset_x, int *offset_y)
-{
-    int max_scale_x = (map->width * TILE) / map->width;
-    int max_scale_y = (map->height * TILE) / map->height;
-    
-    *scale = (max_scale_x < max_scale_y) ? max_scale_x : max_scale_y;
-    
-    int actual_width = map->width * (*scale);
-    int actual_height = map->height * (*scale);
-    
-    *offset_x = ((map->width * TILE) - actual_width) / 2;
-    *offset_y = ((map->height * TILE) - actual_height) / 2;
-}
-
-void	fill_outer_ppixel(t_game_data *data, int i, int j, int floor_color)
-{
-	int tx;
-	int ty;
-	
-	ty = i * TILE;
-	while (ty < (i + 1) * TILE)
-	{
-		tx = j * TILE;
-		while (tx < (j + 1) * TILE)
-		{
-			put_pixel(&data->mlx, tx, ty, floor_color);
-			tx++;
-		}
-		ty++;
-	}
-	// data->map.grid[i][j] = '0';
-}
-void	set_cercle_data(t_game_data *data, t_minimap *minimap, t_cercle *cercle)
-{
-	cercle->c_x = minimap->padding + (int)(data->player.pos.x * minimap->mini_tile);
-	cercle->c_y = minimap->padding + (int)(data->player.pos.y * minimap->mini_tile);
-	cercle->r = minimap->mini_tile / 2;
-	if (cercle->r < 2)
-		cercle->r = 2;
-}
-
-void		draw_player(int color, t_game_data *data, t_minimap *minimap)
-{
-	t_mlx *mlx = &data->mlx;
-	int ty;
-	t_cercle cercle;
-	int tx;
-	
-	set_cercle_data(data, minimap, &cercle);
-	ty = cercle.c_y - cercle.r;
-	while (ty <= cercle.c_y + cercle.r)
-	{
-		tx = cercle.c_x - cercle.r;
-		while (tx <= cercle.c_x + cercle.r)
-		{
-			int dx = tx - cercle.c_x;
-			int dy = ty - cercle.c_y;
-			if ((dx * dx + dy * dy) <= cercle.r * cercle.r)
-			{
-				if (tx >= minimap->padding && ty >= minimap->padding
-					&& tx < minimap->padding + minimap->mini_width
-					&& ty < minimap->padding + minimap->mini_height)
-					put_pixel(mlx, tx, ty, color);
-			}
-			tx++;
-		}
-		ty++;
-	}
-}
-
-void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * ceiling_color)
-{
-	*floor_color = (data->file_data.floor_color[0] << 16)
-		| (data->file_data.floor_color[1] << 8)
-		| data->file_data.floor_color[2];
-	*ceiling_color = (data->file_data.ceiling_color[0] << 16)
-		| (data->file_data.ceiling_color[1] << 8)
-		| data->file_data.ceiling_color[2];
-}
-void	init_mini_draw(t_mini_draw *mini, t_minimap *minimap, t_door *door)
-{
-	
-	mini->span = vec2_rotate(door->span_closed,
-		door->rot_sign * door->progress * HALF_PI);
-	mini->scale = minimap->mini_tile;
-	mini->pivot_x = minimap->padding + door->pivot.x * mini->scale;
-	mini->pivot_y = minimap->padding + door->pivot.y * mini->scale;
-	mini->span = vec2_scale(mini->span, mini->scale);
-	mini->steps = minimap->mini_tile * 2;
-	if (mini->steps < 4)
-		mini->steps = 4;
-	mini->step = 1.0 / (double)mini->steps;
-	mini->k = 0;
-}
-void	drawin_miniDoors_helper(t_mini_draw *mini, t_game_data *data, t_minimap *minimap)
-{
-	int draw_x;
-	int draw_y;
-
-	while (mini->dy <= 1)
-	{
-		mini->dx = -1;
-		while (mini->dx <= 1)
-		{
-			draw_x = mini->px + mini->dx;
-			draw_y = mini->py + mini->dy;
-			if (draw_x >= minimap->padding
-				&& draw_y >= minimap->padding
-				&& draw_x < minimap->padding + minimap->mini_width
-				&& draw_y < minimap->padding + minimap->mini_height)
-				put_pixel(&data->mlx, draw_x, draw_y, 0x553311);
-			mini->dx++;
-		}
-		mini->dy++;
-	}
-}
-
-void	drawing_mini_doors(t_mini_draw *mini, t_game_data *data, t_minimap *minimap)
-{
-	while (mini->k <= mini->steps)
-	{
-
-		mini->t = (double)mini->k * mini->step;
-		mini->pt = vec2_add(vec2_new(mini->pivot_x, mini->pivot_y), vec2_scale(mini->span, mini->t));
-		mini->px = (int)round(mini->pt.x);
-		mini->py = (int)round(mini->pt.y);
-		mini->dy = -1;
-		drawin_miniDoors_helper(mini, data, minimap);
-		mini->k++;
-	}
-}
-
-static void draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door)
-{
-	t_mini_draw mini;
-
-	if (!door || !door->has_geom)
-		return ;
-	init_mini_draw(&mini, minimap, door);
-	drawing_mini_doors(&mini, data, minimap);
-}
-
-void	draw_tile(t_game_data *data, int i, int j, int color, t_minimap *minimap)
-{
-	int tx;
-	int ty;
+// 	left_p = data->rc.camera_x - plane_len;
+// 	right_p = data->rc.camera_x + plane_len;
+// 	while (i < 90)
+// 	{
+// 		curr_x = data->player.pos.x + (data->player.dir.x + data->player.plane.x * left_p) * (i / 100.0);
+// 		curr_y = data->player.pos.y + (data->player.dir.y + data->player.plane.y * left_p) * (i / 100.0);
+// 		put_pixel(&data->mlx, curr_x * TILE, curr_y * TILE, 0x00FF00);
+// 		curr_x = data->player.pos.x + (data->player.dir.x + data->player.plane.x * right_p) * (i / 100.0);
+// 		curr_y = data->player.pos.y + (data->player.dir.y + data->player.plane.y * right_p) * (i / 100.0);
+// 		put_pixel(&data->mlx, curr_x * TILE, curr_y * TILE, 0x0000FF);
+// 		i++;
+// 	}
+// }
 
 
-	ty = 0;
-	while (ty < minimap->mini_tile)
-	{
-		tx = 0;
-		while (tx < minimap->mini_tile)
-		{
-			put_pixel(&data->mlx, minimap->padding +j * minimap->mini_tile + tx,
-				 minimap->padding + i * minimap->mini_tile + ty, color);
-			tx++;
-		}
-		ty++;
-	}
-	if (data->map.grid[i][j] == 'D')
-	{
-		t_door *door;
-
-		door = find_door(data, i, j);
-		if (door)
-			draw_minimap_door(data, minimap, door);
-	}
-}
-
-void	adjust_dimensions(t_minimap *minimap, t_game_data *data)
-{
-	double	usable_w;
-	double	usable_h;
-
-	minimap->mini_width = (data->map.width * TILE) / 4;
-	minimap->mini_height = (data->map.height * TILE) / 3;
-	minimap->padding = 16;
-	usable_w = minimap->mini_width - 2 * minimap->padding;
-	usable_h = minimap->mini_height - 2 * minimap->padding;
-	if (usable_w < 0)
-		usable_w = 0;
-	if (usable_h < 0)
-		usable_h = 0;
-	minimap->mini_tile = (int)fmin(usable_w / data->map.width,
-		usable_h / data->map.height);
-	if (minimap->mini_tile < 1)
-		minimap->mini_tile = 1;
-}
-void	set_right_color(t_game_data *data, int i , int j , int *color)
-{
-	if (data->map.grid[i][j] == '0' || data->map.grid[i][j] == 'N' || data->map.grid[i][j] == 'S' || data->map.grid[i][j] == 'E' || data->map.grid[i][j] == 'W')
-		(*color) = data->file_data.fc;
-	else if (data->map.grid[i][j] == '1')
-		(*color) = data->file_data.cc;
-	else
-		(*color) = 0;
-}
-
-void	draw_env(t_game_data *data)
-{
-	int	i;
-	int	j;
-	int	color;
-	t_minimap	minimap;
-
-	i = 0;
-	j = 0;
-	adjust_dimensions(&minimap, data);
-	set_colors(data, &data->file_data.fc, &data->file_data.cc);
-	while (i < data->map.height)
-	{
-		j = 0;
-		while(j < data->map.width)
-		{
-			set_right_color(data, i , j , &color);
-			draw_tile(data, i, j , color, &minimap);
-			j++;
-		}
-		i++;
-	}
-	draw_player(0xFF0000, data, &minimap);
-}
 // all of the above code is for the minimap some funcs arent used anymore !!
 
 void	redraw_map(t_game_data *data)
@@ -473,129 +244,6 @@ void	redraw_map(t_game_data *data)
     mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win, data->mlx.img, 0, 0);
 }
 
-int	valid_move(t_game_data *data, double new_x, double new_y)
-{
-	int map_x = (int ) new_x;
-	int map_y = (int ) new_y;
-	
-	if (map_x < 0 || map_x >= data->map.width || map_y < 0 || map_y >= data->map.height)
-		return (0);
-	if (data->map.grid[map_y][map_x] == '1')
-		return (0);
-	if (door_is_blocking(data, map_x, map_y))
-		return (0);
-	return (1);
-}
-
-void	move_forward(t_game_data *data)
-{
-	double new_x;
-	double new_y;
-	
-	new_x = data->player.pos.x + (data->player.dir.x * data->player.move_speed);
-	new_y = data->player.pos.y + (data->player.dir.y * data->player.move_speed);
-	if (valid_move(data, new_x, new_y))
-	{
-		data->player.pos.x = new_x;
-		data->player.pos.y = new_y;
-	}
-}
-void	move_backwards(t_game_data *data)
-{
-	double new_x;
-	double new_y;
-	
-	new_x = data->player.pos.x - (data->player.dir.x * data->player.move_speed);
-	new_y = data->player.pos.y - (data->player.dir.y * data->player.move_speed);
-	if (valid_move(data, new_x, new_y))
-	{
-		data->player.pos.x = new_x;
-		data->player.pos.y = new_y;
-	}
-}
-
-void	rotate_right(t_game_data *data)
-{
-	t_vec2 old_dir, old_plane;
-	
-	old_dir.x = data->player.dir.x;
-	old_dir.y = data->player.dir.y;
-	old_plane.x = data->player.plane.x;
-	old_plane.y = data->player.plane.y;
-	data->player.dir.x = old_dir.x * cos(data->player.rot_speed) - old_dir.y * sin(data->player.rot_speed);
-	data->player.dir.y = old_dir.x * sin(data->player.rot_speed) + old_dir.y * cos(data->player.rot_speed);
-	data->player.plane.x = old_plane.x * cos(data->player.rot_speed) - old_plane.y * sin(data->player.rot_speed);
-	data->player.plane.y = old_plane.x * sin(data->player.rot_speed) + old_plane.y * cos(data->player.rot_speed);
-}
-
-void	rotate_left(t_game_data *data)
-{
-	t_vec2 old_dir, old_plane;
-	
-	old_dir.x = data->player.dir.x;
-	old_dir.y = data->player.dir.y;
-	old_plane.x = data->player.plane.x;
-	old_plane.y = data->player.plane.y;
-	data->player.dir.x = old_dir.x * cos(-data->player.rot_speed) - old_dir.y * sin(-data->player.rot_speed);
-	data->player.dir.y = old_dir.x * sin(-data->player.rot_speed) + old_dir.y * cos(-data->player.rot_speed);
-	data->player.plane.x = old_plane.x * cos(-data->player.rot_speed) - old_plane.y * sin(-data->player.rot_speed);
-	data->player.plane.y = old_plane.x * sin(-data->player.rot_speed) + old_plane.y * cos(-data->player.rot_speed);
-}
-
-int key_press(int keycode, void *param)
-{
-    t_game_data *data = (t_game_data *)param;
-    
-    if (keycode == XK_w)
-		data->player.moving_forward = 1;
-	else if (keycode == XK_s)
-		data->player.moving_backward = 1;
-	else if (keycode == XK_d)
-		data->player.rotating_right = 1;
-	else if (keycode == XK_a)
-		data->player.rotating_left = 1;
-	else if (keycode == XK_e)
-		door_toggle(data);
-    return (0);
-}
-
-int key_release(int keycode, void *param)
-{
-    t_game_data *data = (t_game_data *)param;
-    
-    if (keycode == XK_w)
-		data->player.moving_forward = 0;
-	else if (keycode == XK_s)
-		data->player.moving_backward = 0;
-	else if (keycode == XK_d)
-		data->player.rotating_right = 0;
-	else if (keycode == XK_a)
-		data->player.rotating_left = 0;
-    return (0);
-}
-void	set_moved_flag(t_game_data *data, bool *moved)
-{
-	if (data->player.moving_forward)
-	{
-		move_forward(data);
-		(*moved) = true;
-	}
-    if (data->player.moving_backward)
-	{
-		move_backwards(data);
-		(*moved) = true;
-	}
-	if (data->player.rotating_right)
-	{
-		rotate_right(data);
-		(*moved) = true;
-	}
-    if (data->player.rotating_left)
-	{
-		rotate_left(data);
-		(*moved) = true;
-	}
-}
 
 int game_loop(void *param)
 {
@@ -617,58 +265,6 @@ int close_window(void *param)
 	(void)param;
     exit(0);
     return (0);
-}
-
-static void rotate_player(t_game_data *data, double angle)
-{
-    double old_dir_x = data->player.dir.x;
-    double old_plane_x = data->player.plane.x;
-
-    data->player.dir.x = old_dir_x * cos(angle) - data->player.dir.y * sin(angle);
-    data->player.dir.y = old_dir_x * sin(angle) + data->player.dir.y * cos(angle);
-    data->player.plane.x = old_plane_x * cos(angle) - data->player.plane.y * sin(angle);
-    data->player.plane.y = old_plane_x * sin(angle) + data->player.plane.y * cos(angle);
-}
-
-int on_mouse_move(int x, int y, void *param)
-{
-	t_game_data *data = (t_game_data *)param;
-	double	angle;
-	int		delta;
-
-	(void)y;
-	if (data->mouse.has_prev_pos == false)
-	{
-		data->mouse.prev_delta = x;
-		data->mouse.has_prev_pos = true;
-		return (0);
-	}
-	delta = x - (int)data->mouse.prev_delta;
-	if (delta == 0)
-		return (0);
-	if (delta > 200)
-		delta = 200;
-	else if (delta < -200)
-		delta = -200;
-	angle = (double)delta * 0.03;
-	rotate_player(data, angle);
-	redraw_map(data);
-	data->mouse.prev_delta = x;
-	return (0);
-}
-
-void	init_mouse(t_game_data *data)
-{
-	int y;
-	int last_mouse_x;
-	
-	if( mlx_mouse_get_pos(data->mlx.mlx_connection, data->mlx.mlx_win, &last_mouse_x, &y) == 1)
-	{
-		data->mouse.prev_delta = last_mouse_x;
-		data->mouse.has_prev_pos = true;
-	}
-	else
-		data->mouse.has_prev_pos = false;
 }
 
 // all of above code is for movement && processing events
