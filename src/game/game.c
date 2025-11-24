@@ -6,13 +6,12 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 20:44:06 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/24 20:59:42 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
 
-#define HALF_PI 1.5707963267948966
 
 void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * ceiling_color);
 
@@ -273,6 +272,8 @@ int	main(void)
 {
 	t_game_data game_data;
 	
+
+	// insert ur parsing in this part
 	ft_bzero(&game_data, sizeof(game_data));
 	ft_bzero(&game_data.file_data, sizeof(game_data.file_data));
 	ft_bzero(&game_data.map, sizeof(game_data.map));
@@ -285,17 +286,14 @@ int	main(void)
 	init_doors(&game_data);
 	game_data.last_time = get_now_seconds();
 	print_example_summary(&game_data.file_data, &game_data.map, &game_data.player, &game_data.rc);
-
-    
-	initiate(&game_data.mlx, &game_data);
+	// the t_game_data struct should be filled properly as the data sample above shows awalid dzb
+    // my raycasting and bonus componenets
 	
+	initiate(&game_data.mlx, &game_data);
 	door_load_map(&game_data);
 	sprite_load_map(&game_data);
 	sprite_update_all(&game_data, 0.0);
 	redraw_map(&game_data);
-	// draw_dir(&game_data);
-	// draw_plane(&game_data);
-	// draw_cam_plane(&game_data);
 	mlx_hook(game_data.mlx.mlx_win, KeyPress, KeyPressMask, key_press, &game_data);
 	mlx_hook(game_data.mlx.mlx_win, KeyRelease, KeyReleaseMask, key_release, &game_data);
 	mlx_loop_hook(game_data.mlx.mlx_connection, game_loop, &game_data);
