@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 20:59:42 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/24 21:10:16 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,7 +261,8 @@ int game_loop(void *param)
 
 int close_window(void *param)
 {
-	(void)param;
+	t_game_data *data = (t_game_data *)param;
+	cleanup_game(data);
     exit(0);
     return (0);
 }
@@ -302,7 +303,7 @@ int	main(void)
 	init_mouse(&game_data);
 	mlx_hook(game_data.mlx.mlx_win, MotionNotify, PointerMotionMask, on_mouse_move, &game_data);
     mlx_loop(game_data.mlx.mlx_connection);
-
+	cleanup_game(&game_data);
 	return (0);
 }
 

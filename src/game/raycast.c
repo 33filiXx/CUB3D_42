@@ -1,25 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   render_3d.c                                        :+:      :+:    :+:   */
+/*   raycast.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/24 16:57:41 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/23 21:04:27 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/24 21:20:47 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
 
-static t_vec2   ray_origin(t_game_data *data)
-{
-    return (data->player.pos);
-}
+static t_st g_textures;
+static int g_textures_ready;
 
-static t_vec2   ray_direction(t_game_data *data)
+static void destroy_texture_image(t_mlx *mlx, t_texture *tex)
 {
-    return (vec2_new(data->rc.ray_dir_x, data->rc.ray_dir_y));
+    if (!tex)
+        return ;
+    if (tex->img && mlx && mlx->mlx_connection)
+    {
+        mlx_destroy_image(mlx->mlx_connection, tex->img);
+        tex->img = NULL;
+    }
+    tex->addr = NULL;
 }
 
 static t_vec2   door_current_span(const t_door *door)
@@ -64,10 +69,8 @@ int  door_ray_intersection(t_game_data *data, t_door *door,
 void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height)
 {
     int x;
-    static t_st tex;
-    static int textures_ready;
 
-    tex_ready(&textures_ready, &tex, data);
+    tex_ready(&g_textures_ready, &g_textures, data);
     ensure_z_buffer(data, start_x + view_width);
     x = 0;
     while (x < view_width)
@@ -80,11 +83,25 @@ void render_3d_view(t_game_data *data, int start_x, int view_width, int view_hei
         set_horizontal_line_dist(data);
         init_hit_data(data);
         dda(data);
-        set_current_tex(data, &tex);
+        set_current_tex(data, &g_textures);
         draw_walls(data, view_height, view_width, x, start_x,
-            tex.current_tex);
+            g_textures.current_tex);
         data->z_buffer[start_x + x] = data->rc.perp_wall_dist;
         x++;
     }
+}
+
+void    destroy_textures(t_game_data *data)
+{
+    if (!g_textures_ready)
+        return ;
+    destroy_texture_image(&data->mlx, &g_textures.tex_no);
+    destroy_texture_image(&data->mlx, &g_textures.tex_so);
+    destroy_texture_image(&data->mlx, &g_textures.tex_we);
+    destroy_texture_image(&data->mlx, &g_textures.tex_ea);
+    destroy_texture_image(&data->mlx, &g_textures.door_tex);
+    g_textures.current_tex = NULL;
+    g_textures_ready = 0;
+    ft_bzero(&g_textures, sizeof(g_textures));
 }
     

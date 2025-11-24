@@ -6,11 +6,14 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:32:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 20:32:35 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/24 21:14:56 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
+
+static t_texture	g_sprite_sheet;
+static bool		g_sprite_sheet_loaded;
 
 unsigned int texel(t_texture *tex, int x, int y)
 {
@@ -57,24 +60,35 @@ void    set_frame(t_sprite *sprite)
 
 void    sprite_sheet_init(t_game_data *data, t_sprite *sprite)
 {
-    static t_texture sheet;
-    static bool     loaded;
-
     if (!sprite)
         return ;
-    if (!loaded)
+    if (!g_sprite_sheet_loaded)
     {
-        sheet.mlx_connection = data->mlx.mlx_connection;
-        load_texture(data, &sheet, "../../textures/spritesheet.xpm");
-        if (sheet.width > 0 && sheet.height > 0)
+        g_sprite_sheet.mlx_connection = data->mlx.mlx_connection;
+        load_texture(data, &g_sprite_sheet, "../../textures/spritesheet.xpm");
+        if (g_sprite_sheet.width > 0 && g_sprite_sheet.height > 0)
         {
-            sheet.transparent_color = texel(&sheet, 0, 0);
-            sheet.has_transparency = true;
+            g_sprite_sheet.transparent_color = texel(&g_sprite_sheet, 0, 0);
+            g_sprite_sheet.has_transparency = true;
         }
-        loaded = true;
+        g_sprite_sheet_loaded = true;
     }
-    sprite->sp_tex = &sheet;
+    sprite->sp_tex = &g_sprite_sheet;
     set_frame(sprite);
+}
+
+void    sprite_sheet_destroy(void)
+{
+	if (!g_sprite_sheet_loaded)
+		return ;
+	if (g_sprite_sheet.img && g_sprite_sheet.mlx_connection)
+	{
+		mlx_destroy_image(g_sprite_sheet.mlx_connection, g_sprite_sheet.img);
+		g_sprite_sheet.img = NULL;
+	}
+	g_sprite_sheet.addr = NULL;
+	g_sprite_sheet_loaded = false;
+	ft_bzero(&g_sprite_sheet, sizeof(g_sprite_sheet));
 }
 
 void    append_to_sprite(t_game_data *data, int x , int y)
