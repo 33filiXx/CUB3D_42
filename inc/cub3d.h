@@ -294,5 +294,13 @@ void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * cei
 void		draw_player(int color, t_game_data *data, t_minimap *minimap);
 void	fill_outer_ppixel(t_game_data *data, int i, int j, int floor_color);
 void	set_cercle_data(t_game_data *data, t_minimap *minimap, t_cercle *cercle);
+void	cleanup_game(t_game_data *data);
+void	destroy_textures(t_game_data *data);
+void	sprite_sheet_destroy(void);
+void 	free_texture_paths(t_file_data *file_data);
+void 	destroy_mlx_resources(t_mlx *mlx);
+// void 	destroy_texture_image(t_mlx *mlx, t_texture *tex);
+t_vec2   ray_origin(t_game_data *data);
+t_vec2   ray_direction(t_game_data *data);
 
 #endif
