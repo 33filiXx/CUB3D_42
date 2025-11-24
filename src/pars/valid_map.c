@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:34:51 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/17 17:11:37 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/22 10:56:20 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,11 +83,16 @@ int is_valid(t_file_data *file_data)
 				return 1; 
 			if (file_data->map[i][0] != '1' )
 					return 1;
-			if( i > 1 && file_data->map[i][j] == '0' && !last_floor(file_data->map[i] , j))
+			if(file_data->map[i + 1] && i > 1 && file_data->map[i][j] == '0' && !last_floor(file_data->map[i] , j))
 			{
 				if(file_data->map[i][j + 1] == '+' || file_data->map[i][j + 1] == '\n')
 					return 1;
 				if(file_data->map[i - 1][j] == '+' || file_data->map[i + 1][j] == '+')
+					return 1;
+			}
+			if(!file_data->map[i + 1])
+			{
+				if(file_data->map[i][j] == '0')
 					return 1;
 			}
 			j++;
@@ -105,7 +110,6 @@ int	storing(int fd, t_file_data *file_data)
 	int		j;
 	int		value;
 	int		*checked;
-
 	map_info = malloc(8 * sizeof(char));
 	value = 0;
 	checked = &value;

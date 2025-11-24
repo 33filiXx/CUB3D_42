@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/17 17:16:52 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/24 08:17:46 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,51 +95,59 @@ int	comma_length_checker(char *str)
 	return (0);
 }
 
-int	specific_store(char *str, t_file_data *file_data, char who_know)
+int	specific_store(t_file_data *file_data, char who_know , char *buffer)
 {
 	int		i;
-	int		j;
+	int		comma;
 	int		array_length;
-	char	*tmp;
+	char 	*tmp;
+	int j;
+	int p;
 
 	i = 0;
-	j = i;
+	j = 0;
+	p = 0;
+	comma = 0;
+	tmp = malloc(4);
 	array_length = 0;
-	tmp = malloc(3);
-	while (str[i])
+	while(buffer[i])
 	{
 		if (who_know == 'F')
 		{
-			while (str[i] != ',' && str[i])
-				tmp[j++] = str[i++];
-			tmp[j] = '\0';
-			j = 0;
-			file_data->floor_color[array_length++] = ft_atoi(tmp);
-			i++;
-			continue ;
+			if (buffer[i] >= '0' && buffer[i] <= '9')
+			{
+				tmp[p++] = buffer[i];
+			}
+			else if(buffer[i] == ',')
+			{
+				comma += 1;
+				tmp[i] = '\0';
+				file_data->floor_color[j++] = ft_atoi(tmp);
+				i++;
+				p = 0;
+				continue; 
+			}
 		}
 		else if (who_know == 'C')
 		{
-			while (str[i] != ',' && str[i])
+			if (buffer[i] >= '0' && buffer[i] <= '9')
+				tmp[p++] = buffer[i];
+			else if(buffer[i] == ',')
 			{
-				if (str[i] == ' ')
-					return 1;
-				tmp[j++] = str[i++];
+				comma += 1;
+				tmp[i] = '\0';
+				file_data->ceiling_color[j++] = ft_atoi(tmp);
+				i++;
+				p = 0;
+				continue;
 			}
-			tmp[j] = '\0';
-			j = 0;
-			file_data->ceiling_color[array_length++] = ft_atoi(tmp);
-			if (ft_atoi(tmp) > 255 || ft_atoi(tmp) < 0)
-				return (1);
-			i++;
-			continue ;
 		}
+		i++;
 	}
-	free(tmp);
 	return (0);
 }
 
-int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data)
+int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data , char *buffer)
 {
 	if (!strcmp(to_be_splited[0], NO))
 		file_data->no_texture = ft_strdup(to_be_splited[1]);
@@ -152,7 +160,10 @@ int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data)
 	else if (!strcmp(to_be_splited[0], F))
 	{
 		if (!comma_length_checker(to_be_splited[1]))
-			specific_store(to_be_splited[1], file_data, 'F');
+		{
+			if(specific_store(file_data, 'F' , buffer))
+				return 1;
+		}
 		else
 			return (1);
 	}
@@ -160,7 +171,7 @@ int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data)
 	{
 		if (!comma_length_checker(to_be_splited[1]))
 		{
-			if (specific_store(to_be_splited[1], file_data, 'C'))
+			if (specific_store(file_data, 'C' , buffer))
 				return (1);
 		}
 		else
@@ -168,6 +179,7 @@ int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data)
 	}
 	return (0);
 }
+
 
 int	is_empty(char **arry)
 {
@@ -296,13 +308,13 @@ int	set_data(int fd, t_file_data *file_data)
 			if (!match_in_list(to_be_splited[0], cmp_data->compass,
 					already_checked))
 			{
-				if (store_in_the_right_place(to_be_splited, file_data))
+				if (store_in_the_right_place(to_be_splited, file_data , buffer))
 					return (1);
 			}
 			else if (match_in_list(to_be_splited[0], cmp_data->compass,
 					already_checked) == 2)
 				return (1);
-			if (!is_empty(already_checked) && fill_only_map)
+			if (buffer && !is_empty(already_checked) && fill_only_map)
 				fill_map(buffer, file_data, update_map_arr);
 			if (!is_empty(already_checked))
 				fill_only_map = 1;
