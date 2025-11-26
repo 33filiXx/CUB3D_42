@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/24 08:17:46 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/25 11:48:39 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,11 +77,13 @@ int	comma_length_checker(char *str)
 	i = 0;
 	while (str[i])
 	{
-		if (str[i] != ',' && str[i] != '\n')
+		if (str[i] >= '0' && str[i] <= '9')
 		{
 			counter++;
 			if (counter > 3)
+			{
 				return (1);
+			}
 		}
 		else if (str[i] == ',')
 		{
@@ -98,35 +100,38 @@ int	comma_length_checker(char *str)
 int	specific_store(t_file_data *file_data, char who_know , char *buffer)
 {
 	int		i;
-	int		comma;
 	int		array_length;
 	char 	*tmp;
 	int j;
 	int p;
+	int check;
 
-	i = 0;
+	i = 1;
 	j = 0;
 	p = 0;
-	comma = 0;
+	check = 0;
 	tmp = malloc(4);
 	array_length = 0;
-	while(buffer[i])
+	while(buffer[i] && buffer[i] != '\n')
 	{
 		if (who_know == 'F')
 		{
 			if (buffer[i] >= '0' && buffer[i] <= '9')
-			{
 				tmp[p++] = buffer[i];
-			}
 			else if(buffer[i] == ',')
 			{
-				comma += 1;
 				tmp[i] = '\0';
+				if (ft_atoi(tmp) > 255) 
+					return 1;
 				file_data->floor_color[j++] = ft_atoi(tmp);
+				free(tmp);
+				tmp = malloc(4);		
 				i++;
 				p = 0;
-				continue; 
+				continue;
 			}
+			else if (buffer[i] != ' ')
+				return 1;
 		}
 		else if (who_know == 'C')
 		{
@@ -134,9 +139,12 @@ int	specific_store(t_file_data *file_data, char who_know , char *buffer)
 				tmp[p++] = buffer[i];
 			else if(buffer[i] == ',')
 			{
-				comma += 1;
 				tmp[i] = '\0';
+				if (ft_atoi(tmp) > 255) 
+					return 1;
 				file_data->ceiling_color[j++] = ft_atoi(tmp);
+				free(tmp);
+				tmp = malloc(4);		
 				i++;
 				p = 0;
 				continue;
@@ -144,6 +152,7 @@ int	specific_store(t_file_data *file_data, char who_know , char *buffer)
 		}
 		i++;
 	}
+	free(tmp);
 	return (0);
 }
 
@@ -159,9 +168,9 @@ int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data , char
 		file_data->ea_texture = ft_strdup(to_be_splited[1]);
 	else if (!strcmp(to_be_splited[0], F))
 	{
-		if (!comma_length_checker(to_be_splited[1]))
+		if (!comma_length_checker(buffer))
 		{
-			if(specific_store(file_data, 'F' , buffer))
+			if(specific_store(file_data, 'F' ,  ft_strchr(buffer , 'F')))
 				return 1;
 		}
 		else
@@ -169,9 +178,9 @@ int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data , char
 	}
 	else if (!strcmp(to_be_splited[0], C))
 	{
-		if (!comma_length_checker(to_be_splited[1]))
+		if (!comma_length_checker(buffer))
 		{
-			if (specific_store(file_data, 'C' , buffer))
+			if (specific_store(file_data, 'C' , ft_strchr(buffer , 'c')))
 				return (1);
 		}
 		else
