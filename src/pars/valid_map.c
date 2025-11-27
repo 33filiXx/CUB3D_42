@@ -6,11 +6,19 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:34:51 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/27 05:14:13 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 10:30:00 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
+
+static void	drain_fd(int fd)
+{
+	char	*line;
+
+	while ((line = get_next_line(fd)) != NULL)
+		free(line);
+}
 
 void	reset_map_info(char *map_info)
 {
@@ -117,7 +125,9 @@ int	storing(int fd, t_file_data *file_data)
 	i = 0;
 	if (set_data(fd, file_data))
 	{
+		drain_fd(fd);
 		free(map_info);
+		close(fd);
 		return (1);
 	}
 	while (file_data->map[i])
@@ -131,7 +141,12 @@ int	storing(int fd, t_file_data *file_data)
 				file_data->column = j;
 			}
 			else if ((found_player(file_data->map[i][j], map_info ,checked) && *checked) || *checked == 2)
+			{
+				drain_fd(fd);
+				free(map_info);
+				close(fd);
 				return (1);
+			}
 			j++;
 		}
 		if (j < file_data->s_element_size - 1)
@@ -140,12 +155,16 @@ int	storing(int fd, t_file_data *file_data)
 	}
 	if(is_valid(file_data))
 	{
+		drain_fd(fd);
 		free(map_info);
+		close(fd);
 		return 1;
 	}
 	if (!(*checked))
 	{
+		drain_fd(fd);
 		free(map_info);
+		close(fd);
 		return 1;
 	}
 	close(fd);

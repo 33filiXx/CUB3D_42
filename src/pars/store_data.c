@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/27 09:31:11 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 10:26:35 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -282,17 +282,39 @@ int specific_store(t_file_data *file_data, char who_know, char *buffer)
 	free(tmp);
 	return (0);
 }
-
+int check_if_exact(char **str)
+{
+	if (str[2])
+		return 1;
+	else	
+		return 0;
+}
 int store_in_the_right_place(char **to_be_splited, t_file_data *file_data, char *buffer)
 {
-	if (!strcmp(to_be_splited[0], NO))
+	if (!strcmp(to_be_splited[0], NO) )
+	{
+		if( check_if_exact(to_be_splited))
+			return 1;
 		file_data->no_texture = ft_strdup(to_be_splited[1]);
-	else if (!strcmp(to_be_splited[0], SO))
+	}
+	else if (!strcmp(to_be_splited[0], SO) )
+	{
+		if( check_if_exact(to_be_splited))
+			return 1;
 		file_data->so_texture = ft_strdup(to_be_splited[1]);
-	else if (!strcmp(to_be_splited[0], WE))
+	}
+	else if (!strcmp(to_be_splited[0], WE) )
+	{
+		if( check_if_exact(to_be_splited))
+			return 1;
 		file_data->we_texture = ft_strdup(to_be_splited[1]);
-	else if (!strcmp(to_be_splited[0], EA))
+	}
+	else if (!strcmp(to_be_splited[0], EA) )
+	{
+		if( check_if_exact(to_be_splited))
+			return 1;
 		file_data->ea_texture = ft_strdup(to_be_splited[1]);
+	}
 	else if (!strcmp(to_be_splited[0], F))
 	{
 		if (!comma_length_checker(buffer))
@@ -446,7 +468,6 @@ int set_data(int fd, t_file_data *file_data)
 				if (store_in_the_right_place(to_be_splited, file_data, buffer))
 				{
 					cleanup_inside_set_data(cmp_data, already_checked, to_be_splited, buffer);
-					close(fd);
 					return (1);
 				}
 			}
