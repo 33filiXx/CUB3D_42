@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:34:51 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/22 10:56:20 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 05:14:13 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,10 @@ int	storing(int fd, t_file_data *file_data)
 	reset_map_info(map_info);
 	i = 0;
 	if (set_data(fd, file_data))
+	{
+		free(map_info);
 		return (1);
+	}
 	while (file_data->map[i])
 	{
 		j = 0;
@@ -136,8 +139,16 @@ int	storing(int fd, t_file_data *file_data)
 		i++;
 	}
 	if(is_valid(file_data))
+	{
+		free(map_info);
 		return 1;
+	}
 	if (!(*checked))
+	{
+		free(map_info);
 		return 1;
+	}
+	close(fd);
+	free(map_info);
 	return (0);
 }

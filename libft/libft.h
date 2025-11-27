@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 15:32:12 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/25 17:03:26 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 06:05:11 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ char				*ft_strchr(const char *s, int c);
 char				*ft_strdup(const char *s);
 char				*ft_strrchr(const char *s, int c);
 char				*ft_substr(char const *s, unsigned int start, size_t len);
-char				**ft_split(char *str, char *charset);
+char				**ft_split(const char *s, char c);
 char				*ft_strjoin(char *s1, char *s2);
 char				*ft_strtrim(char const *s1, char const *set);
 void				ft_putstr_fd(char *s, int fd);

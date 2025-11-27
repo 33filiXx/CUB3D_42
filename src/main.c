@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:19:29 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/28 09:50:14 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 09:24:37 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,23 +47,93 @@ void	print_file_data(t_file_data data)
 		printf("Map: (null)\n");
 }
 
+
+
+
+void    free_cmp_data(t_cmp_data *cmp)
+{
+    int i;
+
+    if (!cmp)
+        return;
+
+    if (cmp->compass)
+    {
+        i = 0;
+        while (cmp->compass[i])
+        {
+            free(cmp->compass[i]);
+            i++;
+        }
+        free(cmp->compass);
+    }
+
+    free(cmp);
+}
+void    free_double_array(char **arr)
+{
+    int i;
+
+    if (!arr)
+        return;
+
+    i = 0;
+    while (arr[i])
+    {
+        free(arr[i]);
+        i++;
+    }
+    free(arr);
+}
+
+
+void    free_file_data(t_file_data *data)
+{
+    int i;
+
+    if (!data)
+        return;
+
+    free(data->no_texture);
+    free(data->so_texture);
+    free(data->we_texture);
+    free(data->ea_texture);
+
+    if (data->map)
+    {
+        i = 0;
+        while (i < data->map_size)
+        {
+            free(data->map[i]);
+            i++;
+        }
+        free(data->map);
+    }
+    free(data);
+}
+
+
+
+
 int main(int ac , char **av)
 {
 
     t_file_data *file_data;
 
-    file_data = malloc(sizeof(t_file_data));
+    file_data = ft_calloc(1, sizeof(t_file_data));
     if (ac == 2)
     {
         if(!punisher(av + 1 , file_data))
         {
             print_file_data(*file_data);
-            exit(22);
         }
         else
         {
+            free_file_data(file_data);
             printf("error\n");
             exit(55);
         }
     }
+    free_file_data(file_data);
+	
 }

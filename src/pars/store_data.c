@@ -6,13 +6,58 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/25 11:48:39 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 09:31:11 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
 
-static void	reset_data(t_cmp_data *cmp_data)
+// static void	free_map_partial(t_file_data *file_data, int filled)
+// {
+// 	int i;
+
+// 	if (!file_data || !file_data->map)
+// 		return;
+// 	i = 0;
+// 	while (i < filled)
+// 	{
+// 		if (file_data->map[i])
+// 			free(file_data->map[i]);
+// 		i++;
+// 	}
+// 	free(file_data->map);
+// }
+
+// static void free_file_fields(t_file_data *file_data)
+// {
+// 	if (!file_data)
+// 		return;
+// 	if (file_data->no_texture)
+// 		free(file_data->no_texture);
+// 	if (file_data->so_texture)
+// 		free(file_data->so_texture);
+// 	if (file_data->we_texture)
+// 		free(file_data->we_texture);
+// 	if (file_data->ea_texture)
+// 		free(file_data->ea_texture);
+// 	if (file_data->hexa_ceiling_color)
+// 		free(file_data->hexa_ceiling_color);
+// 	if (file_data->hexa_f_color)
+// 		free(file_data->hexa_f_color);
+// }
+
+void cleanup_inside_set_data(t_cmp_data *cmp_data, char **already_checked, char **to_be_splited, char *buffer)
+{
+	if (cmp_data)
+		free_cmp_data(cmp_data);
+	if (already_checked)
+		free_double_array(already_checked);
+	if (to_be_splited)
+		free_double_array(to_be_splited);
+	free(buffer);
+}
+
+static void reset_data(t_cmp_data *cmp_data)
 {
 	cmp_data->compass = malloc(7 * sizeof(char *));
 	cmp_data->compass[0] = ft_strdup(NO);
@@ -24,11 +69,11 @@ static void	reset_data(t_cmp_data *cmp_data)
 	cmp_data->compass[6] = NULL;
 }
 
-int	match_in_list(char *s1, char **s2, char **already_checked)
+int match_in_list(char *s1, char **s2, char **already_checked)
 {
-	int	i;
-	int	j;
-	int	checked;
+	int i;
+	int j;
+	int checked;
 
 	j = 0;
 	checked = 0;
@@ -59,11 +104,11 @@ int	match_in_list(char *s1, char **s2, char **already_checked)
 	}
 	return (1);
 }
-int	comma_length_checker(char *str)
+int comma_length_checker(char *str)
 {
-	int	i;
-	int	counter;
-	int	comma;
+	int i;
+	int counter;
+	int comma;
 
 	i = 0;
 	counter = 0;
@@ -97,11 +142,27 @@ int	comma_length_checker(char *str)
 	return (0);
 }
 
-int	specific_store(t_file_data *file_data, char who_know , char *buffer)
+int next_one(char *str)
 {
-	int		i;
-	int		array_length;
-	char 	*tmp;
+	int i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == ',')
+			return 1;
+		else if ((str[i] >= '0' && str[i] <= '9'))
+			return 0;
+		i++;
+	}
+	return 0;
+}
+
+int specific_store(t_file_data *file_data, char who_know, char *buffer)
+{
+	int i;
+	int array_length;
+	char *tmp;
 	int j;
 	int p;
 	int check;
@@ -112,51 +173,117 @@ int	specific_store(t_file_data *file_data, char who_know , char *buffer)
 	check = 0;
 	tmp = malloc(4);
 	array_length = 0;
-	while(buffer[i] && buffer[i] != '\n')
+	while (buffer[i] && buffer[i] != '\n')
 	{
 		if (who_know == 'F')
 		{
 			if (buffer[i] >= '0' && buffer[i] <= '9')
-				tmp[p++] = buffer[i];
-			else if(buffer[i] == ',')
 			{
-				tmp[i] = '\0';
-				if (ft_atoi(tmp) > 255) 
+				if (p >= 3)
+				{
+					free(tmp);
 					return 1;
+				}
+				tmp[p++] = buffer[i];
+				check = 1;
+			}
+			else if (buffer[i] == ',')
+			{
+				tmp[p] = '\0';
+				check = 0;
+				if (ft_atoi(tmp) > 255)
+				{
+					free(tmp);
+					return 1;
+				}
 				file_data->floor_color[j++] = ft_atoi(tmp);
 				free(tmp);
-				tmp = malloc(4);		
+				tmp = malloc(4);
 				i++;
 				p = 0;
 				continue;
 			}
 			else if (buffer[i] != ' ')
+			{
+				free(tmp);
 				return 1;
+			}
+			if (check && buffer[i] == ' ' && !next_one(buffer + i))
+			{
+				free(tmp);
+				return 1;
+			}
 		}
 		else if (who_know == 'C')
 		{
 			if (buffer[i] >= '0' && buffer[i] <= '9')
-				tmp[p++] = buffer[i];
-			else if(buffer[i] == ',')
 			{
-				tmp[i] = '\0';
-				if (ft_atoi(tmp) > 255) 
+				if (p >= 3)
+				{
+					free(tmp);
 					return 1;
+				}
+				tmp[p++] = buffer[i];
+				check = 1;
+			}
+			else if (buffer[i] == ',')
+			{
+				tmp[p] = '\0';
+				check = 0;
+				if (ft_atoi(tmp) > 255)
+				{
+					free(tmp);
+					return 1;
+				}
 				file_data->ceiling_color[j++] = ft_atoi(tmp);
 				free(tmp);
-				tmp = malloc(4);		
+				tmp = malloc(4);
 				i++;
 				p = 0;
 				continue;
 			}
+			else if (buffer[i] != ' ')
+			{
+				free(tmp);
+				return 1;
+			}
+			if (check && buffer[i] == ' ' && !next_one(buffer + i))
+			{
+				free(tmp);
+				return 1;
+			}
 		}
 		i++;
+	}
+	if (check && p > 0)
+	{
+		tmp[p] = '\0';
+		if (who_know == 'F')
+		{
+			if (ft_atoi(tmp) > 255)
+			{
+				free(tmp);
+				return 1;
+			}
+			if (j < 3)
+				file_data->floor_color[j++] = ft_atoi(tmp);
+		}
+		else if (who_know == 'C')
+		{
+			if (ft_atoi(tmp) > 255)
+			{
+				free(tmp);
+				return 1;
+			}
+			if (j < 3)
+				file_data->ceiling_color[j++] = ft_atoi(tmp);
+		}
 	}
 	free(tmp);
 	return (0);
 }
 
-int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data , char *buffer)
+int store_in_the_right_place(char **to_be_splited, t_file_data *file_data, char *buffer)
 {
 	if (!strcmp(to_be_splited[0], NO))
 		file_data->no_texture = ft_strdup(to_be_splited[1]);
@@ -170,7 +297,7 @@ int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data , char
 	{
 		if (!comma_length_checker(buffer))
 		{
-			if(specific_store(file_data, 'F' ,  ft_strchr(buffer , 'F')))
+			if (specific_store(file_data, 'F', ft_strchr(buffer, 'F')))
 				return 1;
 		}
 		else
@@ -180,7 +307,7 @@ int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data , char
 	{
 		if (!comma_length_checker(buffer))
 		{
-			if (specific_store(file_data, 'C' , ft_strchr(buffer , 'c')))
+			if (specific_store(file_data, 'C', ft_strchr(buffer, 'C')))
 				return (1);
 		}
 		else
@@ -189,10 +316,9 @@ int	store_in_the_right_place(char **to_be_splited, t_file_data *file_data , char
 	return (0);
 }
 
-
-int	is_empty(char **arry)
+int is_empty(char **arry)
 {
-	int	i;
+	int i;
 
 	i = 0;
 	while (arry[i])
@@ -202,10 +328,10 @@ int	is_empty(char **arry)
 	return (0);
 }
 
-int	is_color_dup(t_file_data *file_data)
+int is_color_dup(t_file_data *file_data)
 {
-	int	i;
-	int	check;
+	int i;
+	int check;
 
 	i = 0;
 	check = 0;
@@ -220,7 +346,6 @@ int	is_color_dup(t_file_data *file_data)
 	return (0);
 }
 
-
 int is_only_space(char *str)
 {
 	int i;
@@ -228,25 +353,24 @@ int is_only_space(char *str)
 
 	i = 0;
 	just_space = 1;
-    if (!str)
+	if (!str)
 	{
-        return 1;
+		return 1;
 	}
 	while (str[i])
 	{
-		if(str[i] != ' ' || str[i] != '\n')
+		if (str[i] != ' ' || str[i] != '\n')
 		{
 			just_space = 0;
 		}
-		i++;	
+		i++;
 	}
 	return just_space;
 }
 
-
 void update_line(char *line)
 {
-	int i ;
+	int i;
 
 	i = 0;
 	while (line[i])
@@ -254,7 +378,7 @@ void update_line(char *line)
 		if (line[i] == ' ' || line[i] == '\t')
 			line[i] = '1';
 		i++;
-	}	
+	}
 }
 
 int skip_empty_line(char *line)
@@ -264,25 +388,27 @@ int skip_empty_line(char *line)
 	i = 0;
 	while (line[i] && line[i] != '\n')
 	{
-		if(line[i] != ' ' || line[i] != '\t')
+		if (line[i] != ' ' || line[i] != '\t')
 			return 0;
 		i++;
 	}
 	return 1;
 }
-void	fill_map(char *line, t_file_data *file_data, int *update_map_arr)
+void fill_map(char *line, t_file_data *file_data, int *update_map_arr)
 {
-	int	i;
+	int i;
 
 	i = 0;
-	// printf("%s" , line);
 	file_data->map[*update_map_arr] = malloc(file_data->element_size);
 	if (skip_empty_line(line) && *update_map_arr == 0)
+	{
+		free(file_data->map[*update_map_arr]);
 		return;
+	}
 	while (line[i])
 	{
 		update_line(line);
-		if(line && ft_strlen(line) > file_data->s_element_size)
+		if (line && ft_strlen(line) > file_data->s_element_size)
 			file_data->s_element_size = ft_strlen(line);
 		file_data->map[*update_map_arr][i] = line[i];
 		i++;
@@ -291,15 +417,15 @@ void	fill_map(char *line, t_file_data *file_data, int *update_map_arr)
 	(*update_map_arr)++;
 }
 
-int	set_data(int fd, t_file_data *file_data)
+int set_data(int fd, t_file_data *file_data)
 {
-	char		*buffer;
-	char		**to_be_splited;
-	t_cmp_data	*cmp_data;
-	char		**already_checked;
-	int			value;
-	int			*update_map_arr;
-	int			fill_only_map;
+	char *buffer;
+	char **to_be_splited;
+	t_cmp_data *cmp_data;
+	char **already_checked;
+	int value;
+	int *update_map_arr;
+	int fill_only_map;
 
 	cmp_data = malloc(sizeof(t_cmp_data));
 	reset_data(cmp_data);
@@ -307,32 +433,48 @@ int	set_data(int fd, t_file_data *file_data)
 	update_map_arr = &value;
 	fill_only_map = 0;
 	already_checked = ft_calloc(7, sizeof(char *));
-	file_data->map = malloc(file_data->map_size * sizeof(char *));
+	file_data->map = ft_calloc(file_data->map_size + 1, sizeof(char *));
 	while (1)
 	{
 		buffer = get_next_line(fd);
 		if (buffer)
 		{
-			to_be_splited = ft_split(buffer, " ");
+			to_be_splited = ft_split(buffer, ' ');
 			if (!match_in_list(to_be_splited[0], cmp_data->compass,
-					already_checked))
+							   already_checked))
 			{
-				if (store_in_the_right_place(to_be_splited, file_data , buffer))
+				if (store_in_the_right_place(to_be_splited, file_data, buffer))
+				{
+					cleanup_inside_set_data(cmp_data, already_checked, to_be_splited, buffer);
+					close(fd);
 					return (1);
+				}
 			}
 			else if (match_in_list(to_be_splited[0], cmp_data->compass,
-					already_checked) == 2)
+								   already_checked) == 2)
+			{
+				cleanup_inside_set_data(cmp_data, already_checked, to_be_splited, buffer);
 				return (1);
+			}
 			if (buffer && !is_empty(already_checked) && fill_only_map)
 				fill_map(buffer, file_data, update_map_arr);
 			if (!is_empty(already_checked))
 				fill_only_map = 1;
+			free_double_array(to_be_splited);
+			free(buffer);
 		}
 		else
 			break;
 	}
+	file_data->map[value] = NULL;
 	if (is_empty(already_checked) || is_color_dup(file_data))
+	{
+		free_cmp_data(cmp_data);
+		free_double_array(already_checked);
 		return (1);
+	}
 	file_data->s_element_size++;
+	free_cmp_data(cmp_data);
+	free_double_array(already_checked);
 	return (0);
 }

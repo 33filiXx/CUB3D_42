@@ -26,8 +26,6 @@ typedef struct s_file_data
 	char	*ea_texture;
 	int		floor_color[3];
 	int		ceiling_color[3];
-	char *hexa_ceiling_color;
-	char *hexa_f_color;
 	int map_size;
 	int element_size;
 	int s_element_size;
@@ -47,6 +45,8 @@ int punisher(char **av , t_file_data *file_data);
 int storing(int fd, t_file_data *file_data);
 int	set_data(int fd, t_file_data *file_data);
 int	ft_strcmp(const char *s1, const char *s2);
+void    free_cmp_data(t_cmp_data *cmp);
+void    free_double_array(char **arr);
 // int	my_strcmp(const char *s1, const char **s2);
 
 

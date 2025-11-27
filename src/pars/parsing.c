@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:18:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/10/30 21:01:03 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 05:34:18 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,8 +75,9 @@ void get_size(int fd  , t_file_data *file_data)
 		map_length++;
 		if(!buffer)
 			break;
+        if(buffer)
+            free(buffer);
 	}
-    free(buffer);
     file_data->map_size = map_length;
     file_data->element_size = element_length + 1;
 }
