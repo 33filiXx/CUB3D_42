@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   drawing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:41:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 20:45:47 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/27 20:44:17 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,9 +55,11 @@ void	adjust_dimensions(t_minimap *minimap, t_game_data *data)
 {
 	double	usable_w;
 	double	usable_h;
+	double	per_cell_w;
+	double	per_cell_h;
 
-	minimap->mini_width = (data->map.width * TILE) / 4;
-	minimap->mini_height = (data->map.height * TILE) / 3;
+	minimap->mini_width = (int)(WIDTH * 0.3);
+	minimap->mini_height = (int)(HEIGHT * 0.4);
 	minimap->padding = 16;
 	usable_w = minimap->mini_width - 2 * minimap->padding;
 	usable_h = minimap->mini_height - 2 * minimap->padding;
@@ -65,8 +67,15 @@ void	adjust_dimensions(t_minimap *minimap, t_game_data *data)
 		usable_w = 0;
 	if (usable_h < 0)
 		usable_h = 0;
-	minimap->mini_tile = (int)fmin(usable_w / data->map.width,
-		usable_h / data->map.height);
+	if (data->map.width > 0)
+		per_cell_w = usable_w / data->map.width;
+	else
+		per_cell_w = usable_w;
+	if (data->map.height > 0)
+		per_cell_h = usable_h / data->map.height;
+	else
+		per_cell_h = usable_h;
+	minimap->mini_tile = (int)fmin(per_cell_w, per_cell_h);
 	if (minimap->mini_tile < 1)
 		minimap->mini_tile = 1;
 }

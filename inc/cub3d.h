@@ -7,30 +7,28 @@
 #	include <stdlib.h>
 #	include <sys/time.h>
 #	include <stdbool.h>
-//	 #include "../../minilibx-linux/mlx.h"
+	//  #include "../../minilibx-linux/mlx.h"
 #	include "../libft/libft.h"
 #	include <X11/keysym.h>
 #	include <X11/X.h>
-#	include <mlx.h>
+#	include "mlx.h"
 #	include "../src/vectorslib/vec.h"
 #	include "door.h"
 # 	include "sprite.h"
-#	define NO "NO"
-#	define SO "SO"
-#	define WE "WE"
-#	define EA "EA"
-#	define F "F"
-#	define C "C"
+#define HEIGHT 1080
+#define WIDTH 1920
+#define PLAYER_COLLISION_RADIUS 0.2
+
+#  define NO "NO"
+#  define SO "SO"
+#  define WE "WE"
+#  define EA "EA"
+#  define F "F"
+#  define C "C"
+
 
 #  define TILE 64
 #	define HALF_PI 1.5707963267948966
-
-/*
-void func(your struct , my struct)
-{
-	my struct map 
-}
-*/
 
 typedef enum s_hit_kind
 {
@@ -46,6 +44,10 @@ typedef struct s_cercle
 	int c_y;
 	int	r;
 }			t_cercle;
+
+
+
+
 typedef struct s_file_data
 {
 	char	*no_texture;
@@ -54,9 +56,30 @@ typedef struct s_file_data
 	char	*ea_texture;
 	int		floor_color[3];
 	int		ceiling_color[3];
+	int map_size;
+	int element_size;
+	int s_element_size;
+	char **map;
+	int row;
+	int column;
 	unsigned int fc;
 	unsigned int cc;
 }			t_file_data;
+
+typedef struct s_cmp_data
+{
+	char **compass;
+}			t_cmp_data;
+
+
+// char	**ft_split(char *str, char *charset);
+int punisher(char **av , t_file_data *file_data);
+int storing(int fd, t_file_data *file_data);
+int	set_data(int fd, t_file_data *file_data);
+int	ft_strcmp(const char *s1, const char *s2);
+void    free_cmp_data(t_cmp_data *cmp);
+void    free_double_array(char **arr);
+// int	my_strcmp(const char *s1, const char **s2);
 
 
 typedef struct s_texture
@@ -93,10 +116,6 @@ typedef struct s_nt
 	t_texture *current_tex;
 }	t_st;
 
-typedef struct s_cmp_data
-{
-	char **compass;
-}			t_cmp_data;
 
 typedef struct s_map
 {
@@ -234,12 +253,11 @@ typedef struct s_game_data
 	double		*z_buffer;
 	int		z_buffer_size;
 }   t_game_data;
+void	initiate(t_mlx *mlx, t_game_data *game_data);
+int game_loop(void *param);
+int close_window(void *param);
 
-// char	**ft_split(char *str, char *charset);
-int punisher(char **av , t_file_data *file_data);
-int set_data(int fd , t_file_data *file_data);
-int	ft_strcmp(const char *s1, const char *s2);
-// int	my_strcmp(const char *s1, const char **s2);
+
 void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height);
 void put_pixel(t_mlx *mlx, int x, int y, int color);
 int on_mouse_move(int x, int y, void *param);
@@ -302,5 +320,5 @@ void 	destroy_mlx_resources(t_mlx *mlx);
 // void 	destroy_texture_image(t_mlx *mlx, t_texture *tex);
 t_vec2   ray_origin(t_game_data *data);
 t_vec2   ray_direction(t_game_data *data);
-
+int merge_data(t_game_data *game_data, t_file_data *file_data);
 #endif

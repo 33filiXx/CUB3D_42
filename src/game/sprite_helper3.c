@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sprite_helper3.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:32:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 21:14:56 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/27 20:27:51 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void    sprite_sheet_init(t_game_data *data, t_sprite *sprite)
     if (!g_sprite_sheet_loaded)
     {
         g_sprite_sheet.mlx_connection = data->mlx.mlx_connection;
-        load_texture(data, &g_sprite_sheet, "../../textures/spritesheet.xpm");
+        load_texture(data, &g_sprite_sheet, "textures/spritesheet.xpm");
         if (g_sprite_sheet.width > 0 && g_sprite_sheet.height > 0)
         {
             g_sprite_sheet.transparent_color = texel(&g_sprite_sheet, 0, 0);

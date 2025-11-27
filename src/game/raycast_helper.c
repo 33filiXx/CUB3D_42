@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   raycast_helper.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:25:33 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/23 19:31:13 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/27 20:27:51 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void    tex_ready(int *textures_ready, t_st *tex, t_game_data *data)
         tex->tex_we.mlx_connection = data->mlx.mlx_connection;
         tex->tex_ea.mlx_connection = data->mlx.mlx_connection;
         tex->door_tex.mlx_connection = data->mlx.mlx_connection;
-        load_texture(data, &tex->door_tex, "../../textures/door.xpm");
+        load_texture(data, &tex->door_tex, "textures/door.xpm");
         load_texture(data, &tex->tex_no, data->file_data.no_texture);
         load_texture(data, &tex->tex_so, data->file_data.so_texture);
         load_texture(data, &tex->tex_we, data->file_data.we_texture);
