@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/10/15 17:34:51 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/27 10:30:00 by wel-mjiy         ###   ########.fr       */
+/*   Created: 2025/11/27 15:17:19 by wel-mjiy          #+#    #+#             */
+/*   Updated: 2025/11/28 16:33:51 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ int	found_player(char s1, char *s2, int *checked)
 	{
 		if (s1 == s2[i])
 		{
-			if(s1 == '1' || s1 == '0')
+			if(s1 == '1' || s1 == '0' || s1 == 'S' || s1 == 'D')
 				return 0;
 			*checked = 1;
 			return (1);
@@ -89,7 +89,7 @@ int is_valid(t_file_data *file_data)
 		
 			if (file_data->map[0][j] == '0' )	
 				return 1; 
-			if (file_data->map[i][0] != '1' )
+			if (file_data->map[i][0] != '1')
 					return 1;
 			if(file_data->map[i + 1] && i > 1 && file_data->map[i][j] == '0' && !last_floor(file_data->map[i] , j))
 			{
@@ -100,7 +100,7 @@ int is_valid(t_file_data *file_data)
 			}
 			if(!file_data->map[i + 1])
 			{
-				if(file_data->map[i][j] == '0')
+				if(file_data->map[i][j] != '1' && file_data->map[i][j] != '+')
 					return 1;
 			}
 			j++;

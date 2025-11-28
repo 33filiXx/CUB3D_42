@@ -6,11 +6,12 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:18:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/27 05:34:18 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 21:04:54 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
+
 
 int	ft_strcmp(const char *s1, const char *s2)
 {

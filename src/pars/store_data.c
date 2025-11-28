@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 18:34:54 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/27 10:26:35 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 21:05:18 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,23 +28,20 @@
 // 	free(file_data->map);
 // }
 
-// static void free_file_fields(t_file_data *file_data)
-// {
-// 	if (!file_data)
-// 		return;
-// 	if (file_data->no_texture)
-// 		free(file_data->no_texture);
-// 	if (file_data->so_texture)
-// 		free(file_data->so_texture);
-// 	if (file_data->we_texture)
-// 		free(file_data->we_texture);
-// 	if (file_data->ea_texture)
-// 		free(file_data->ea_texture);
-// 	if (file_data->hexa_ceiling_color)
-// 		free(file_data->hexa_ceiling_color);
-// 	if (file_data->hexa_f_color)
-// 		free(file_data->hexa_f_color);
-// }
+static char *dup_trimmed_token(char *token)
+{
+	char	*trimmed;
+	char	*result;
+
+	if (!token)
+		return (NULL);
+	trimmed = ft_strtrim(token, " \t\n\r");
+	if (!trimmed)
+		return (NULL);
+	result = ft_strdup(trimmed);
+	free(trimmed);
+	return (result);
+}
 
 void cleanup_inside_set_data(t_cmp_data *cmp_data, char **already_checked, char **to_be_splited, char *buffer)
 {
@@ -161,7 +158,6 @@ int next_one(char *str)
 int specific_store(t_file_data *file_data, char who_know, char *buffer)
 {
 	int i;
-	int array_length;
 	char *tmp;
 	int j;
 	int p;
@@ -172,7 +168,6 @@ int specific_store(t_file_data *file_data, char who_know, char *buffer)
 	p = 0;
 	check = 0;
 	tmp = malloc(4);
-	array_length = 0;
 	while (buffer[i] && buffer[i] != '\n')
 	{
 		if (who_know == 'F')
@@ -295,25 +290,33 @@ int store_in_the_right_place(char **to_be_splited, t_file_data *file_data, char 
 	{
 		if( check_if_exact(to_be_splited))
 			return 1;
-		file_data->no_texture = ft_strdup(to_be_splited[1]);
+		file_data->no_texture = dup_trimmed_token(to_be_splited[1]);
+		if (!file_data->no_texture)
+			return 1;
 	}
 	else if (!strcmp(to_be_splited[0], SO) )
 	{
 		if( check_if_exact(to_be_splited))
 			return 1;
-		file_data->so_texture = ft_strdup(to_be_splited[1]);
+		file_data->so_texture = dup_trimmed_token(to_be_splited[1]);
+		if (!file_data->so_texture)
+			return 1;
 	}
 	else if (!strcmp(to_be_splited[0], WE) )
 	{
 		if( check_if_exact(to_be_splited))
 			return 1;
-		file_data->we_texture = ft_strdup(to_be_splited[1]);
+		file_data->we_texture = dup_trimmed_token(to_be_splited[1]);
+		if (!file_data->we_texture)
+			return 1;
 	}
 	else if (!strcmp(to_be_splited[0], EA) )
 	{
 		if( check_if_exact(to_be_splited))
 			return 1;
-		file_data->ea_texture = ft_strdup(to_be_splited[1]);
+		file_data->ea_texture = dup_trimmed_token(to_be_splited[1]);
+		if (!file_data->ea_texture)
+			return 1;
 	}
 	else if (!strcmp(to_be_splited[0], F))
 	{
