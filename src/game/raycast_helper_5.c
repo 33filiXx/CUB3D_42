@@ -12,12 +12,12 @@
 
 #include "../../inc/cub3d.h"
 
-t_vec2   ray_origin(t_game_data *data)
+t_vec2	ray_origin(t_game_data *data)
 {
-    return (data->player.pos);
+	return (data->player.pos);
 }
 
-t_vec2   ray_direction(t_game_data *data)
+t_vec2	ray_direction(t_game_data *data)
 {
-    return (vec2_new(data->rc.ray_dir_x, data->rc.ray_dir_y));
+	return (vec2_new(data->rc.ray_dir_x, data->rc.ray_dir_y));
 }

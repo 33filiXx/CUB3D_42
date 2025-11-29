@@ -269,7 +269,7 @@ void    init_hit_data(t_game_data *data);
 void    set_ray_dir_xy(t_game_data *data);
 void    tex_ready(int *textures_ready, t_st *tex, t_game_data *data);
 int    flip_text_horizontally(t_game_data *data, t_texture *current_tex);
-void    draw(t_game_data *data ,t_texture *tex, int view_height, int view_width, int x, int start_x);
+void    draw(t_game_data *data ,t_texture *tex, int view_height, int x, int start_x);
 void    color_floor_and_ceiling(t_game_data *data, int view_hieght, int view_width, int start_x, int x);
 bool ensure_z_buffer(t_game_data *data, int width);
 void    draw_walls(t_game_data *data, int view_height, int view_width,
@@ -306,7 +306,7 @@ void	adjust_dimensions(t_minimap *minimap, t_game_data *data);
 void	set_right_color(t_game_data *data, int i , int j , int *color);
 void	draw_env(t_game_data *data);
 void	drawing_mini_doors(t_mini_draw *mini, t_game_data *data, t_minimap *minimap);
-void	drawin_miniDoors_helper(t_mini_draw *mini, t_game_data *data, t_minimap *minimap);
+void	drawin_minidoors_helper(t_mini_draw *mini, t_game_data *data, t_minimap *minimap);
 void	init_mini_draw(t_mini_draw *mini, t_minimap *minimap, t_door *door);
 void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * ceiling_color);
 void		draw_player(int color, t_game_data *data, t_minimap *minimap);
@@ -321,4 +321,7 @@ void 	destroy_mlx_resources(t_mlx *mlx);
 t_vec2   ray_origin(t_game_data *data);
 t_vec2   ray_direction(t_game_data *data);
 int merge_data(t_game_data *game_data, t_file_data *file_data);
+void	hit_wall(t_game_data *data);
+void	check_doors(t_game_data *data);
+
 #endif

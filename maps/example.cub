@@ -3,7 +3,7 @@ SO ./textures/wall_south.xpm
 WE ./textures/wall_west.xpm
 EA ./textures/wall_east.xpm
 F 255,255,255
-C 255,255,255
+C 255,255,215
            1111111111111111111111111
            1000000000110000S000000101
            1011000001100000S00000011

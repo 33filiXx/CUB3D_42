@@ -6,15 +6,13 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 21:16:56 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 21:19:58 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/29 20:52:26 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
 
-
-
-void destroy_mlx_resources(t_mlx *mlx)
+void	destroy_mlx_resources(t_mlx *mlx)
 {
 	if (!mlx)
 		return ;
@@ -36,7 +34,7 @@ void destroy_mlx_resources(t_mlx *mlx)
 	}
 }
 
-void free_texture_paths(t_file_data *file_data)
+void	free_texture_paths(t_file_data *file_data)
 {
 	if (!file_data)
 		return ;

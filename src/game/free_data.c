@@ -12,8 +12,7 @@
 
 #include "../../inc/cub3d.h"
 
-
-static void free_sprite_array(t_game_data *data)
+static void	free_sprite_array(t_game_data *data)
 {
 	if (!data)
 		return ;
@@ -24,7 +23,7 @@ static void free_sprite_array(t_game_data *data)
 	data->v_sprite_counter = 0;
 }
 
-static void free_door_array(t_game_data *data)
+static void	free_door_array(t_game_data *data)
 {
 	if (!data)
 		return ;
@@ -34,7 +33,7 @@ static void free_door_array(t_game_data *data)
 	data->door_count = 0;
 }
 
-static void free_z_buffer_data(t_game_data *data)
+static void	free_z_buffer_data(t_game_data *data)
 {
 	if (!data)
 		return ;
@@ -44,9 +43,9 @@ static void free_z_buffer_data(t_game_data *data)
 	data->z_buffer_size = 0;
 }
 
-static void free_map_grid(t_game_data *data)
+static void	free_map_grid(t_game_data *data)
 {
-	int i;
+	int	i;
 
 	if (!data || !data->map.grid)
 		return ;
@@ -63,8 +62,6 @@ static void free_map_grid(t_game_data *data)
 	data->map.width = 0;
 	data->map.height = 0;
 }
-
-
 
 void	cleanup_game(t_game_data *data)
 {

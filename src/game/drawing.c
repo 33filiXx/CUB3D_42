@@ -3,19 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   drawing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:41:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/27 20:44:17 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/29 20:40:20 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
 
-
-void draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door)
+void	draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door)
 {
-	t_mini_draw mini;
+	t_mini_draw	mini;
 
 	if (!door || !door->has_geom)
 		return ;
@@ -23,11 +22,12 @@ void draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door)
 	drawing_mini_doors(&mini, data, minimap);
 }
 
-void	draw_tile(t_game_data *data, int i, int j, int color, t_minimap *minimap)
+void	draw_tile(t_game_data *data, int i, int j, int color,
+		t_minimap *minimap)
 {
-	int tx;
-	int ty;
-
+	int		tx;
+	int		ty;
+	t_door	*door;
 
 	ty = 0;
 	while (ty < minimap->mini_tile)
@@ -35,16 +35,14 @@ void	draw_tile(t_game_data *data, int i, int j, int color, t_minimap *minimap)
 		tx = 0;
 		while (tx < minimap->mini_tile)
 		{
-			put_pixel(&data->mlx, minimap->padding +j * minimap->mini_tile + tx,
-				 minimap->padding + i * minimap->mini_tile + ty, color);
+			put_pixel(&data->mlx, minimap->padding + j * minimap->mini_tile
+				+ tx, minimap->padding + i * minimap->mini_tile + ty, color);
 			tx++;
 		}
 		ty++;
 	}
 	if (data->map.grid[i][j] == 'D')
 	{
-		t_door *door;
-
 		door = find_door(data, i, j);
 		if (door)
 			draw_minimap_door(data, minimap, door);
@@ -79,9 +77,12 @@ void	adjust_dimensions(t_minimap *minimap, t_game_data *data)
 	if (minimap->mini_tile < 1)
 		minimap->mini_tile = 1;
 }
-void	set_right_color(t_game_data *data, int i , int j , int *color)
+
+void	set_right_color(t_game_data *data, int i, int j, int *color)
 {
-	if (data->map.grid[i][j] == '0' || data->map.grid[i][j] == 'N' || data->map.grid[i][j] == 'S' || data->map.grid[i][j] == 'E' || data->map.grid[i][j] == 'W')
+	if (data->map.grid[i][j] == '0' || data->map.grid[i][j] == 'N'
+		|| data->map.grid[i][j] == 'S' || data->map.grid[i][j] == 'E'
+		|| data->map.grid[i][j] == 'W')
 		(*color) = data->file_data.fc;
 	else if (data->map.grid[i][j] == '1')
 		(*color) = data->file_data.cc;
@@ -91,9 +92,9 @@ void	set_right_color(t_game_data *data, int i , int j , int *color)
 
 void	draw_env(t_game_data *data)
 {
-	int	i;
-	int	j;
-	int	color;
+	int			i;
+	int			j;
+	int			color;
 	t_minimap	minimap;
 
 	i = 0;
@@ -103,10 +104,10 @@ void	draw_env(t_game_data *data)
 	while (i < data->map.height)
 	{
 		j = 0;
-		while(j < data->map.width)
+		while (j < data->map.width)
 		{
-			set_right_color(data, i , j , &color);
-			draw_tile(data, i, j , color, &minimap);
+			set_right_color(data, i, j, &color);
+			draw_tile(data, i, j, color, &minimap);
 			j++;
 		}
 		i++;

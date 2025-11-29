@@ -3,21 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   movement.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:38:58 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/27 20:53:35 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/29 20:52:44 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
 
-int on_mouse_move(int x, int y, void *param)
+int	on_mouse_move(int x, int y, void *param)
 {
-	t_game_data *data = (t_game_data *)param;
-	double	angle;
-	int		delta;
+	t_game_data	*data;
+	double		angle;
+	int			delta;
 
+	data = (t_game_data *)param;
 	(void)y;
 	if (data->mouse.has_prev_pos == false)
 	{
@@ -41,10 +42,11 @@ int on_mouse_move(int x, int y, void *param)
 
 void	init_mouse(t_game_data *data)
 {
-	int y;
-	int last_mouse_x;
-	
-	if( mlx_mouse_get_pos(data->mlx.mlx_connection, data->mlx.mlx_win, &last_mouse_x, &y) == 1)
+	int	y;
+	int	last_mouse_x;
+
+	if (mlx_mouse_get_pos(data->mlx.mlx_connection, data->mlx.mlx_win,
+			&last_mouse_x, &y) == 1)
 	{
 		data->mouse.prev_delta = last_mouse_x;
 		data->mouse.has_prev_pos = true;
@@ -102,10 +104,11 @@ int	valid_move(t_game_data *data, double new_x, double new_y)
 	return (1);
 }
 
-static void	apply_move_with_slide(t_game_data *data, double step_x, double step_y)
+static void	apply_move_with_slide(t_game_data *data, double step_x,
+		double step_y)
 {
-	double base_x;
-	double base_y;
+	double	base_x;
+	double	base_y;
 
 	base_x = data->player.pos.x;
 	base_y = data->player.pos.y;
@@ -125,8 +128,8 @@ static void	apply_move_with_slide(t_game_data *data, double step_x, double step_
 
 void	move_forward(t_game_data *data)
 {
-	double step_x;
-	double step_y;
+	double	step_x;
+	double	step_y;
 
 	step_x = data->player.dir.x * data->player.move_speed;
 	step_y = data->player.dir.y * data->player.move_speed;
@@ -134,8 +137,8 @@ void	move_forward(t_game_data *data)
 }
 void	move_backwards(t_game_data *data)
 {
-	double step_x;
-	double step_y;
+	double	step_x;
+	double	step_y;
 
 	step_x = -(data->player.dir.x * data->player.move_speed);
 	step_y = -(data->player.dir.y * data->player.move_speed);

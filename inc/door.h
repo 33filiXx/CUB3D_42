@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 15:08:30 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/23 19:25:50 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/29 20:35:25 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ typedef struct s_door
 }       t_door;
 
 struct s_game_data;
-
+struct s_door_geo;
 void    door_load_map(struct s_game_data *data);
 void    door_toggle(struct s_game_data *data);
 void    door_update(struct s_game_data *data, double dt);
@@ -49,8 +49,7 @@ int  map_in_bounds(struct s_game_data *data, int y, int x);
 int  map_is_wall(struct s_game_data *data, int y, int x);
 int  map_is_walkable(struct s_game_data *data, int y, int x);
 int  point_hits_wall(struct s_game_data *data, t_vec2 point);
-void set_candidate(t_vec2 center, t_vec2 span_dir, int hinge_sign,
-        t_vec2 *pivot, t_vec2 *span);
+void	set_candidate(t_vec2 center, t_vec2 span_dir, int hinge_sign, struct s_door_geo *geo);
 bool get_front_cell(struct s_game_data *data, int *out_y, int *out_x);
 bool append_to_doors(struct s_game_data *data, int map_y, int map_x);
 void configure_door_geometry(struct s_game_data *data, t_door *door);
