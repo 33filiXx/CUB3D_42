@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:28:12 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 18:41:10 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 19:19:38 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ int	flip_text_horizontally(t_game_data *data, t_texture *current_tex)
 	return (tex_x);
 }
 
-void	draw(t_game_data *data, t_texture *tex, int view_height, int x, int start_x)
+void	draw(t_game_data *data, t_texture *tex,
+	int view_height, int x, int start_x)
 {
 	int				y;
 	unsigned int	color;
@@ -56,11 +57,10 @@ void	draw(t_game_data *data, t_texture *tex, int view_height, int x, int start_x
 }
 
 void	color_floor_and_ceiling(t_game_data *data, int view_hieght,
-		int view_width, int start_x, int x)
+						int start_x, int x)
 {
 	int	y;
 
-	(void)view_width;
 	y = 0;
 	while (y < data->rc.draw_start)
 	{
@@ -85,11 +85,10 @@ bool	ensure_z_buffer(t_game_data *data, int width)
 	return (data->z_buffer != NULL);
 }
 
-void	draw_walls(t_game_data *data, int view_height, int view_width, int x,
+void	draw_walls(t_game_data *data, int view_height, int x,
 		int start_x, t_texture *current_tex)
 {
 	int	tex_x;
-	(void)view_width;
 
 	get_perp_wall_distance(data);
 	set_line_height(data, view_height);
@@ -107,5 +106,5 @@ void	draw_walls(t_game_data *data, int view_height, int view_width, int x,
 	else
 		current_tex->tex_x = flip_text_horizontally(data, current_tex);
 	draw(data, current_tex, view_height, x, start_x);
-	color_floor_and_ceiling(data, view_height, view_width, start_x, x);
+	color_floor_and_ceiling(data, view_height, start_x, x);
 }

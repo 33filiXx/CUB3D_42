@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/24 16:57:41 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 21:20:47 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 19:19:24 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,7 @@ int	door_ray_intersection(t_game_data *data, t_door *door, double *hit_dist,
 
 	if (!door || !door->has_geom)
 		return (0);
-	origin = ray_origin(data);
-	dir = ray_direction(data);
+	set_origin_dir(data, &origin, &dir);
 	span = door_current_span(door);
 	denom = vec2_cross(dir, span);
 	if (fabs(denom) < 1e-8)
@@ -85,7 +84,7 @@ void	render_3d_view(t_game_data *data, int start_x, int view_width,
 		init_hit_data(data);
 		dda(data);
 		set_current_tex(data, &g_textures);
-		draw_walls(data, view_height, view_width, x, start_x,
+		draw_walls(data, view_height, x, start_x,
 			g_textures.current_tex);
 		data->z_buffer[start_x + x] = data->rc.perp_wall_dist;
 		x++;

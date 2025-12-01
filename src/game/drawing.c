@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:41:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/29 20:40:20 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 19:04:36 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,7 @@ void	draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door)
 	drawing_mini_doors(&mini, data, minimap);
 }
 
-void	draw_tile(t_game_data *data, int i, int j, int color,
-		t_minimap *minimap)
+void	draw_tile(t_game_data *data, int *int_holder, t_minimap *minimap)
 {
 	int		tx;
 	int		ty;
@@ -35,15 +34,17 @@ void	draw_tile(t_game_data *data, int i, int j, int color,
 		tx = 0;
 		while (tx < minimap->mini_tile)
 		{
-			put_pixel(&data->mlx, minimap->padding + j * minimap->mini_tile
-				+ tx, minimap->padding + i * minimap->mini_tile + ty, color);
+			put_pixel(&data->mlx, minimap->padding + int_holder[1]
+				* minimap->mini_tile
+				+ tx, minimap->padding + int_holder[0]
+				* minimap->mini_tile + ty, int_holder[2]);
 			tx++;
 		}
 		ty++;
 	}
-	if (data->map.grid[i][j] == 'D')
+	if (data->map.grid[int_holder[0]][int_holder[1]] == 'D')
 	{
-		door = find_door(data, i, j);
+		door = find_door(data, int_holder[0], int_holder[1]);
 		if (door)
 			draw_minimap_door(data, minimap, door);
 	}
@@ -94,6 +95,7 @@ void	draw_env(t_game_data *data)
 {
 	int			i;
 	int			j;
+	int			*int_holder;
 	int			color;
 	t_minimap	minimap;
 
@@ -106,11 +108,13 @@ void	draw_env(t_game_data *data)
 		j = 0;
 		while (j < data->map.width)
 		{
+			int_holder = set_ints(i, j, color);
 			set_right_color(data, i, j, &color);
-			draw_tile(data, i, j, color, &minimap);
+			draw_tile(data, int_holder, &minimap);
 			j++;
 		}
 		i++;
 	}
+	free(int_holder);
 	draw_player(0xFF0000, data, &minimap);
 }

@@ -270,7 +270,6 @@ void    set_ray_dir_xy(t_game_data *data);
 void    tex_ready(int *textures_ready, t_st *tex, t_game_data *data);
 int    flip_text_horizontally(t_game_data *data, t_texture *current_tex);
 void    draw(t_game_data *data ,t_texture *tex, int view_height, int x, int start_x);
-void    color_floor_and_ceiling(t_game_data *data, int view_hieght, int view_width, int start_x, int x);
 void    set_drawing_ends(t_game_data *data, int view_height);
 void    set_texture_coordinations(t_game_data *data);
 char    *get_the_right_texture(t_game_data *data);
@@ -298,7 +297,7 @@ int 	key_release(int keycode, void *param);
 void	set_moved_flag(t_game_data *data, bool *moved);
 void 	rotate_player(t_game_data *data, double angle);
 void 	draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door);
-void	draw_tile(t_game_data *data, int i, int j, int color, t_minimap *minimap);
+void	draw_tile(t_game_data *data, int *int_holder, t_minimap *minimap);
 void	adjust_dimensions(t_minimap *minimap, t_game_data *data);
 void	set_right_color(t_game_data *data, int i , int j , int *color);
 void	draw_env(t_game_data *data);
@@ -323,6 +322,12 @@ void	check_doors(t_game_data *data);
 unsigned int	texel(t_texture *tex, int x, int y);
 bool	render_sprite_x_incr(t_render_sprite *render_s, t_game_data *data, t_sprite *sprite);
 bool	ensure_z_buffer(t_game_data *data, int width);
-void	draw_walls(t_game_data *data, int view_height, int view_width, int x,
+int	*set_ints(int i, int j, int color);
+int	get_ty (t_cercle *cercle, t_game_data *data, t_minimap *minimap);
+int	blocked_at(t_game_data *data, double x, double y);
+void	set_origin_dir(t_game_data *data, t_vec2 *origin, t_vec2 *dir);
+void	draw_walls(t_game_data *data, int view_height, int x,
 		int start_x, t_texture *current_tex);
+void	color_floor_and_ceiling(t_game_data *data, int view_hieght,
+						int start_x, int x);
 #endif

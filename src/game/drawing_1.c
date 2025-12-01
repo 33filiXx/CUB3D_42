@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:42:38 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/29 20:47:00 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 19:08:00 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,7 @@ void	draw_player(int color, t_game_data *data, t_minimap *minimap)
 	int			dx;
 	int			dy;
 
-	set_cercle_data(data, minimap, &cercle);
-	ty = cercle.c_y - cercle.r;
+	ty = get_ty(&cercle, data, minimap);
 	while (ty <= cercle.c_y + cercle.r)
 	{
 		tx = cercle.c_x - cercle.r;

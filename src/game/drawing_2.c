@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:43:14 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/29 20:51:31 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 19:08:39 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	calculate_scale_and_offset(t_map *map, int *scale, int *offset_x,
 	max_scale_x = (map->width * TILE) / map->width;
 	max_scale_y = (map->height * TILE) / map->height;
 	if (max_scale_x < max_scale_y)
-		*scale =  max_scale_x;
+		*scale = max_scale_x;
 	else
 		*scale = max_scale_y;
 	actual_width = map->width * (*scale);

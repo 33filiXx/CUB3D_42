@@ -1,29 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   raycast_helper_5.c                                 :+:      :+:    :+:   */
+/*   drawing_3.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/24 21:21:20 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 19:15:46 by rhafidi          ###   ########.fr       */
+/*   Created: 2025/12/01 19:01:13 by rhafidi           #+#    #+#             */
+/*   Updated: 2025/12/01 19:19:55 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
 
-t_vec2	ray_origin(t_game_data *data)
+int	*set_ints(int i, int j, int color)
 {
-	return (data->player.pos);
+	int	*int_holder;
+
+	int_holder = malloc(sizeof(int ) * 3);
+	int_holder[0] = i;
+	int_holder[1] = j;
+	int_holder[2] = color;
+	return (int_holder);
 }
 
-t_vec2	ray_direction(t_game_data *data)
+int	get_ty(t_cercle *cercle, t_game_data *data, t_minimap *minimap)
 {
-	return (vec2_new(data->rc.ray_dir_x, data->rc.ray_dir_y));
-}
-
-void	set_origin_dir(t_game_data *data, t_vec2 *origin, t_vec2 *dir)
-{
-	*origin = ray_origin(data);
-	*dir = ray_direction(data);
+	set_cercle_data(data, minimap, cercle);
+	return (cercle->c_y - cercle->r);
 }
