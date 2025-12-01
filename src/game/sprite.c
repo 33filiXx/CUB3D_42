@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 15:08:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 20:32:44 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 18:40:42 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,14 @@ t_frame	get_frame_within_sheet(t_sprite *sprite)
 {
 	t_frame	frame;
 
-	frame.cols = (sprite->frame_cols > 0) ? sprite->frame_cols : 1;
-	frame.rows = (sprite->frame_rows > 0) ? sprite->frame_rows : 1;
+	if (sprite->frame_cols > 0)
+		frame.cols = sprite->frame_cols;
+	else
+		frame.cols = 1;
+	if (sprite->frame_rows > 0)
+		frame.rows = sprite->frame_rows;
+	else
+		frame.rows = 1;
 	sprite->draw.frame_col = sprite->frame % frame.cols;
 	sprite->draw.frame_row = sprite->frame / frame.cols;
 	if (sprite->draw.frame_row >= frame.rows)
@@ -65,14 +71,8 @@ void	render_sprites(t_sprite *sprite, t_frame *frame, t_game_data *data)
 	render_s.x = sprite->draw.draw_start_x;
 	while (render_s.x <= sprite->draw.draw_end_x)
 	{
-		if (!data->z_buffer || render_s.x < 0
-			|| render_s.x >= data->z_buffer_size
-			|| data->z_buffer[render_s.x] <= 0.0
-			|| sprite->cam_z >= data->z_buffer[render_s.x])
-		{
-			render_s.x++;
+		if (render_sprite_x_incr(&render_s, data, sprite) == true)
 			continue ;
-		}
 		render_s.u = (double)(render_s.x - sprite->draw.draw_start_x)
 			/ (double)frame->span_x;
 		if (render_s.u < 0.0)

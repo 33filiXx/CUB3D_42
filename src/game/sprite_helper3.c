@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sprite_helper3.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:32:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/27 20:27:51 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/01 18:24:35 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,6 @@
 
 static t_texture	g_sprite_sheet;
 static bool			g_sprite_sheet_loaded;
-
-unsigned int	texel(t_texture *tex, int x, int y)
-{
-	char	*addr;
-
-	if (!tex || !tex->addr || x < 0 || y < 0 || x >= tex->width
-		|| y >= tex->height)
-		return (0);
-	addr = tex->addr + y * tex->line_len + x * (tex->bpp / 8);
-	return (*(unsigned int *)addr);
-}
 
 bool	texture_is_transparent(t_texture *tex, unsigned int color)
 {
@@ -42,6 +31,7 @@ bool	texture_is_transparent(t_texture *tex, unsigned int color)
 	}
 	return (masked_color == 0);
 }
+
 void	set_frame(t_sprite *sprite)
 {
 	sprite->frame_w = SPRITE_FRAME_SIZE;
@@ -92,9 +82,9 @@ void	sprite_sheet_destroy(void)
 
 void	append_to_sprite(t_game_data *data, int x, int y)
 {
-	t_sprite *sprite;
-	t_sprite *tmp;
-	size_t new_count;
+	t_sprite	*sprite;
+	t_sprite	*tmp;
+	size_t		new_count;
 
 	new_count = data->sprite_count + 1;
 	tmp = realloc(data->sprite, sizeof(t_sprite) * new_count);

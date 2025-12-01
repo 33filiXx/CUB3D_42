@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:39:13 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/29 20:54:03 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 18:41:38 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void	rotate_right(t_game_data *data)
 
 void	rotate_left(t_game_data *data)
 {
-	t_vec2	old_dir; 
+	t_vec2	old_dir;
 	t_vec2	old_plane;
 
 	old_dir.x = data->player.dir.x;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sprite_helper1.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:30:55 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/27 18:06:05 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/01 18:21:55 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,10 +74,12 @@ void	free_sprites(t_sprite **visible_sprites, int len)
 
 t_sprite	**sort_sprites(t_game_data *data)
 {
-	int i = 0;
-	int j = 0;
-	t_sprite **visible_sprites;
+	int			i;
+	int			j;
+	t_sprite	**visible_sprites;
 
+	i = 0;
+	j = 0;
 	data->v_sprite_counter = collect_visible_sprites(data, &visible_sprites);
 	if (!data->v_sprite_counter || !visible_sprites)
 		return (NULL);

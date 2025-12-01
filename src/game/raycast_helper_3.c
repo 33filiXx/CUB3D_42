@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   raycast_helper_3.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:29:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/27 20:21:29 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/01 18:13:39 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ void	set_drawing_ends(t_game_data *data, int view_height)
 	if (data->rc.draw_end >= view_height)
 		data->rc.draw_end = view_height - 1;
 }
+
 void	set_texture_coordinations(t_game_data *data)
 {
 	if (data->rc.kind == HIT_DOOR)

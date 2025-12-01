@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:30:28 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 20:30:48 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 18:20:55 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ void	sprite_update_all(t_game_data *data, double dt)
 		i++;
 	}
 }
+
 void	project_to_screen(t_sprite *sprite, int start_x, int v_w, int v_h)
 {
 	sprite->draw.screen_x = start_x + (int)((v_w / 2.0) * (1.0 + sprite->cam_x

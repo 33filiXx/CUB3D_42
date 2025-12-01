@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:28:12 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/29 21:15:54 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 18:41:10 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@ void	draw(t_game_data *data, t_texture *tex, int view_height, int x, int start_x
 {
 	int				y;
 	unsigned int	color;
-	double	tex_step; 
-	double	tex_pos;
+	double			tex_step;
+	double			tex_pos;
 
 	tex_step = (double)tex->height / data->rc.line_height;
 	tex_pos = (data->rc.draw_start - view_height / 2.0 + data->rc.line_height
@@ -88,15 +88,15 @@ bool	ensure_z_buffer(t_game_data *data, int width)
 void	draw_walls(t_game_data *data, int view_height, int view_width, int x,
 		int start_x, t_texture *current_tex)
 {
+	int	tex_x;
 	(void)view_width;
+
 	get_perp_wall_distance(data);
 	set_line_height(data, view_height);
 	set_drawing_ends(data, view_height);
 	set_texture_coordinations(data);
 	if (data->rc.kind == HIT_DOOR)
 	{
-		int tex_x;
-
 		tex_x = (int)(data->rc.wall_x * current_tex->width);
 		if (tex_x < 0)
 			tex_x = 0;

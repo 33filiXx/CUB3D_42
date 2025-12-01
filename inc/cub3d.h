@@ -271,9 +271,6 @@ void    tex_ready(int *textures_ready, t_st *tex, t_game_data *data);
 int    flip_text_horizontally(t_game_data *data, t_texture *current_tex);
 void    draw(t_game_data *data ,t_texture *tex, int view_height, int x, int start_x);
 void    color_floor_and_ceiling(t_game_data *data, int view_hieght, int view_width, int start_x, int x);
-bool ensure_z_buffer(t_game_data *data, int width);
-void    draw_walls(t_game_data *data, int view_height, int view_width,
-            int x, int start_x, t_texture *current_tex);
 void    set_drawing_ends(t_game_data *data, int view_height);
 void    set_texture_coordinations(t_game_data *data);
 char    *get_the_right_texture(t_game_data *data);
@@ -323,5 +320,9 @@ t_vec2   ray_direction(t_game_data *data);
 int merge_data(t_game_data *game_data, t_file_data *file_data);
 void	hit_wall(t_game_data *data);
 void	check_doors(t_game_data *data);
-
+unsigned int	texel(t_texture *tex, int x, int y);
+bool	render_sprite_x_incr(t_render_sprite *render_s, t_game_data *data, t_sprite *sprite);
+bool	ensure_z_buffer(t_game_data *data, int width);
+void	draw_walls(t_game_data *data, int view_height, int view_width, int x,
+		int start_x, t_texture *current_tex);
 #endif

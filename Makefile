@@ -32,7 +32,8 @@ SRCS = \
 	src/game/sprite_helper.c \
 	src/game/sprite_helper1.c \
 	src/game/sprite_helper2.c \
-	src/game/sprite_helper3.c
+	src/game/sprite_helper3.c \
+	src/game/sprite_helper4.c
 SRCS_get =  libft/get_next_line/get_next_line.c libft/get_next_line/get_next_line_utils.c
 OBJS = $(SRCS:.c=.o)
 OBJS_get = $(SRCS_get:.c=.o)

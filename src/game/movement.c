@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:38:58 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/29 20:52:44 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 18:41:30 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,7 @@ void	move_forward(t_game_data *data)
 	step_y = data->player.dir.y * data->player.move_speed;
 	apply_move_with_slide(data, step_x, step_y);
 }
+
 void	move_backwards(t_game_data *data)
 {
 	double	step_x;
