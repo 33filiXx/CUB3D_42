@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:28:12 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 19:19:38 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 19:39:20 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,7 @@ int	flip_text_horizontally(t_game_data *data, t_texture *current_tex)
 	return (tex_x);
 }
 
-void	draw(t_game_data *data, t_texture *tex,
-	int view_height, int x, int start_x)
+void	draw(t_game_data *data, t_texture *tex, t_infos infos)
 {
 	int				y;
 	unsigned int	color;
@@ -38,8 +37,8 @@ void	draw(t_game_data *data, t_texture *tex,
 	double			tex_pos;
 
 	tex_step = (double)tex->height / data->rc.line_height;
-	tex_pos = (data->rc.draw_start - view_height / 2.0 + data->rc.line_height
-			/ 2.0) * tex_step;
+	tex_pos = (data->rc.draw_start - infos.view_height
+			/ 2.0 + data->rc.line_height / 2.0) * tex_step;
 	y = data->rc.draw_start;
 	while (y <= data->rc.draw_end)
 	{
@@ -51,7 +50,7 @@ void	draw(t_game_data *data, t_texture *tex,
 		tex_pos += tex_step;
 		color = *(unsigned int *)(tex->addr + tex->tex_y * tex->line_len
 				+ tex->tex_x * (tex->bpp / 8));
-		put_pixel(&data->mlx, start_x + x, y, color);
+		put_pixel(&data->mlx, infos.start_x + infos.x, y, color);
 		y++;
 	}
 }
@@ -85,14 +84,13 @@ bool	ensure_z_buffer(t_game_data *data, int width)
 	return (data->z_buffer != NULL);
 }
 
-void	draw_walls(t_game_data *data, int view_height, int x,
-		int start_x, t_texture *current_tex)
+void	draw_walls(t_game_data *data, t_infos infos, t_texture *current_tex)
 {
 	int	tex_x;
 
 	get_perp_wall_distance(data);
-	set_line_height(data, view_height);
-	set_drawing_ends(data, view_height);
+	set_line_height(data, infos.view_height);
+	set_drawing_ends(data, infos.view_height);
 	set_texture_coordinations(data);
 	if (data->rc.kind == HIT_DOOR)
 	{
@@ -105,6 +103,6 @@ void	draw_walls(t_game_data *data, int view_height, int x,
 	}
 	else
 		current_tex->tex_x = flip_text_horizontally(data, current_tex);
-	draw(data, current_tex, view_height, x, start_x);
-	color_floor_and_ceiling(data, view_height, start_x, x);
+	draw(data, current_tex, infos);
+	color_floor_and_ceiling(data, infos.view_height, infos.start_x, infos.x);
 }

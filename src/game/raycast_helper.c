@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:25:33 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/29 20:54:34 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 19:22:42 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,7 @@ void	set_current_tex(t_game_data *data, t_st *tex)
 	if (data->rc.kind == HIT_DOOR)
 		tex->current_tex = &tex->door_tex;
 	else
-		tex->current_tex = get_current_texture(data, &tex->tex_no, &tex->tex_so,
-				&tex->tex_we, &tex->tex_ea);
+		tex->current_tex = get_current_texture(data, tex);
 }
 
 void	get_perp_wall_distance(t_game_data *data)

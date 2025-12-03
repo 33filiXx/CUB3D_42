@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:29:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 18:13:39 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 19:23:25 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,21 +70,20 @@ void	load_texture(t_game_data *data, t_texture *tex, char *path)
 	tex->has_transparency = false;
 }
 
-t_texture	*get_current_texture(t_game_data *data, t_texture *tex_no,
-		t_texture *tex_so, t_texture *tex_we, t_texture *tex_ea)
+t_texture	*get_current_texture(t_game_data *data, t_st *tex)
 {
 	if (data->rc.side == 0) // vertical wall
 	{
 		if (data->rc.ray_dir_x > 0)
-			return (tex_ea); // looking EAST
+			return (&tex->tex_ea); // looking EAST
 		else
-			return (tex_we); // looking WEST
+			return (&tex->tex_we); // looking WEST
 	}
 	else // horizontal wall
 	{
 		if (data->rc.ray_dir_y > 0)
-			return (tex_so); // looking SOUTH
+			return (&tex->tex_so); // looking SOUTH
 		else
-			return (tex_no); // looking NORTH
+			return (&tex->tex_no); // looking NORTH
 	}
 }

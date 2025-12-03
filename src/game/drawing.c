@@ -6,21 +6,11 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:41:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 19:04:36 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 19:10:14 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
-
-void	draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door)
-{
-	t_mini_draw	mini;
-
-	if (!door || !door->has_geom)
-		return ;
-	init_mini_draw(&mini, minimap, door);
-	drawing_mini_doors(&mini, data, minimap);
-}
 
 void	draw_tile(t_game_data *data, int *int_holder, t_minimap *minimap)
 {
@@ -84,11 +74,35 @@ void	set_right_color(t_game_data *data, int i, int j, int *color)
 	if (data->map.grid[i][j] == '0' || data->map.grid[i][j] == 'N'
 		|| data->map.grid[i][j] == 'S' || data->map.grid[i][j] == 'E'
 		|| data->map.grid[i][j] == 'W')
-		(*color) = data->file_data.fc;
+		(*color) = MINI_FLOOR_COLOR;
 	else if (data->map.grid[i][j] == '1')
-		(*color) = data->file_data.cc;
+		(*color) = MINI_WALL_COLOR;
+	else if (data->map.grid[i][j] == 'X')
+		(*color) = MINI_SPRITE_COLOR;
 	else
 		(*color) = 0;
+}
+
+static void	draw_minimap_background(t_game_data *data, t_minimap *minimap)
+{
+	int	x;
+	int	y;
+	int	max_x;
+	int	max_y;
+
+	max_x = minimap->padding * 2 + data->map.width * minimap->mini_tile;
+	max_y = minimap->padding * 2 + data->map.height * minimap->mini_tile;
+	y = 0;
+	while (y < max_y)
+	{
+		x = 0;
+		while (x < max_x)
+		{
+			put_pixel(&data->mlx, x, y, 0x111111);
+			x++;
+		}
+		y++;
+	}
 }
 
 void	draw_env(t_game_data *data)
@@ -103,18 +117,19 @@ void	draw_env(t_game_data *data)
 	j = 0;
 	adjust_dimensions(&minimap, data);
 	set_colors(data, &data->file_data.fc, &data->file_data.cc);
+	draw_minimap_background(data, &minimap);
 	while (i < data->map.height)
 	{
 		j = 0;
 		while (j < data->map.width)
 		{
-			int_holder = set_ints(i, j, color);
 			set_right_color(data, i, j, &color);
+			int_holder = set_ints(i, j, color);
 			draw_tile(data, int_holder, &minimap);
+			free(int_holder);
 			j++;
 		}
 		i++;
 	}
-	free(int_holder);
-	draw_player(0xFF0000, data, &minimap);
+	draw_player(MINI_PLAYER_COLOR, data, &minimap);
 }

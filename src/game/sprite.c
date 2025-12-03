@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 15:08:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 18:40:42 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 19:37:38 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,8 +91,7 @@ void	render_sprites(t_sprite *sprite, t_frame *frame, t_game_data *data)
 	}
 }
 
-void	sprite_draw(t_game_data *data, t_sprite *sprite, int start_x, int v_w,
-		int v_h)
+void	sprite_draw(t_game_data *data, t_sprite *sprite, t_infos infos)
 {
 	t_frame	frame;
 
@@ -100,10 +99,12 @@ void	sprite_draw(t_game_data *data, t_sprite *sprite, int start_x, int v_w,
 		|| !sprite->sp_tex->addr)
 		return ;
 	sprite->draw.inv_z = 1.0 / sprite->cam_z;
-	project_to_screen(sprite, start_x, v_w, v_h);
+	project_to_screen(sprite, infos.start_x,
+		infos.view_width, infos.view_height);
 	if (sprite->draw.sprite_height <= 0 || sprite->draw.sprite_width <= 0)
 		return ;
-	clamp_drawing_bounds(sprite, start_x, v_w, v_h);
+	clamp_drawing_bounds(sprite, infos.start_x,
+		infos.view_width, infos.view_height);
 	if (sprite->draw.draw_start_x > sprite->draw.draw_end_x)
 		return ;
 	frame = get_frame_within_sheet(sprite);
@@ -124,7 +125,8 @@ void	sprite_render_all(t_game_data *data, int start_x, int view_w,
 		return ;
 	while (i < data->v_sprite_counter)
 	{
-		sprite_draw(data, visible[i], start_x, view_w, view_h);
+		sprite_draw(data, visible[i],
+			get_sprite_infos(start_x, view_w, view_h));
 		i++;
 	}
 	free(visible);

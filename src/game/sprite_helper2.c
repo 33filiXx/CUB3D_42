@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:31:32 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 20:31:52 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 17:58:31 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void	sprite_load_map(t_game_data *data)
 		x = 0;
 		while (x < data->map.width)
 		{
-			if (data->map.grid[y][x] == 'S')
+			if (data->map.grid[y][x] == 'I')
 				append_to_sprite(data, x, y);
 			x++;
 		}

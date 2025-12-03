@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:42:38 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 19:08:00 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 18:04:51 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ void	drawin_minidoors_helper(t_mini_draw *mini, t_game_data *data,
 			if (draw_x >= minimap->padding && draw_y >= minimap->padding
 				&& draw_x < minimap->padding + minimap->mini_width
 				&& draw_y < minimap->padding + minimap->mini_height)
-				put_pixel(&data->mlx, draw_x, draw_y, 0x553311);
+				put_pixel(&data->mlx, draw_x, draw_y, MINI_DOOR_COLOR);
 			mini->dx++;
 		}
 		mini->dy++;

@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 18:24:17 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 18:40:19 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 19:37:44 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,4 +35,15 @@ bool	render_sprite_x_incr(t_render_sprite *render_s,
 		return (true);
 	}
 	return (false);
+}
+
+t_infos	get_sprite_infos(int start_x, int v_w, int v_h)
+{
+	t_infos	infos;
+
+	infos.start_x = start_x;
+	infos.view_height = v_h;
+	infos.view_width = v_w;
+	infos.x = 0;
+	return (infos);
 }

@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/24 16:57:41 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 19:19:24 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 19:21:04 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ void	render_3d_view(t_game_data *data, int start_x, int view_width,
 		init_hit_data(data);
 		dda(data);
 		set_current_tex(data, &g_textures);
-		draw_walls(data, view_height, x, start_x,
+		draw_walls(data, get_infos(start_x, x, view_height),
 			g_textures.current_tex);
 		data->z_buffer[start_x + x] = data->rc.perp_wall_dist;
 		x++;
