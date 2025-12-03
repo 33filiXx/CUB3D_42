@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:25:33 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 19:22:42 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 20:38:21 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,17 +65,16 @@ void	get_perp_wall_distance(t_game_data *data)
 
 	if (data->rc.kind == HIT_DOOR)
 		return ;
-	if (data->rc.side == 0) // vertical wall
+	if (data->rc.side == 0)
 	{
 		data->rc.perp_wall_dist = (data->rc.map_x - data->player.pos.x + (1
 					- data->rc.step_x) / 2.0) / data->rc.ray_dir_x;
 	}
-	else // horizontal wall
+	else
 	{
 		data->rc.perp_wall_dist = (data->rc.map_y - data->player.pos.y + (1
 					- data->rc.step_y) / 2.0) / data->rc.ray_dir_y;
 	}
-	// wall adjustement for wall height
 	if (data->rc.kind == HIT_DOOR)
 	{
 		offset = data->rc.perp_wall_dist;

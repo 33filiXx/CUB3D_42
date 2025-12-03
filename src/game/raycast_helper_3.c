@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:29:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 19:23:25 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 20:40:05 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,12 @@ void	set_texture_coordinations(t_game_data *data)
 {
 	if (data->rc.kind == HIT_DOOR)
 		return ;
-	if (data->rc.side == 0) // vertical wall
+	if (data->rc.side == 0)
 		data->rc.wall_x = data->player.pos.y + data->rc.perp_wall_dist
 			* data->rc.ray_dir_y;
-	else // horizontal wall
+	else
 		data->rc.wall_x = data->player.pos.x + data->rc.perp_wall_dist
 			* data->rc.ray_dir_x;
-	// Keep only the fractional part within [0, 1)
 	data->rc.wall_x -= floor(data->rc.wall_x);
 }
 
@@ -40,19 +39,19 @@ char	*get_the_right_texture(t_game_data *data)
 {
 	char	*texture_path;
 
-	if (data->rc.side == 0) // vertical wall
+	if (data->rc.side == 0)
 	{
 		if (data->rc.ray_dir_x > 0)
-			texture_path = data->file_data.ea_texture; // facing EAST
+			texture_path = data->file_data.ea_texture;
 		else
-			texture_path = data->file_data.we_texture; // facing WEST
+			texture_path = data->file_data.we_texture;
 	}
-	else // horizontal wall
+	else
 	{
 		if (data->rc.ray_dir_y > 0)
-			texture_path = data->file_data.so_texture; // facing SOUTH
+			texture_path = data->file_data.so_texture;
 		else
-			texture_path = data->file_data.no_texture; // facing NORTH
+			texture_path = data->file_data.no_texture;
 	}
 	return (texture_path);
 }
@@ -72,18 +71,18 @@ void	load_texture(t_game_data *data, t_texture *tex, char *path)
 
 t_texture	*get_current_texture(t_game_data *data, t_st *tex)
 {
-	if (data->rc.side == 0) // vertical wall
+	if (data->rc.side == 0)
 	{
 		if (data->rc.ray_dir_x > 0)
-			return (&tex->tex_ea); // looking EAST
+			return (&tex->tex_ea);
 		else
-			return (&tex->tex_we); // looking WEST
+			return (&tex->tex_we);
 	}
-	else // horizontal wall
+	else
 	{
 		if (data->rc.ray_dir_y > 0)
-			return (&tex->tex_so); // looking SOUTH
+			return (&tex->tex_so);
 		else
-			return (&tex->tex_no); // looking NORTH
+			return (&tex->tex_no);
 	}
 }

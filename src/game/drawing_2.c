@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:43:14 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 19:08:39 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 20:38:07 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,6 @@ void	fill_outer_ppixel(t_game_data *data, int i, int j, int floor_color)
 		}
 		ty++;
 	}
-	// data->map.grid[i][j] = '0';
 }
 
 void	set_cercle_data(t_game_data *data, t_minimap *minimap, t_cercle *cercle)

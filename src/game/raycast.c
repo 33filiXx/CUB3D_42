@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/24 16:57:41 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 19:21:04 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 20:37:02 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,8 @@ int	door_ray_intersection(t_game_data *data, t_door *door, double *hit_dist,
 	t_vec2	dir;
 	t_vec2	span;
 	t_vec2	diff;
-	double	denom;
-	double	t;
-	double	s;
 
+	double (denom), (t), (s);
 	if (!door || !door->has_geom)
 		return (0);
 	set_origin_dir(data, &origin, &dir);

@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:31:32 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 17:58:31 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 20:40:16 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ void	sprite_load_map(t_game_data *data)
 
 	y = 0;
 	x = 0;
-	// free_previous_sprites(data); // when levels are added we ll need this one
 	if (data->sprite)
 		free(data->sprite);
 	data->sprite = NULL;
@@ -98,7 +97,7 @@ void	sprite_update_one(t_game_data *data, t_sprite *sprite, double dt)
 
 	sprite_animate(sprite, dt);
 	to_player = vec2_sub(data->player.pos, sprite->position);
-	len2 = vec2_dot(to_player, to_player); // to_player vec dist is : sqrt(len2)
+	len2 = vec2_dot(to_player, to_player);
 	if (len2 > 1e-6)
 	{
 		dir = vec2_scale(to_player, 1.0 / sqrt(len2));
