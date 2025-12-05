@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   valid_map.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 15:17:19 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/28 16:33:51 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/05 18:51:39 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,9 @@ void	reset_map_info(char *map_info)
 	map_info[3] = 'N';
 	map_info[4] = 'S';
 	map_info[5] = 'E';
-	map_info[6] = '\0';
+	map_info[6] = 'D';
+	map_info[7] = 'X';
+	map_info[8] = '\0';
 }
 int	found_player(char s1, char *s2, int *checked)
 {
@@ -39,7 +41,7 @@ int	found_player(char s1, char *s2, int *checked)
 	{
 		if (s1 == s2[i])
 		{
-			if (s1 == '1' || s1 == '0' || s1 == 'S' || s1 == 'D')
+			if (s1 == '1' || s1 == '0' || s1 == 'D' || s1 == 'X')
 				return (0);
 			*checked = 1;
 			return (1);
@@ -67,11 +69,16 @@ int	last_floor(char *line, int j)
 	i = j + 1;
 	while (line[i] && line[i] != '+' && line[i] != '\n')
 	{
-		if (line[i] == '0')
+		if (line[i] == '0' || line[i] == 'D' || line[i] == 'X')
 			return (1);
 		i++;
 	}
 	return (0);
+}
+
+static int	is_floor_tile(char c)
+{
+	return (c == '0' || c == 'D' || c == 'X');
 }
 
 int	is_valid(t_file_data *file_data)
@@ -85,11 +92,11 @@ int	is_valid(t_file_data *file_data)
 		j = 0;
 		while (file_data->map[i][j] && file_data->map[i][j] != '\n')
 		{
-			if (file_data->map[0][j] == '0')
+			if (is_floor_tile(file_data->map[0][j]))
 				return (1);
 			if (file_data->map[i][0] != '1')
 				return (1);
-			if (file_data->map[i + 1] && i > 1 && file_data->map[i][j] == '0'
+			if (file_data->map[i + 1] && i > 1 && is_floor_tile(file_data->map[i][j])
 				&& !last_floor(file_data->map[i], j))
 			{
 				if (file_data->map[i][j + 1] == '+' || file_data->map[i][j
@@ -119,7 +126,7 @@ int	storing(int fd, t_file_data *file_data)
 	int		value;
 	int		*checked;
 
-	map_info = malloc(8 * sizeof(char));
+	map_info = malloc(10 * sizeof(char));
 	value = 0;
 	checked = &value;
 	reset_map_info(map_info);

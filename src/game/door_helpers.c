@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:16:08 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/29 20:36:35 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/05 18:51:40 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,11 +52,11 @@ void	set_candidate(t_vec2 center, t_vec2 span_dir,
 	t_vec2	pivot;
 	t_vec2	span;
 
-	pivot = geo->pivot;
-	span = geo->span;
 	pivot = vec2_add(center, vec2_scale(span_dir, 0.5 * hinge_sign));
 	if (hinge_sign < 0)
 		span = span_dir;
 	else
 		span = vec2_scale(span_dir, -1.0);
+	geo->pivot = pivot;
+	geo->span = span;
 }
