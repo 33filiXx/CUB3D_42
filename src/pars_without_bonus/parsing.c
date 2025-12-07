@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:18:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/07 17:10:18 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 21:04:54 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ int valid_extantion(char *str)
     return 1;
 }
 
-
 int exists(char *str)
 {
     int fd;
@@ -60,7 +59,6 @@ int exists(char *str)
         return -1;
     return fd; 
 }
-
 void get_size(int fd  , t_file_data *file_data)
 {
 	int map_length;
@@ -83,7 +81,6 @@ void get_size(int fd  , t_file_data *file_data)
     file_data->map_size = map_length;
     file_data->element_size = element_length + 1;
 }
-
 int  punisher(char **av , t_file_data *file_data)
 {
     int fd;

@@ -52,6 +52,17 @@ typedef struct s_cercle
 	int	r;
 }			t_cercle;
 
+typedef struct s_helper_data
+{
+	int j;
+	int i;
+	int value;
+	int checked;
+	int p;
+	char *tmp;
+	int check;
+}			t_helper_data;
+
 
 
 
