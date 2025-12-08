@@ -6,23 +6,23 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 15:17:19 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/08 17:49:56 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/08 20:42:21 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
 
-static void	drain_fd(int fd)
+static void drain_fd(int fd)
 {
-	char	*line;
+	char *line;
 
 	while ((line = get_next_line(fd)) != NULL)
 		free(line);
 }
 
-void	reset_map_info(char *map_info)
+void reset_map_info(char *map_info)
 {
-	
+
 	map_info[0] = '0';
 	map_info[1] = '1';
 	map_info[2] = 'W';
@@ -35,21 +35,21 @@ void	reset_map_info(char *map_info)
 	map_info[8] = ' ';
 	map_info[9] = '\0';
 }
-void skip_plus(char *line , int *j)
+void skip_plus(char *line, int *j)
 {
 	while (line[*j] && line[*j] == '+')
 		(*j)++;
 }
-int	found_player(char s1, char *s2, int *checked)
+int found_player(char s1, char *s2, int *checked)
 {
-	int	i;
+	int i;
 
 	i = 0;
 	while (s2[i])
 	{
 		if (s1 == s2[i])
 		{
-			if(s1 == '1' || s1 == '0' || s1 == 'X' || s1 == 'D' || s1 == ' ')
+			if (s1 == '1' || s1 == '0' || s1 == 'X' || s1 == 'D' || s1 == ' ')
 				return 0;
 			*checked = 1;
 			return (1);
@@ -60,9 +60,9 @@ int	found_player(char s1, char *s2, int *checked)
 	return (0);
 }
 
-void	add_characters(char *str, t_file_data *file_data, int j)
+void add_characters(char *str, t_file_data *file_data, int j)
 {
-	int	i;
+	int i;
 
 	i = j;
 	while (i < file_data->s_element_size - 2)
@@ -70,9 +70,9 @@ void	add_characters(char *str, t_file_data *file_data, int j)
 	str[i++] = '\n';
 	str[i] = '\0';
 }
-int last_floor(char *line , int j)
+int last_floor(char *line, int j)
 {
-	int i ;
+	int i;
 
 	i = j + 1;
 	while (line[i] && line[i] != '+' && line[i] != '\n')
@@ -84,16 +84,16 @@ int last_floor(char *line , int j)
 	return 0;
 }
 
-int is_door_valid(char *str , char *next , char *prev)
+int is_door_valid(char *str, char *next, char *prev)
 {
 	int i;
 
-	i =  0;
+	i = 0;
 	while (str[i])
 	{
 		if (str[i] == 'D')
 		{
-			if ((str[i - 1] == '1' && str[i + 1] == '1') || (next[i] == '1' && prev[i] == '1'))
+			if ((str[i - 1] == '1' && str[i + 1] == '1') || (next[i] == '1' && prev[i] == '1'))	
 				return 0;
 			else
 				return 1;
@@ -103,59 +103,51 @@ int is_door_valid(char *str , char *next , char *prev)
 	return 0;
 }
 
-
-
-
 int is_valid(t_file_data *file_data)
 {
-	int i;
-	int j;
-	int start;
+	t_helper_data *helper_data;
 
-	i = 0;
-	while (file_data->map[i])
+	helper_data = malloc(sizeof(t_helper_data));
+	reset_data_helper(helper_data, 0);
+	while (file_data->map[helper_data->i])
 	{
-		j = 0;
-		skip_plus(file_data->map[i] , &j);
-		start = j;
-		while (file_data->map[i][j] && file_data->map[i][j] != '\n')
+		helper_data->j = 0;
+		skip_plus(file_data->map[helper_data->i], &(helper_data->j));
+		helper_data->start = helper_data->j;
+		while (file_data->map[helper_data->i][helper_data->j] && file_data->map[helper_data->i][helper_data->j] != '\n')
 		{
-			if (file_data->map[0][j] != '1' && file_data->map[0][j] != '+' && file_data->map[0][j] != ' ')
+			if (file_data->map[0][helper_data->j] != '1' && file_data->map[0][helper_data->j] != '+' && file_data->map[0][helper_data->j] != ' ')
 				return 1;
-			if (file_data->map[i][start] != '1')
-					return 1;
-			if (i >= 1 && is_door_valid(file_data->map[i] , file_data->map[i + 1] , file_data->map[i + 1]))
+			if (file_data->map[helper_data->i][helper_data->start] != '1')
 				return 1;
-			if(file_data->map[i + 1] && i >= 1 && file_data->map[i][j] == '0')
+			if (helper_data->i >= 1 && is_door_valid(file_data->map[helper_data->i], file_data->map[helper_data->i + 1], file_data->map[helper_data->i - 1]))
+				return 1;
+			if (file_data->map[helper_data->i + 1] && helper_data->i >= 1 && file_data->map[helper_data->i][helper_data->j] == '0')
 			{
-				if(file_data->map[i][j + 1] == '+' || file_data->map[i][j + 1] == '\n')
+				if (file_data->map[helper_data->i][helper_data->j + 1] == '+' || file_data->map[helper_data->i][helper_data->j + 1] == '\n')
 					return 1;
-				if(file_data->map[i - 1][j] == '+' || file_data->map[i + 1][j] == '+' || file_data->map[i - 1][j] == ' ' || file_data->map[i + 1][j] == ' ')
+				if (file_data->map[helper_data->i - 1][helper_data->j] == '+' || file_data->map[helper_data->i + 1][helper_data->j] == '+' || file_data->map[helper_data->i - 1][helper_data->j] == ' ' || file_data->map[helper_data->i + 1][helper_data->j] == ' ')
 					return 1;
 			}
-			if(!file_data->map[i + 1])
+			if (!file_data->map[helper_data->i + 1])
 			{
-				if(file_data->map[i][j] != '1' && file_data->map[i][j] != '+')
+				if (file_data->map[helper_data->i][helper_data->j] != '1' && file_data->map[helper_data->i][helper_data->j] != '+')
 					return 1;
 			}
-			j++;
+			(helper_data->j)++;
 		}
-		i++;
+		(helper_data->i)++;
 	}
 	return 0;
 }
 
-
-
-
-
-int	storing(int fd, t_file_data *file_data)
+int storing(int fd, t_file_data *file_data)
 {
-	char	*map_info;
-	int		i;
-	int		j;
-	int		value;
-	int		*checked;
+	char *map_info;
+	int i;
+	int j;
+	int value;
+	int *checked;
 	map_info = malloc(11 * sizeof(char));
 	value = 0;
 	checked = &value;
@@ -173,17 +165,17 @@ int	storing(int fd, t_file_data *file_data)
 	while (file_data->map[i])
 	{
 		j = 0;
-		skip_plus(file_data->map[i] , &j);
+		skip_plus(file_data->map[i], &j);
 		while (file_data->map[i][j] && file_data->map[i][j] != '\n')
 		{
-			if (!(*checked) && found_player(file_data->map[i][j], map_info ,checked))
+			if (!(*checked) && found_player(file_data->map[i][j], map_info, checked))
 			{
 				file_data->row = i;
 				file_data->column = j;
 			}
-			else if ((found_player(file_data->map[i][j], map_info ,checked) && *checked) || *checked == 2)
+			else if ((found_player(file_data->map[i][j], map_info, checked) && *checked) || *checked == 2)
 			{
-				//printf("%s\n" , file_data->map[i]);
+				// printf("%s\n" , file_data->map[i]);
 				drain_fd(fd);
 				free(map_info);
 				close(fd);
@@ -195,7 +187,7 @@ int	storing(int fd, t_file_data *file_data)
 			add_characters(file_data->map[i], file_data, j);
 		i++;
 	}
-	if(is_valid(file_data))
+	if (is_valid(file_data))
 	{
 		drain_fd(fd);
 		free(map_info);

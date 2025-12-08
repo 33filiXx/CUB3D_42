@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   movement.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:38:58 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 18:07:05 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/08 19:02:34 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ int	on_mouse_move(int x, int y, void *param)
 		delta = 200;
 	else if (delta < -200)
 		delta = -200;
-	angle = (double)delta * 0.01;
+	angle = (double)delta * 0.001;
 	rotate_player(data, angle);
 	redraw_map(data);
 	data->mouse.prev_delta = x;

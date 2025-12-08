@@ -61,6 +61,13 @@ typedef struct s_helper_data
 	int p;
 	char *tmp;
 	int check;
+	char *buffer;
+    char **to_be_splited;
+	char **already_checked;
+	int *update_map_arr;
+    int fill_only_map;
+	int start;
+
 }			t_helper_data;
 
 
@@ -97,6 +104,7 @@ int	set_data(int fd, t_file_data *file_data);
 int	ft_strcmp(const char *s1, const char *s2);
 void    free_cmp_data(t_cmp_data *cmp);
 void    free_double_array(char **arr);
+void reset_data_helper(t_helper_data *helper_data, int flag);
 // int	my_strcmp(const char *s1, const char **s2);
 
 
