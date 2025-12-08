@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/07 17:05:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/07 20:48:36 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/08 17:48:25 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,49 +80,51 @@ int is_deff_line(char *str)
     return 0;
 }
 
-int match_in_list_helper(char **already_checked, t_helper_data *helper_data, char *s1, char **s2)
-{
-    if (!(s1[helper_data->i] - s2[helper_data->j][helper_data->i]))
-    {
-        if (!already_checked[helper_data->checked])
-        {
-            already_checked[helper_data->checked] = ft_strdup(s1);
-            return (0);
-        }
-        while (already_checked[helper_data->checked])
-        {
-            if (!ft_strcmp(s1, already_checked[helper_data->checked]))
-                return (2);
-            (helper_data->checked)++;
-        }
-        already_checked[helper_data->checked] = ft_strdup(s1);
-        return (0);
-    }
-    return 1;
+int match_in_list_h(char *s1, char **already_checked , t_helper_data *helper_data)
+{  
+			if (!already_checked[helper_data->checked])
+			{
+				already_checked[helper_data->checked] = ft_strdup(s1);
+				return (0);
+			}
+			while (already_checked[helper_data->checked])
+			{
+				if (!ft_strcmp(s1, already_checked[helper_data->checked]))
+                {
+					return (2);
+                }
+				(helper_data->checked)++;
+			}
+			already_checked[helper_data->checked] = ft_strdup(s1);
+			return (0);
 }
+
+
 int match_in_list(char *s1, char **s2, char **already_checked)
 {
-
-    t_helper_data *helper_data;
-
-    helper_data = malloc(sizeof(helper_data));
-    reset_data_helper(helper_data , 0);
+	t_helper_data *helper_data;
     if (!s1 || !s2)
         return (1);
-    while (s2[helper_data->j])
-    {
-        helper_data->i = 0;
-        while (s1 && s2[helper_data->j] && s1[helper_data->i] && s2[helper_data->j][helper_data->i] && s1[helper_data->i] == s2[helper_data->j][helper_data->i])
-            (helper_data->i)++;
-        helper_data->value = match_in_list_helper(already_checked, helper_data, s1, s2);
-        if (helper_data->value != 1)
-            return (free(helper_data) ,helper_data->value );
-        (helper_data->j)++;
-    }
-    if (is_deff_line(s1))
-        return (free(helper_data) , 1);
+    helper_data = malloc(sizeof(helper_data));
+    reset_data_helper(helper_data , 0);
+	while (s2[helper_data->j])
+	{
+		helper_data->i = 0;
+		while (s1 && s2[helper_data->j] && s1[helper_data->i] && s2[helper_data->j][helper_data->i] && s1[helper_data->i] == s2[helper_data->j][helper_data->i])
+			(helper_data->i)++;
+		if (!(s1[helper_data->i] - s2[helper_data->j][helper_data->i]))
+		{
+			if(match_in_list_h(s1, already_checked , helper_data) == 2)
+                return ( free(helper_data), 2);
+            else
+                return ( free(helper_data), 0);
+		}
+		(helper_data->j)++;
+	}
+	if(is_deff_line(s1))
+		return (free(helper_data),1);
     free(helper_data);
-    return 0;
+	return 0;
 }
 
 int comma_length_checker_helper(char *str , int *i , int *counter , int *comma)
@@ -185,57 +187,6 @@ int next_one(char *str)
 }
 
 
-
-
-
-
-
-// int handle_c()
-// {
-// if (who_know == 'F')
-//         {
-//             if (buffer[helper_data->i] >= '0' && buffer[helper_data->i] <= '9')
-//             {
-//                 tmp[(helper_data->p)++] = buffer[helper_data->i];
-//                 helper_data->check = 1;
-//             }
-//             else if (buffer[helper_data->i] == ',')
-//             {
-//                 tmp[helper_data->p] = '\0';
-//                 helper_data->check = 0;
-//                 if (ft_atoi(tmp) > 255)
-//                 {
-//                     free(tmp);
-//                     return 1;
-//                 }
-//                 file_data->floor_color[(helper_data->j)++] = ft_atoi(tmp);
-//                 free(tmp);
-//                 tmp = malloc(4);
-//                 (helper_data->i)++;
-//                 helper_data->p = 0;
-//                 continue;
-//             }
-//             else if (buffer[helper_data->i] != ' ')
-//             {
-//                 free(tmp);
-//                 return 1;
-//             }
-//             if (helper_data->check && buffer[helper_data->i] == ' ' && !next_one(buffer + helper_data->i))
-//             {
-//                 free(tmp);
-//                 return 1;
-//             }
-//         }
-
-
-    
-// }
-
-
-
-
-
-
 static int	handle_comma(char **tmp, t_helper_data *h, int *arr)
 {
 	(*tmp)[h->p] = '\0';
@@ -264,7 +215,6 @@ static int	parse_step(char *buf, char **tmp, t_helper_data *h, int *arr)
 	else if (buf[h->i] != ' ')
 	{
 		free(*tmp);
-        free(h);
 		return (1);
 	}
 	if (h->check && buf[h->i] == ' ' && !next_one(buf + h->i))
@@ -304,6 +254,7 @@ int	specific_store(t_file_data *file_data, char who_know, char *buffer)
 	char			*tmp;
 	t_helper_data	*h;
 	int				*arr;
+	int				result;
 
 	h = malloc(sizeof(t_helper_data));
 	if (!h)
@@ -314,11 +265,15 @@ int	specific_store(t_file_data *file_data, char who_know, char *buffer)
 	while (buffer[h->i] && buffer[h->i] != '\n')
 	{
 		if (parse_step(buffer, &tmp, h, arr))
+		{
+			free(h);
 			return (1);
+		}
 		h->i++;
 	}
-    free(h);
-	return (finalize_store(tmp, h, arr));
+	result = finalize_store(tmp, h, arr);
+	free(h);
+	return (result);
 }
 
 int check_if_exact(char **str)

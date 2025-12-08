@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   valid_map.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 15:17:19 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/05 18:51:39 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/08 17:49:56 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	reset_map_info(char *map_info)
 	map_info[4] = 'S';
 	map_info[5] = 'E';
 	map_info[6] = 'D';
-	map_info[7] = 'I';
+	map_info[7] = 'X';
 	// map_info[8] = '+';
 	map_info[8] = ' ';
 	map_info[9] = '\0';
@@ -49,7 +49,7 @@ int	found_player(char s1, char *s2, int *checked)
 	{
 		if (s1 == s2[i])
 		{
-			if(s1 == '1' || s1 == '0' || s1 == 'I' || s1 == 'D' || s1 == ' ')
+			if(s1 == '1' || s1 == '0' || s1 == 'X' || s1 == 'D' || s1 == ' ')
 				return 0;
 			*checked = 1;
 			return (1);
@@ -161,6 +161,7 @@ int	storing(int fd, t_file_data *file_data)
 	checked = &value;
 	reset_map_info(map_info);
 	i = 0;
+
 	if (set_data(fd, file_data))
 	{
 		drain_fd(fd);
@@ -168,6 +169,7 @@ int	storing(int fd, t_file_data *file_data)
 		close(fd);
 		return (1);
 	}
+
 	while (file_data->map[i])
 	{
 		j = 0;
