@@ -30,6 +30,13 @@
 #  define TILE 64
 #	define HALF_PI 1.5707963267948966
 
+/* Minimap colors (fixed, independent of game textures) */
+# define MINI_WALL_COLOR   0x2F4F4F
+# define MINI_FLOOR_COLOR  0xD2B48C
+# define MINI_PLAYER_COLOR 0x00FFFF
+# define MINI_DOOR_COLOR   0xFFA500
+# define MINI_SPRITE_COLOR 0xFF4444
+
 typedef enum s_hit_kind
 {
 	HIT_NONE,
@@ -197,6 +204,7 @@ typedef struct s_mouse
 	int c_x;
 	bool has_prev_pos;
 	double prev_delta;
+	double pending_rotation;
 }			t_mouse;
 
 typedef struct s_frame
@@ -235,6 +243,15 @@ typedef struct s_minimap_draw
 	int	dx;
 }				t_mini_draw;
 
+typedef	struct s_infos
+{
+	int	x;
+	int	view_height;
+	int	view_width;
+	int	start_x;
+}				t_infos;
+
+
 
 typedef struct s_game_data
 {
@@ -256,8 +273,7 @@ typedef struct s_game_data
 void	initiate(t_mlx *mlx, t_game_data *game_data);
 int game_loop(void *param);
 int close_window(void *param);
-
-
+t_infos	get_infos(int start_x, int x, int view_height);
 void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height);
 void put_pixel(t_mlx *mlx, int x, int y, int color);
 int on_mouse_move(int x, int y, void *param);
@@ -269,15 +285,11 @@ void    init_hit_data(t_game_data *data);
 void    set_ray_dir_xy(t_game_data *data);
 void    tex_ready(int *textures_ready, t_st *tex, t_game_data *data);
 int    flip_text_horizontally(t_game_data *data, t_texture *current_tex);
-void    draw(t_game_data *data ,t_texture *tex, int view_height, int view_width, int x, int start_x);
-void    color_floor_and_ceiling(t_game_data *data, int view_hieght, int view_width, int start_x, int x);
-bool ensure_z_buffer(t_game_data *data, int width);
-void    draw_walls(t_game_data *data, int view_height, int view_width,
-            int x, int start_x, t_texture *current_tex);
+void    draw(t_game_data *data ,t_texture *tex, t_infos infos);
 void    set_drawing_ends(t_game_data *data, int view_height);
 void    set_texture_coordinations(t_game_data *data);
 char    *get_the_right_texture(t_game_data *data);
-t_texture *get_current_texture(t_game_data *data, t_texture *tex_no, t_texture *tex_so, t_texture *tex_we, t_texture *tex_ea);
+t_texture	*get_current_texture(t_game_data *data, t_st *tex);
 void    get_perp_wall_distance(t_game_data *data);
 void    set_horizontal_line_dist(t_game_data *data);
 void    set_next_line(t_game_data *data);
@@ -301,12 +313,12 @@ int 	key_release(int keycode, void *param);
 void	set_moved_flag(t_game_data *data, bool *moved);
 void 	rotate_player(t_game_data *data, double angle);
 void 	draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door);
-void	draw_tile(t_game_data *data, int i, int j, int color, t_minimap *minimap);
+void	draw_tile(t_game_data *data, int *int_holder, t_minimap *minimap);
 void	adjust_dimensions(t_minimap *minimap, t_game_data *data);
 void	set_right_color(t_game_data *data, int i , int j , int *color);
 void	draw_env(t_game_data *data);
 void	drawing_mini_doors(t_mini_draw *mini, t_game_data *data, t_minimap *minimap);
-void	drawin_miniDoors_helper(t_mini_draw *mini, t_game_data *data, t_minimap *minimap);
+void	drawin_minidoors_helper(t_mini_draw *mini, t_game_data *data, t_minimap *minimap);
 void	init_mini_draw(t_mini_draw *mini, t_minimap *minimap, t_door *door);
 void	set_colors(t_game_data *data, unsigned int *floor_color, unsigned int * ceiling_color);
 void		draw_player(int color, t_game_data *data, t_minimap *minimap);
@@ -321,4 +333,22 @@ void 	destroy_mlx_resources(t_mlx *mlx);
 t_vec2   ray_origin(t_game_data *data);
 t_vec2   ray_direction(t_game_data *data);
 int merge_data(t_game_data *game_data, t_file_data *file_data);
+void	hit_wall(t_game_data *data);
+void	check_doors(t_game_data *data);
+unsigned int	texel(t_texture *tex, int x, int y);
+bool	render_sprite_x_incr(t_render_sprite *render_s, t_game_data *data, t_sprite *sprite);
+bool	ensure_z_buffer(t_game_data *data, int width);
+int	*set_ints(int i, int j, int color);
+int	get_ty (t_cercle *cercle, t_game_data *data, t_minimap *minimap);
+int	blocked_at(t_game_data *data, double x, double y);
+void	set_origin_dir(t_game_data *data, t_vec2 *origin, t_vec2 *dir);
+void	draw_walls(t_game_data *data, t_infos info, t_texture *current_tex);
+void	color_floor_and_ceiling(t_game_data *data, int view_hieght,
+						int start_x, int x);
+void	draw_minimap_door(t_game_data *data, t_minimap *minimap, t_door *door);
+t_infos	get_sprite_infos(int start_x, int v_w, int v_h);
+void	gun_init(t_game_data *data);
+void	gun_render(t_game_data *data);
+void	gun_destroy(void);
+
 #endif

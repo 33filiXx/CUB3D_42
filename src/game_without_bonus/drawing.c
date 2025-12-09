@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:41:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 19:10:14 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 22:51:14 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ void	draw_tile(t_game_data *data, int *int_holder, t_minimap *minimap)
 {
 	int		tx;
 	int		ty;
-	t_door	*door;
 
 	ty = 0;
 	while (ty < minimap->mini_tile)
@@ -31,12 +30,6 @@ void	draw_tile(t_game_data *data, int *int_holder, t_minimap *minimap)
 			tx++;
 		}
 		ty++;
-	}
-	if (data->map.grid[int_holder[0]][int_holder[1]] == 'D')
-	{
-		door = find_door(data, int_holder[0], int_holder[1]);
-		if (door)
-			draw_minimap_door(data, minimap, door);
 	}
 }
 
@@ -77,8 +70,6 @@ void	set_right_color(t_game_data *data, int i, int j, int *color)
 		(*color) = MINI_FLOOR_COLOR;
 	else if (data->map.grid[i][j] == '1')
 		(*color) = MINI_WALL_COLOR;
-	else if (data->map.grid[i][j] == 'X')
-		(*color) = MINI_SPRITE_COLOR;
 	else
 		(*color) = 0;
 }

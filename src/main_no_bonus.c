@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   main_no_bonus.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:19:29 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/27 21:07:55 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/03 22:51:15 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,7 +235,7 @@ static int	parse_and_merge(t_game_data *game_data, char **av)
 
 int	main(int ac, char **av)
 {
-	t_game_data game_data;
+	t_game_data	game_data;
 
 	if (ac != 2)
 		return (report_error("Usage: ./cub3D <map.cub>"));
@@ -243,10 +243,6 @@ int	main(int ac, char **av)
 	if (parse_and_merge(&game_data, av))
 		return (1);
 	initiate(&game_data.mlx, &game_data);
-	gun_init(&game_data);
-	door_load_map(&game_data);
-	sprite_load_map(&game_data);
-	sprite_update_all(&game_data, 0.0);
 	redraw_map(&game_data);
 	mlx_hook(game_data.mlx.mlx_win, KeyPress, KeyPressMask, key_press,
 		&game_data);

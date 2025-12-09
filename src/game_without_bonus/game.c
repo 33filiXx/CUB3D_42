@@ -6,11 +6,20 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 19:05:50 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 22:51:13 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
+
+double	get_now_seconds(void)
+{
+	struct timeval	tv;
+
+	if (gettimeofday(&tv, NULL) != 0)
+		return (0.0);
+	return ((double)tv.tv_sec + (double)tv.tv_usec / 1000000.0);
+}
 
 void	initiate(t_mlx *mlx, t_game_data *game_data)
 {
@@ -41,8 +50,6 @@ void	initiate(t_mlx *mlx, t_game_data *game_data)
 void	redraw_map(t_game_data *data)
 {
 	render_3d_view(data, 0, WIDTH, HEIGHT);
-	sprite_render_all(data, 0, WIDTH, HEIGHT);
-	gun_render(data);
 	draw_env(data);
 	mlx_put_image_to_window(data->mlx.mlx_connection, data->mlx.mlx_win,
 		data->mlx.img, 0, 0);
@@ -59,11 +66,10 @@ int	game_loop(void *param)
 	now = get_now_seconds();
 	dt = now - data->last_time;
 	moved = false;
+	(void)dt;
 	data->last_time = now;
-	door_update(data, dt);
-	sprite_update_all(data, dt);
 	set_moved_flag(data, &moved);
-	if (moved || data->sprite_count > 0)
+	if (moved)
 		redraw_map(data);
 	return (0);
 }

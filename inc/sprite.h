@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/15 20:17:17 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/24 20:52:27 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 19:29:12 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ typedef struct s_sprite
     t_draw_sprite   draw;
     bool            visible;
 }       t_sprite;
-
+struct s_infos;
 struct s_frame    get_frame_within_sheet(t_sprite *sprite);
 void    render_helper(t_sprite *sprite, struct s_frame *frame, struct s_game_data *data, struct s_render_sprite *render_s);
 void    render_sprites(t_sprite *sprite, struct s_frame *frame, struct s_game_data *data);
@@ -97,6 +97,6 @@ void sprite_load_map(struct s_game_data *data);
 void    sprite_sheet_init(struct s_game_data *data, t_sprite *sprite);
 void sprite_update_all(struct s_game_data *data, double dt);
 void sprite_render_all(struct s_game_data *data, int start_x, int view_w, int view_h);
-void	sprite_draw(struct s_game_data *data, t_sprite *sprite, int start_x, int v_w, int v_h);
+void	sprite_draw(struct s_game_data *data, t_sprite *sprite, struct s_infos infos);
 #endif
 
