@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 04:54:18 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/09 04:59:32 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/09 17:13:23 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -406,6 +406,7 @@ void destroy_textures(t_game_data *data);
 void sprite_sheet_destroy(void);
 void free_texture_paths(t_file_data *file_data);
 void destroy_mlx_resources(t_mlx *mlx);
+int	parse_and_merge(t_game_data *game_data, char **av);
 // void 	destroy_texture_image(t_mlx *mlx, t_texture *tex);
 t_vec2 ray_origin(t_game_data *data);
 t_vec2 ray_direction(t_game_data *data);
@@ -413,6 +414,7 @@ int merge_data(t_game_data *game_data, t_file_data *file_data);
 void hit_wall(t_game_data *data);
 void check_doors(t_game_data *data);
 unsigned int texel(t_texture *tex, int x, int y);
+int	report_error(char *message);
 bool render_sprite_x_incr(t_render_sprite *render_s, t_game_data *data, t_sprite *sprite);
 bool ensure_z_buffer(t_game_data *data, int width);
 int *set_ints(int i, int j, int color);

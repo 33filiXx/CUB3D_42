@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 02:05:17 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/09 04:23:55 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/09 16:45:09 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,8 @@ void	reset_map_info(char *map_info)
 	map_info[3] = 'N';
 	map_info[4] = 'S';
 	map_info[5] = 'E';
-	map_info[6] = 'D';
-	map_info[7] = 'X';
-	map_info[8] = ' ';
-	map_info[9] = '\0';
+	map_info[6] = ' ';
+	map_info[7] = '\0';
 }
 
 void	skip_plus(char *line, int *j)
@@ -53,7 +51,7 @@ int	found_player(char s1, char *s2, int *checked)
 	{
 		if (s1 == s2[i])
 		{
-			if (s1 == '1' || s1 == '0' || s1 == 'X' || s1 == 'D' || s1 == ' ')
+			if (s1 == '1' || s1 == '0' || s1 == ' ')
 				return (0);
 			*checked = 1;
 			return (1);

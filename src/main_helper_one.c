@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main_helper_one                                    :+:      :+:    :+:   */
+/*   main_helper_one.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 04:44:16 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/09 04:44:44 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/09 17:27:11 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3d.h"
 
-int normalize_map_rows(t_file_data *file_data, int *out_width)
+int	normalize_map_rows(t_file_data *file_data, int *out_width)
 {
 	int	height;
 	int	width;
@@ -65,10 +65,9 @@ void	init_player(t_game_data *game_data, int row, int col,
 
 int	merge_data(t_game_data *game_data, t_file_data *file_data)
 {
-	int		map_width;
-	int		map_height;
 	char	orientation;
 
+	int (map_width), (map_height);
 	if (!game_data || !file_data)
 		return (1);
 	map_height = normalize_map_rows(file_data, &map_width);

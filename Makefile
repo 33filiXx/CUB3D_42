@@ -47,18 +47,21 @@ SRCS = \
 	src/game/drawing_3.c
 
 SRCS_NO_BONUS = \
-	src/main_no_bonus.c \
-	src/pars/parsing.c \
-	src/pars/parsing_one.c \
-	src/pars/store_data_one.c \
-	src/pars/store_data_two.c \
-	src/pars/store_data_three.c \
-	src/pars/store_data_four.c \
-	src/pars/store_data_five.c \
-	src/pars/store_data.c \
-	src/pars/valid_map.c \
-	src/pars/valid_map_one.c \
-	src/pars/valid_map_two.c \
+src/main_no_bonus.c \
+src/main_helper.c \
+src/main_helper_two.c \
+	src/main_helper_one.c \
+	src/pars_without_bonus/parsing.c \
+	src/pars_without_bonus/pasring_one.c \
+	src/pars_without_bonus/store_data_one.c \
+	src/pars_without_bonus/store_data_two.c \
+	src/pars_without_bonus/store_data_three.c \
+	src/pars_without_bonus/store_data_four.c \
+	src/pars_without_bonus/store_data_five.c \
+	src/pars_without_bonus/store_data.c \
+	src/pars_without_bonus/valid_map.c \
+	src/pars_without_bonus/valid_map_one.c \
+	src/pars_without_bonus/valid_map_two.c \
 	src/vectorslib/vec.c \
 	src/game_without_bonus/dda_n_helpers.c \
 	src/game_without_bonus/drawing.c \
