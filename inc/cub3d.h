@@ -1,7 +1,19 @@
-#ifndef CUBE3D_H
-#define CUBE3D_H
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cub3d.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/12/09 04:54:18 by wel-mjiy          #+#    #+#             */
+/*   Updated: 2025/12/09 04:59:32 by wel-mjiy         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#include <fcntl.h>
+#ifndef	CUBE3D_H
+#define	CUBE3D_H
+
+#include	<fcntl.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -142,6 +154,15 @@ int already_checked_lenght(char **already_checked);
 int set_data_helper(t_file_data *file_data, t_cmp_data *cmp_data, t_helper_data *helper_data);
 int set_clean_helep(t_file_data *file_data, t_cmp_data *cmp_data, t_helper_data *helper_data);
 int set_data(int fd, t_file_data *file_data);
+void free_cmp_data(t_cmp_data *cmp);
+void free_double_array(char **arr);
+void free_file_data(t_file_data *data);
+unsigned int pack_color(int color[3]);
+int trim_row(char *row);
+int normalize_map_rows(t_file_data *file_data, int *out_width);
+bool is_player_symbol(char tile);
+t_vec2 orientation_dir(char orientation);
+
 // int	my_strcmp(const char *s1, const char **s2);
 
 typedef struct s_texture
@@ -322,6 +343,7 @@ typedef struct s_game_data
 	double *z_buffer;
 	int z_buffer_size;
 } t_game_data;
+
 void initiate(t_mlx *mlx, t_game_data *game_data);
 int game_loop(void *param);
 int close_window(void *param);
@@ -356,6 +378,9 @@ void set_line_height(t_game_data *data, int view_height);
 int door_ray_intersection(t_game_data *data, t_door *door,
 						  double *hit_dist, double *u);
 void init_mouse(t_game_data *data);
+void init_player(t_game_data *game_data, int row, int col,
+				char orientation);
+int merge_data(t_game_data *game_data, t_file_data *file_data);
 void move_forward(t_game_data *data);
 void move_backwards(t_game_data *data);
 void rotate_right(t_game_data *data);

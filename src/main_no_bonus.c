@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main_no_bonus.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:19:29 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/03 22:51:15 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/09 04:58:25 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ static t_vec2	orientation_dir(char orientation)
 	return (vec2_new(-1.0, 0.0));
 }
 
-static void	init_player(t_game_data *game_data, int row, int col,
+static void	init_playerr(t_game_data *game_data, int row, int col,
 		char orientation)
 {
 	t_vec2	perp;
@@ -176,7 +176,7 @@ static void	init_player(t_game_data *game_data, int row, int col,
 	game_data->player.rot_speed = 0.05;
 }
 
-int	merge_data(t_game_data *game_data, t_file_data *file_data)
+int	merge_dataa(t_game_data *game_data, t_file_data *file_data)
 {
 	int		map_width;
 	int		map_height;
@@ -201,7 +201,7 @@ int	merge_data(t_game_data *game_data, t_file_data *file_data)
 	game_data->file_data.map_size = map_height;
 	game_data->file_data.fc = pack_color(game_data->file_data.floor_color);
 	game_data->file_data.cc = pack_color(game_data->file_data.ceiling_color);
-	init_player(game_data, file_data->row, file_data->column, orientation);
+	init_playerr(game_data, file_data->row, file_data->column, orientation);
 	game_data->last_time = get_now_seconds();
 	return (0);
 }
@@ -224,7 +224,7 @@ static int	parse_and_merge(t_game_data *game_data, char **av)
 		free_file_data(file_data);
 		return (report_error("Parsing failed"));
 	}
-	if (merge_data(game_data, file_data))
+	if (merge_dataa(game_data, file_data))
 	{
 		free_file_data(file_data);
 		return (report_error("Failed to merge parsed data"));

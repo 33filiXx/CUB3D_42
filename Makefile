@@ -4,6 +4,8 @@ CFLAGS = -Wall -Wextra -Werror #-fsanitize=address -g
 
 SRCS = \
 	src/main.c \
+	src/main_helper.c \
+	src/main_helper_one.c \
 	src/pars/parsing.c \
 	src/pars/pasring_one.c \
 	src/pars/store_data_one.c \
