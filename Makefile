@@ -5,8 +5,16 @@ CFLAGS = -Wall -Wextra -Werror #-fsanitize=address -g
 SRCS = \
 	src/main.c \
 	src/pars/parsing.c \
+	src/pars/pasring_one.c \
+	src/pars/store_data_one.c \
+	src/pars/store_data_two.c \
+	src/pars/store_data_three.c \
+	src/pars/store_data_four.c \
+	src/pars/store_data_five.c \
 	src/pars/store_data.c \
 	src/pars/valid_map.c \
+	src/pars/valid_map_one.c \
+	src/pars/valid_map_two.c \
 	src/vectorslib/vec.c \
 	src/game/dda_n_helpers.c \
 	src/game/door.c \
@@ -39,8 +47,16 @@ SRCS = \
 SRCS_NO_BONUS = \
 	src/main_no_bonus.c \
 	src/pars/parsing.c \
+	src/pars/parsing_one.c \
+	src/pars/store_data_one.c \
+	src/pars/store_data_two.c \
+	src/pars/store_data_three.c \
+	src/pars/store_data_four.c \
+	src/pars/store_data_five.c \
 	src/pars/store_data.c \
 	src/pars/valid_map.c \
+	src/pars/valid_map_one.c \
+	src/pars/valid_map_two.c \
 	src/vectorslib/vec.c \
 	src/game_without_bonus/dda_n_helpers.c \
 	src/game_without_bonus/drawing.c \
