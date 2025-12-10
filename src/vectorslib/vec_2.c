@@ -1,30 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   drawing_3.c                                        :+:      :+:    :+:   */
+/*   vec_2.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/01 19:01:13 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 22:51:15 by rhafidi          ###   ########.fr       */
+/*   Created: 2025/01/01 00:00:00 by rhafidi           #+#    #+#             */
+/*   Updated: 2025/12/10 16:05:47 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/cub3d.h"
+#include "vec.h"
+#include <math.h>
 
-int	*set_ints(int i, int j, int color)
+double	vec2_distance(t_vec2 a, t_vec2 b)
 {
-	int	*int_holder;
-
-	int_holder = malloc(sizeof(int) * 3);
-	int_holder[0] = i;
-	int_holder[1] = j;
-	int_holder[2] = color;
-	return (int_holder);
+	return (vec2_length(vec2_sub(a, b)));
 }
 
-int	get_ty(t_cercle *cercle, t_game_data *data, t_minimap *minimap)
+t_vec2	vec2_lerp(t_vec2 a, t_vec2 b, double t)
 {
-	set_cercle_data(data, minimap, cercle);
-	return (cercle->c_y - cercle->r);
+	return (vec2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t));
+}
+
+double	vec2_angle(t_vec2 v)
+{
+	return (atan2(v.y, v.x));
 }

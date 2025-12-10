@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:39:13 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 22:51:15 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/01 18:41:38 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,12 @@ int	key_press(int keycode, void *param)
 	t_game_data	*data;
 
 	data = (t_game_data *)param;
-	if (keycode == XK_w)
+	if (keycode == XK_Escape)
+	{
+		cleanup_game(data);
+		exit(0);
+	}
+	else if (keycode == XK_w)
 		data->player.moving_forward = 1;
 	else if (keycode == XK_s)
 		data->player.moving_backward = 1;
@@ -63,6 +68,8 @@ int	key_press(int keycode, void *param)
 		data->player.rotating_right = 1;
 	else if (keycode == XK_a)
 		data->player.rotating_left = 1;
+	else if (keycode == XK_e)
+		door_toggle(data);
 	return (0);
 }
 
@@ -80,28 +87,4 @@ int	key_release(int keycode, void *param)
 	else if (keycode == XK_a)
 		data->player.rotating_left = 0;
 	return (0);
-}
-
-void	set_moved_flag(t_game_data *data, bool *moved)
-{
-	if (data->player.moving_forward)
-	{
-		move_forward(data);
-		(*moved) = true;
-	}
-	if (data->player.moving_backward)
-	{
-		move_backwards(data);
-		(*moved) = true;
-	}
-	if (data->player.rotating_right)
-	{
-		rotate_right(data);
-		(*moved) = true;
-	}
-	if (data->player.rotating_left)
-	{
-		rotate_left(data);
-		(*moved) = true;
-	}
 }

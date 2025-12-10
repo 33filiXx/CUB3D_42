@@ -70,7 +70,7 @@ void	sprite_try_move(t_game_data *data, t_sprite *sprite, t_vec2 step)
 
 	if (move_to_target(data, sprite, step) == 1)
 		return ;
-	test_x = vec2_add(sprite->position, vec2_new(step.x, 0));
+	test_x = vec2_add(sprite->position, vec2(step.x, 0));
 	if (valid_move(data, test_x.x, test_x.y))
 	{
 		sprite->position = test_x;
@@ -78,7 +78,7 @@ void	sprite_try_move(t_game_data *data, t_sprite *sprite, t_vec2 step)
 		sprite->map_y = (int)floor(sprite->position.y);
 		return ;
 	}
-	test_y = vec2_add(sprite->position, vec2_new(0, step.y));
+	test_y = vec2_add(sprite->position, vec2(0, step.y));
 	if (valid_move(data, test_y.x, test_y.y))
 	{
 		sprite->position = test_y;

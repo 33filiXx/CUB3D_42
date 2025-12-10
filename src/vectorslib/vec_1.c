@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   vec.c                                              :+:      :+:    :+:   */
+/*   vec_1.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -11,32 +11,39 @@
 /* ************************************************************************** */
 
 #include "vec.h"
+#include <math.h>
 
-t_vec2	vec2(double x, double y)
+double	vec2_cross(t_vec2 a, t_vec2 b)
 {
-	t_vec2	v;
-
-	v.x = x;
-	v.y = y;
-	return (v);
+	return (a.x * b.y - a.y * b.x);
 }
 
-t_vec2	vec2_add(t_vec2 a, t_vec2 b)
+double	vec2_length(t_vec2 v)
 {
-	return (vec2(a.x + b.x, a.y + b.y));
+	return (sqrt(v.x * v.x + v.y * v.y));
 }
 
-t_vec2	vec2_sub(t_vec2 a, t_vec2 b)
+t_vec2	vec2_normalize(t_vec2 v)
 {
-	return (vec2(a.x - b.x, a.y - b.y));
+	double	len;
+
+	len = vec2_length(v);
+	if (len == 0)
+		return (vec2(0, 0));
+	return (vec2(v.x / len, v.y / len));
 }
 
-t_vec2	vec2_scale(t_vec2 v, double s)
+t_vec2	vec2_rotate(t_vec2 v, double angle)
 {
-	return (vec2(v.x * s, v.y * s));
+	double	cos_a;
+	double	sin_a;
+
+	cos_a = cos(angle);
+	sin_a = sin(angle);
+	return (vec2(v.x * cos_a - v.y * sin_a, v.x * sin_a + v.y * cos_a));
 }
 
-double	vec2_dot(t_vec2 a, t_vec2 b)
+t_vec2	vec2_perpendicular(t_vec2 v)
 {
-	return (a.x * b.x + a.y * b.y);
+	return (vec2(-v.y, v.x));
 }

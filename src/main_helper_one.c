@@ -42,12 +42,12 @@ bool	is_player_symbol(char tile)
 t_vec2	orientation_dir(char orientation)
 {
 	if (orientation == 'N')
-		return (vec2_new(0.0, -1.0));
+		return (vec2(0.0, -1.0));
 	if (orientation == 'S')
-		return (vec2_new(0.0, 1.0));
+		return (vec2(0.0, 1.0));
 	if (orientation == 'E')
-		return (vec2_new(1.0, 0.0));
-	return (vec2_new(-1.0, 0.0));
+		return (vec2(1.0, 0.0));
+	return (vec2(-1.0, 0.0));
 }
 
 void	init_player(t_game_data *game_data, int row, int col,
@@ -55,7 +55,7 @@ void	init_player(t_game_data *game_data, int row, int col,
 {
 	t_vec2	perp;
 
-	game_data->player.pos = vec2_new(col + 0.5, row + 0.5);
+	game_data->player.pos = vec2(col + 0.5, row + 0.5);
 	game_data->player.dir = orientation_dir(orientation);
 	perp = vec2_perpendicular(game_data->player.dir);
 	game_data->player.plane = vec2_scale(perp, 0.66);

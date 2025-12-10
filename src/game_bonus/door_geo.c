@@ -30,17 +30,17 @@ int	evaluate_geometry(t_game_data *data, t_vec2 pivot, t_vec2 span,
 
 void	init_door_geo(t_game_data *data, t_door *door, t_door_geo *geo)
 {
-	geo->center = vec2_new(door->map_x + 0.5, door->map_y + 0.5);
+	geo->center = vec2(door->map_x + 0.5, door->map_y + 0.5);
 	geo->vertical_open = map_is_walkable(data, door->map_y - 1, door->map_x)
 		+ map_is_walkable(data, door->map_y + 1, door->map_x);
 	geo->horizontal_open = map_is_walkable(data, door->map_y, door->map_x - 1)
 		+ map_is_walkable(data, door->map_y, door->map_x + 1);
 	if (geo->vertical_open > geo->horizontal_open)
-		geo->span_dir = vec2_new(1.0, 0.0);
+		geo->span_dir = vec2(1.0, 0.0);
 	else if (geo->horizontal_open > geo->vertical_open)
-		geo->span_dir = vec2_new(0.0, 1.0);
+		geo->span_dir = vec2(0.0, 1.0);
 	else
-		geo->span_dir = vec2_new(1.0, 0.0);
+		geo->span_dir = vec2(1.0, 0.0);
 	geo->hinge_signs[0] = -1;
 	geo->hinge_signs[1] = 1;
 	geo->rot_signs[0] = 1;

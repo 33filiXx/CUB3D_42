@@ -95,12 +95,12 @@ void	append_to_sprite(t_game_data *data, int x, int y)
 	ft_bzero(sprite, sizeof(*sprite));
 	sprite->map_x = x;
 	sprite->map_y = y;
-	sprite->position = vec2_new(x + 0.5, y + 0.5);
+	sprite->position = vec2(x + 0.5, y + 0.5);
 	sprite->frame = 0;
 	sprite->frame_time = 0;
 	sprite->frame_duration = 0.12;
 	sprite->speed = 0.4;
-	sprite->velocity = vec2_new(0, 0);
+	sprite->velocity = vec2(0, 0);
 	sprite->state = SPRITE_IDLE;
 	sprite->visible = false;
 	sprite_sheet_init(data, sprite);

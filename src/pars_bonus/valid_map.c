@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 15:17:19 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/09 16:46:50 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/09 04:36:38 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ int	storing(int fd, t_file_data *file_data)
 	int		value;
 	int		*checked;
 
-	map_info = malloc(8 * sizeof(char));
+	map_info = malloc(11 * sizeof(char));
 	value = 0;
 	checked = &value;
 	reset_map_info(map_info);

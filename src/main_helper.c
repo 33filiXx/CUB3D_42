@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main_helper.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 04:41:08 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/09 17:26:48 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/10 16:05:47 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,4 +95,3 @@ int	trim_row(char *row)
 	row[len] = '\0';
 	return (len);
 }
-

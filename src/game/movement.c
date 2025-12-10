@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:38:58 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 18:07:05 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/10 16:17:54 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,8 +55,6 @@ static int	cell_is_blocked(t_game_data *data, int map_x, int map_y)
 	if (map_y < 0 || map_y >= data->map.height)
 		return (1);
 	if (data->map.grid[map_y][map_x] == '1')
-		return (1);
-	if (door_is_blocking(data, map_x, map_y))
 		return (1);
 	return (0);
 }

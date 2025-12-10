@@ -19,7 +19,7 @@ t_vec2	ray_origin(t_game_data *data)
 
 t_vec2	ray_direction(t_game_data *data)
 {
-	return (vec2_new(data->rc.ray_dir_x, data->rc.ray_dir_y));
+	return (vec2(data->rc.ray_dir_x, data->rc.ray_dir_y));
 }
 
 void	set_origin_dir(t_game_data *data, t_vec2 *origin, t_vec2 *dir)

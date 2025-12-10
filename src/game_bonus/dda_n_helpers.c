@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:31:32 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 22:51:14 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/11/29 20:27:49 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,24 @@ int	check_bounds(t_game_data *data)
 	return (0);
 }
 
+void	set_door_data(t_game_data *data, t_door *door, double dist,
+		double tex_u)
+{
+	data->rc.hit = 1;
+	data->rc.kind = HIT_DOOR;
+	data->rc.hit_door = door;
+	data->rc.door_progress = door->progress;
+	data->rc.perp_wall_dist = dist;
+	data->rc.wall_x = tex_u;
+	data->rc.side = 0;
+}
+
 void	dda(t_game_data *data)
 {
+	t_door	*door;
+	double	dist;
+	double	tex_u;
+
 	while (!data->rc.hit)
 	{
 		if (check_bounds(data))
@@ -57,5 +73,14 @@ void	dda(t_game_data *data)
 			break ;
 		if (data->map.grid[data->rc.map_y][data->rc.map_x] == '1')
 			hit_wall(data);
+		if (data->map.grid[data->rc.map_y][data->rc.map_x] == 'D')
+		{
+			door = find_door(data, data->rc.map_y, data->rc.map_x);
+			if (!door || door->progress >= 0.99)
+				continue ;
+			if (!door_ray_intersection(data, door, &dist, &tex_u))
+				continue ;
+			set_door_data(data, door, dist, tex_u);
+		}
 	}
 }

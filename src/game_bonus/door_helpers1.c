@@ -39,8 +39,8 @@ bool	append_to_doors(t_game_data *data, int map_y, int map_x)
 	door->progress = 0.0;
 	door->speed = 0.1;
 	door->state = DOOR_CLOSED;
-	door->pivot = vec2_zero();
-	door->span_closed = vec2_new(1.0, 0.0);
+	door->pivot = vec2(0, 0);
+	door->span_closed = vec2(1.0, 0.0);
 	door->rot_sign = 1;
 	door->has_geom = false;
 	data->door_count = new_count;

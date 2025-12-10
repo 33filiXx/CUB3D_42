@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:39:13 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/01 18:41:38 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/10 16:19:48 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,6 @@ int	key_press(int keycode, void *param)
 		data->player.rotating_right = 1;
 	else if (keycode == XK_a)
 		data->player.rotating_left = 1;
-	else if (keycode == XK_e)
-		door_toggle(data);
 	return (0);
 }
 

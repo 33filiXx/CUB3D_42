@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   valid_map_two.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 02:06:50 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/09 04:23:12 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/10 15:40:00 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,8 @@ int	is_valid_helper(t_file_data *file_data, t_helper_data *helper_data)
 			file_data->map[helper_data->i - 1]))
 		return (1);
 	if (file_data->map[helper_data->i + 1] && helper_data->i >= 1
-		&& file_data->map[helper_data->i][helper_data->j] == '0')
+		&& (file_data->map[helper_data->i][helper_data->j] == '0'
+		|| file_data->map[helper_data->i][helper_data->j] == 'X'))
 	{
 		if (is_valid_helper_o(file_data, helper_data))
 			return (1);

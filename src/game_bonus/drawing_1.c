@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:42:38 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 22:51:14 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/03 18:04:51 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,4 +50,58 @@ void	set_colors(t_game_data *data, unsigned int *floor_color,
 	*ceiling_color = (data->file_data.ceiling_color[0] << 16)
 		| (data->file_data.ceiling_color[1] << 8)
 		| data->file_data.ceiling_color[2];
+}
+
+void	init_mini_draw(t_mini_draw *mini, t_minimap *minimap, t_door *door)
+{
+	mini->span = vec2_rotate(door->span_closed, door->rot_sign * door->progress
+			* HALF_PI);
+	mini->scale = minimap->mini_tile;
+	mini->pivot_x = minimap->padding + door->pivot.x * mini->scale;
+	mini->pivot_y = minimap->padding + door->pivot.y * mini->scale;
+	mini->span = vec2_scale(mini->span, mini->scale);
+	mini->steps = minimap->mini_tile * 2;
+	if (mini->steps < 4)
+		mini->steps = 4;
+	mini->step = 1.0 / (double)mini->steps;
+	mini->k = 0;
+}
+
+void	drawin_minidoors_helper(t_mini_draw *mini, t_game_data *data,
+		t_minimap *minimap)
+{
+	int	draw_x;
+	int	draw_y;
+
+	while (mini->dy <= 1)
+	{
+		mini->dx = -1;
+		while (mini->dx <= 1)
+		{
+			draw_x = mini->px + mini->dx;
+			draw_y = mini->py + mini->dy;
+			if (draw_x >= minimap->padding && draw_y >= minimap->padding
+				&& draw_x < minimap->padding + minimap->mini_width
+				&& draw_y < minimap->padding + minimap->mini_height)
+				put_pixel(&data->mlx, draw_x, draw_y, MINI_DOOR_COLOR);
+			mini->dx++;
+		}
+		mini->dy++;
+	}
+}
+
+void	drawing_mini_doors(t_mini_draw *mini, t_game_data *data,
+		t_minimap *minimap)
+{
+	while (mini->k <= mini->steps)
+	{
+		mini->t = (double)mini->k * mini->step;
+		mini->pt = vec2_add(vec2(mini->pivot_x, mini->pivot_y),
+				vec2_scale(mini->span, mini->t));
+		mini->px = (int)round(mini->pt.x);
+		mini->py = (int)round(mini->pt.y);
+		mini->dy = -1;
+		drawin_minidoors_helper(mini, data, minimap);
+		mini->k++;
+	}
 }
