@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/23 19:29:34 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 20:40:05 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/10 21:02:02 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,11 +58,14 @@ char	*get_the_right_texture(t_game_data *data)
 
 void	load_texture(t_game_data *data, t_texture *tex, char *path)
 {
-	(void)data;
 	tex->img = mlx_xpm_file_to_image(tex->mlx_connection, path, &tex->width,
 			&tex->height);
 	if (!tex->img)
-		(printf("Texture load failed : %s\n", path), exit(1));
+	{
+		printf("Texture load failed : %s\n", path);
+		cleanup_game(data);
+		exit(1);
+	}
 	tex->addr = mlx_get_data_addr(tex->img, &tex->bpp, &tex->line_len,
 			&tex->endian);
 	tex->transparent_color = 0;

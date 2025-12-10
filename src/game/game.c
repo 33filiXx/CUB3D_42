@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 22:51:13 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/10 21:02:02 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ void	initiate(t_mlx *mlx, t_game_data *game_data)
 	mlx->img = mlx_new_image(mlx->mlx_connection, WIDTH, HEIGHT);
 	if (!mlx->img)
 	{
+		mlx_destroy_window(mlx->mlx_connection, mlx->mlx_win);
 		mlx_destroy_display(mlx->mlx_connection);
 		free(mlx->mlx_connection);
 		exit(1);

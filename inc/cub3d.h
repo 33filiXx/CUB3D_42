@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 04:54:18 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/10 16:05:47 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/10 20:52:27 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,6 +232,8 @@ typedef struct s_player
 	int		moving_backward;
 	int		rotating_left;
 	int		rotating_right;
+	int		strafing_left;
+	int		strafing_right;
 }	t_player;
 
 typedef struct s_raycast
@@ -275,6 +277,7 @@ typedef struct s_mouse
 {
 	int		c_x;
 	bool	has_prev_pos;
+	bool	mouse_locked;
 	double	prev_delta;
 	double	pending_rotation;
 }	t_mouse;
@@ -383,8 +386,8 @@ void			init_player(t_game_data *game_data, int row, int col,
 int				merge_data(t_game_data *game_data, t_file_data *file_data);
 void			move_forward(t_game_data *data);
 void			move_backwards(t_game_data *data);
-void			rotate_right(t_game_data *data);
-void			rotate_left(t_game_data *data);
+void			strafe_move(t_game_data *data, int direction);
+void			rotate_view(t_game_data *data, int direction);
 int				key_press(int keycode, void *param);
 int				key_release(int keycode, void *param);
 void			set_moved_flag(t_game_data *data, bool *moved);

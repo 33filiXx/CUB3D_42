@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:38:58 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/10 16:17:54 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/10 20:52:27 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int	on_mouse_move(int x, int y, void *param)
 
 	data = (t_game_data *)param;
 	(void)y;
-	if (g_warping_mouse)
+	if (g_warping_mouse || !data->mouse.mouse_locked)
 		return (0);
 	center_x = WIDTH / 2;
 	delta = x - center_x;
@@ -44,6 +44,7 @@ void	init_mouse(t_game_data *data)
 {
 	data->mouse.pending_rotation = 0.0;
 	data->mouse.has_prev_pos = false;
+	data->mouse.mouse_locked = true;
 	mlx_mouse_move(data->mlx.mlx_connection, data->mlx.mlx_win,
 		WIDTH / 2, HEIGHT / 2);
 }

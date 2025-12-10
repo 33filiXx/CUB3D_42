@@ -6,48 +6,43 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:39:13 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/10 16:19:48 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/10 20:52:27 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
 
-void	rotate_right(t_game_data *data)
+void	rotate_view(t_game_data *data, int direction)
 {
-	t_vec2	old_dir;
-	t_vec2	old_plane;
+	double	angle;
+	double	old_dir_x;
+	double	old_plane_x;
 
-	old_dir.x = data->player.dir.x;
-	old_dir.y = data->player.dir.y;
-	old_plane.x = data->player.plane.x;
-	old_plane.y = data->player.plane.y;
-	data->player.dir.x = old_dir.x * cos(data->player.rot_speed) - old_dir.y
-		* sin(data->player.rot_speed);
-	data->player.dir.y = old_dir.x * sin(data->player.rot_speed) + old_dir.y
-		* cos(data->player.rot_speed);
-	data->player.plane.x = old_plane.x * cos(data->player.rot_speed)
-		- old_plane.y * sin(data->player.rot_speed);
-	data->player.plane.y = old_plane.x * sin(data->player.rot_speed)
-		+ old_plane.y * cos(data->player.rot_speed);
+	angle = direction * data->player.rot_speed;
+	old_dir_x = data->player.dir.x;
+	old_plane_x = data->player.plane.x;
+	data->player.dir.x = old_dir_x * cos(angle) - data->player.dir.y
+		* sin(angle);
+	data->player.dir.y = old_dir_x * sin(angle) + data->player.dir.y
+		* cos(angle);
+	data->player.plane.x = old_plane_x * cos(angle) - data->player.plane.y
+		* sin(angle);
+	data->player.plane.y = old_plane_x * sin(angle) + data->player.plane.y
+		* cos(angle);
 }
 
-void	rotate_left(t_game_data *data)
+static void	handle_key_press_ext(int keycode, t_game_data *data)
 {
-	t_vec2	old_dir;
-	t_vec2	old_plane;
-
-	old_dir.x = data->player.dir.x;
-	old_dir.y = data->player.dir.y;
-	old_plane.x = data->player.plane.x;
-	old_plane.y = data->player.plane.y;
-	data->player.dir.x = old_dir.x * cos(-data->player.rot_speed) - old_dir.y
-		* sin(-data->player.rot_speed);
-	data->player.dir.y = old_dir.x * sin(-data->player.rot_speed) + old_dir.y
-		* cos(-data->player.rot_speed);
-	data->player.plane.x = old_plane.x * cos(-data->player.rot_speed)
-		- old_plane.y * sin(-data->player.rot_speed);
-	data->player.plane.y = old_plane.x * sin(-data->player.rot_speed)
-		+ old_plane.y * cos(-data->player.rot_speed);
+	if (keycode == XK_a)
+		data->player.strafing_left = 1;
+	else if (keycode == XK_d)
+		data->player.strafing_right = 1;
+	else if (keycode == XK_Left)
+		data->player.rotating_left = 1;
+	else if (keycode == XK_Right)
+		data->player.rotating_right = 1;
+	else if (keycode == XK_m)
+		data->mouse.mouse_locked = !data->mouse.mouse_locked;
 }
 
 int	key_press(int keycode, void *param)
@@ -64,11 +59,21 @@ int	key_press(int keycode, void *param)
 		data->player.moving_forward = 1;
 	else if (keycode == XK_s)
 		data->player.moving_backward = 1;
-	else if (keycode == XK_d)
-		data->player.rotating_right = 1;
-	else if (keycode == XK_a)
-		data->player.rotating_left = 1;
+	else
+		handle_key_press_ext(keycode, data);
 	return (0);
+}
+
+static void	handle_key_release_ext(int keycode, t_game_data *data)
+{
+	if (keycode == XK_a)
+		data->player.strafing_left = 0;
+	else if (keycode == XK_d)
+		data->player.strafing_right = 0;
+	else if (keycode == XK_Left)
+		data->player.rotating_left = 0;
+	else if (keycode == XK_Right)
+		data->player.rotating_right = 0;
 }
 
 int	key_release(int keycode, void *param)
@@ -80,9 +85,7 @@ int	key_release(int keycode, void *param)
 		data->player.moving_forward = 0;
 	else if (keycode == XK_s)
 		data->player.moving_backward = 0;
-	else if (keycode == XK_d)
-		data->player.rotating_right = 0;
-	else if (keycode == XK_a)
-		data->player.rotating_left = 0;
+	else
+		handle_key_release_ext(keycode, data);
 	return (0);
 }
