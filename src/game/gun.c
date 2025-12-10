@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 14:00:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/09 14:00:00 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/10 13:56:38 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,19 +34,16 @@ void	gun_init(t_game_data *data)
 	g_gun_loaded = true;
 }
 
-static unsigned int	get_gun_pixel(int tex_x, int tex_y)
+static void	draw_gun_pixel(t_game_data *data, int x, int y, int *tex)
 {
-	if (tex_x < 0 || tex_x >= g_gun_texture.width)
-		return (0);
-	if (tex_y < 0 || tex_y >= g_gun_texture.height)
-		return (0);
-	return (texel(&g_gun_texture, tex_x, tex_y));
-}
-
-static void	draw_gun_pixel(t_game_data *data, int x, int y, unsigned int color)
-{
+	unsigned int	color;
 	unsigned int	masked;
 
+	if (tex[0] < 0 || tex[0] >= g_gun_texture.width)
+		return ;
+	if (tex[1] < 0 || tex[1] >= g_gun_texture.height)
+		return ;
+	color = texel(&g_gun_texture, tex[0], tex[1]);
 	masked = color & 0x00FFFFFF;
 	if (masked == (g_gun_texture.transparent_color & 0x00FFFFFF))
 		return ;
@@ -55,27 +52,36 @@ static void	draw_gun_pixel(t_game_data *data, int x, int y, unsigned int color)
 	put_pixel(&data->mlx, x, y, color);
 }
 
+static void	render_gun_row(t_game_data *data, int y, int *dims)
+{
+	int	x;
+	int	tex[2];
+
+	x = 0;
+	while (x < dims[2])
+	{
+		tex[0] = x / dims[3];
+		tex[1] = y / dims[3];
+		draw_gun_pixel(data, dims[0] + x, dims[1] + y, tex);
+		x++;
+	}
+}
+
 void	gun_render(t_game_data *data)
 {
-	int		x;
-	int		y;
-	int		start_x;
-	int		start_y;
+	int				y;
+	int				dims[4];
 
 	if (!g_gun_loaded || !g_gun_texture.addr)
 		return ;
-	start_x = (WIDTH - g_gun_texture.width) / 2;
-	start_y = HEIGHT - g_gun_texture.height;
+	dims[3] = 4;
+	dims[2] = g_gun_texture.width * dims[3];
+	dims[0] = (WIDTH - dims[2]) / 2 + WIDTH / 5;
+	dims[1] = HEIGHT - g_gun_texture.height * dims[3];
 	y = 0;
-	while (y < g_gun_texture.height)
+	while (y < g_gun_texture.height * dims[3])
 	{
-		x = 0;
-		while (x < g_gun_texture.width)
-		{
-			draw_gun_pixel(data, start_x + x, start_y + y,
-				get_gun_pixel(x, y));
-			x++;
-		}
+		render_gun_row(data, y, dims);
 		y++;
 	}
 }

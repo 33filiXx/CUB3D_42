@@ -350,5 +350,6 @@ t_infos	get_sprite_infos(int start_x, int v_w, int v_h);
 void	gun_init(t_game_data *data);
 void	gun_render(t_game_data *data);
 void	gun_destroy(void);
+void	draw_minimap_sprites(t_game_data *data, t_minimap *minimap);
 
 #endif

@@ -36,7 +36,8 @@ SRCS = \
 	src/game/sprite_helper2.c \
 	src/game/sprite_helper3.c \
 	src/game/sprite_helper4.c \
-	src/game/drawing_3.c
+	src/game/drawing_3.c \
+	src/game/minimap_sprite.c
 
 SRCS_NO_BONUS = \
 	src/main_no_bonus.c \

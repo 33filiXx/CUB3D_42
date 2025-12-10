@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:41:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/03 19:10:14 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/10 13:56:38 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,12 +73,10 @@ void	set_right_color(t_game_data *data, int i, int j, int *color)
 {
 	if (data->map.grid[i][j] == '0' || data->map.grid[i][j] == 'N'
 		|| data->map.grid[i][j] == 'S' || data->map.grid[i][j] == 'E'
-		|| data->map.grid[i][j] == 'W')
+		|| data->map.grid[i][j] == 'W' || data->map.grid[i][j] == 'X')
 		(*color) = MINI_FLOOR_COLOR;
 	else if (data->map.grid[i][j] == '1')
 		(*color) = MINI_WALL_COLOR;
-	else if (data->map.grid[i][j] == 'X')
-		(*color) = MINI_SPRITE_COLOR;
 	else
 		(*color) = 0;
 }
@@ -114,7 +112,6 @@ void	draw_env(t_game_data *data)
 	t_minimap	minimap;
 
 	i = 0;
-	j = 0;
 	adjust_dimensions(&minimap, data);
 	set_colors(data, &data->file_data.fc, &data->file_data.cc);
 	draw_minimap_background(data, &minimap);
@@ -131,5 +128,6 @@ void	draw_env(t_game_data *data)
 		}
 		i++;
 	}
+	draw_minimap_sprites(data, &minimap);
 	draw_player(MINI_PLAYER_COLOR, data, &minimap);
 }
