@@ -1,4 +1,16 @@
-pars the ways 
 
-pars the f and c and dont be the same
 
++ check if no needed info bettwen this sex important infos 
+(
+NO ./path_to_the_north_texture
+SO ./path_to_the_south_texture
+WE ./path_to_the_west_texture
+EA ./path_to_the_east_texture
+F 220, 100 ,0
+C 225, 30,0
+)
+
+
+check all the leaks
+splite function
+merge
