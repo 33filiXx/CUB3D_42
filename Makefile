@@ -1,10 +1,91 @@
 NAME = cub3D
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror #-fsanitize=address -g
 
+SRCS = \
+	src/main.c \
+	src/main_helper.c \
+	src/main_helper_one.c \
+	src/main_helper_two.c \
+	src/pars/parsing.c \
+	src/pars/pasring_one.c \
+	src/pars/store_data_one.c \
+	src/pars/store_data_two.c \
+	src/pars/store_data_three.c \
+	src/pars/store_data_four.c \
+	src/pars/store_data_five.c \
+	src/pars/store_data.c \
+	src/pars/valid_map.c \
+	src/pars/valid_map_one.c \
+	src/pars/valid_map_two.c \
+	src/vectorslib/vec.c \
+	src/game/dda_n_helpers.c \
+	src/game/door.c \
+	src/game/door_geo.c \
+	src/game/door_helpers.c \
+	src/game/door_helpers1.c \
+	src/game/drawing.c \
+	src/game/drawing_1.c \
+	src/game/drawing_2.c \
+	src/game/free_data.c \
+	src/game/free_data_1.c \
+	src/game/game.c \
+	src/game/movement.c \
+	src/game/movement_1.c \
+	src/game/movement_2.c \
+	src/game/raycast.c \
+	src/game/raycast_helper.c \
+	src/game/raycast_helper_2.c \
+	src/game/raycast_helper_3.c \
+	src/game/raycast_helper_4.c \
+	src/game/raycast_helper_5.c \
+	src/game/sprite.c \
+	src/game/sprite_helper.c \
+	src/game/sprite_helper1.c \
+	src/game/sprite_helper2.c \
+	src/game/sprite_helper3.c \
+	src/game/sprite_helper4.c \
+	src/game/drawing_3.c \
+	src/game/gun.c \
+	src/game/minimap_sprite.c \
+	src/game/movement_3.c
 
-SRCS =  src/main.c src/pars/parsing.c src/pars/store_data.c src/vectorslib/vec.c
+SRCS_NO_BONUS = \
+src/main_no_bonus.c \
+src/main_helper.c \
+src/main_helper_two.c \
+	src/main_helper_one.c \
+	src/pars_without_bonus/parsing.c \
+	src/pars_without_bonus/pasring_one.c \
+	src/pars_without_bonus/store_data_one.c \
+	src/pars_without_bonus/store_data_two.c \
+	src/pars_without_bonus/store_data_three.c \
+	src/pars_without_bonus/store_data_four.c \
+	src/pars_without_bonus/store_data_five.c \
+	src/pars_without_bonus/store_data.c \
+	src/pars_without_bonus/valid_map.c \
+	src/pars_without_bonus/valid_map_one.c \
+	src/pars_without_bonus/valid_map_two.c \
+	src/vectorslib/vec.c \
+	src/game_without_bonus/dda_n_helpers.c \
+	src/game_without_bonus/drawing.c \
+	src/game_without_bonus/drawing_1.c \
+	src/game_without_bonus/drawing_2.c \
+	src/game_without_bonus/drawing_3.c \
+	src/game_without_bonus/free_data.c \
+	src/game_without_bonus/free_data_1.c \
+	src/game_without_bonus/game.c \
+	src/game_without_bonus/movement.c \
+	src/game_without_bonus/movement_1.c \
+	src/game_without_bonus/movement_2.c \
+	src/game_without_bonus/raycast.c \
+	src/game_without_bonus/raycast_helper.c \
+	src/game_without_bonus/raycast_helper_2.c \
+	src/game_without_bonus/raycast_helper_3.c \
+	src/game_without_bonus/raycast_helper_4.c \
+	src/game_without_bonus/raycast_helper_5.c
 
+SRCS_get =  libft/get_next_line/get_next_line.c libft/get_next_line/get_next_line_utils.c
 OBJS = $(SRCS:.c=.o)
 OBJS_NO_BONUS = $(SRCS_NO_BONUS:.c=.o)
 OBJS_get = $(SRCS_get:.c=.o)
