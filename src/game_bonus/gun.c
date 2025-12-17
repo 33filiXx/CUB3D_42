@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 14:00:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/17 18:00:09 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/17 18:02:30 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,16 @@ void	gun_init(t_game_data *data)
 		return ;
 	data->gun_texture.mlx_connection = data->mlx.mlx_connection;
 	data->gun_texture.img = mlx_xpm_file_to_image(data->mlx.mlx_connection,
-			"textures/gun.xpm", &data->gun_texture.width, &data->gun_texture.height);
+			"textures/gun.xpm", &data->gun_texture.width,
+			&data->gun_texture.height);
 	if (!data->gun_texture.img)
 	{
 		printf("Warning: gun.xpm not found, gun disabled\n");
 		return ;
 	}
 	data->gun_texture.addr = mlx_get_data_addr(data->gun_texture.img,
-			&data->gun_texture.bpp, &data->gun_texture.line_len, &data->gun_texture.endian);
+			&data->gun_texture.bpp, &data->gun_texture.line_len,
+			&data->gun_texture.endian);
 	data->gun_texture.transparent_color = texel(&data->gun_texture, 0, 0);
 	data->gun_texture.has_transparency = true;
 	data->gun_loaded = true;
@@ -88,7 +90,8 @@ void	gun_destroy(t_game_data *data)
 	if (!data->gun_loaded)
 		return ;
 	if (data->gun_texture.img && data->gun_texture.mlx_connection)
-		mlx_destroy_image(data->gun_texture.mlx_connection, data->gun_texture.img);
+		mlx_destroy_image(data->gun_texture.mlx_connection,
+			data->gun_texture.img);
 	data->gun_texture.img = NULL;
 	data->gun_texture.addr = NULL;
 	data->gun_loaded = false;

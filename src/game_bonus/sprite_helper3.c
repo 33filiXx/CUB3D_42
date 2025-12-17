@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:32:00 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/17 18:00:09 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/17 18:03:19 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,8 @@ void	sprite_sheet_init(t_game_data *data, t_sprite *sprite)
 		load_texture(data, &data->sprite_sheet, "textures/spritesheet.xpm");
 		if (data->sprite_sheet.width > 0 && data->sprite_sheet.height > 0)
 		{
-			data->sprite_sheet.transparent_color = texel(&data->sprite_sheet, 0, 0);
+			data->sprite_sheet.transparent_color
+				= texel(&data->sprite_sheet, 0, 0);
 			data->sprite_sheet.has_transparency = true;
 		}
 		data->sprite_sheet_loaded = true;
@@ -69,7 +70,8 @@ void	sprite_sheet_destroy(t_game_data *data)
 		return ;
 	if (data->sprite_sheet.img && data->sprite_sheet.mlx_connection)
 	{
-		mlx_destroy_image(data->sprite_sheet.mlx_connection, data->sprite_sheet.img);
+		mlx_destroy_image(data->sprite_sheet.mlx_connection,
+			data->sprite_sheet.img);
 		data->sprite_sheet.img = NULL;
 	}
 	data->sprite_sheet.addr = NULL;
