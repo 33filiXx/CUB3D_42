@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 04:54:18 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/10 20:52:27 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/17 18:00:09 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -342,6 +342,13 @@ typedef struct s_game_data
 	t_sprite	*sprite;
 	double		*z_buffer;
 	int			z_buffer_size;
+	t_st		textures;
+	int			textures_ready;
+	t_texture	gun_texture;
+	bool		gun_loaded;
+	t_texture	sprite_sheet;
+	bool		sprite_sheet_loaded;
+	int			warping_mouse;
 }	t_game_data;
 
 void			initiate(t_mlx *mlx, t_game_data *game_data);
@@ -414,7 +421,7 @@ void			set_cercle_data(t_game_data *data, t_minimap *minimap,
 					t_cercle *cercle);
 void			cleanup_game(t_game_data *data);
 void			destroy_textures(t_game_data *data);
-void			sprite_sheet_destroy(void);
+void			sprite_sheet_destroy(t_game_data *data);
 void			free_texture_paths(t_file_data *file_data);
 void			destroy_mlx_resources(t_mlx *mlx);
 int				parse_and_merge(t_game_data *game_data, char **av);
@@ -439,7 +446,7 @@ void			color_floor_and_ceiling(t_game_data *data, int view_hieght,
 t_infos			get_sprite_infos(int start_x, int v_w, int v_h);
 void			gun_init(t_game_data *data);
 void			gun_render(t_game_data *data);
-void			gun_destroy(void);
+void			gun_destroy(t_game_data *data);
 void			draw_minimap_sprites(t_game_data *data, t_minimap *minimap);
 
 #endif

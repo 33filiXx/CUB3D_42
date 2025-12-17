@@ -6,13 +6,11 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:38:58 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/10 20:52:27 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/17 18:00:09 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/cub3d.h"
-
-static int	g_warping_mouse = 0;
 
 int	on_mouse_move(int x, int y, void *param)
 {
@@ -22,7 +20,7 @@ int	on_mouse_move(int x, int y, void *param)
 
 	data = (t_game_data *)param;
 	(void)y;
-	if (g_warping_mouse || !data->mouse.mouse_locked)
+	if (data->warping_mouse || !data->mouse.mouse_locked)
 		return (0);
 	center_x = WIDTH / 2;
 	delta = x - center_x;
@@ -33,10 +31,10 @@ int	on_mouse_move(int x, int y, void *param)
 	else if (delta < -50)
 		delta = -50;
 	data->mouse.pending_rotation += (double)delta * 0.003;
-	g_warping_mouse = 1;
+	data->warping_mouse = 1;
 	mlx_mouse_move(data->mlx.mlx_connection, data->mlx.mlx_win,
 		center_x, HEIGHT / 2);
-	g_warping_mouse = 0;
+	data->warping_mouse = 0;
 	return (0);
 }
 

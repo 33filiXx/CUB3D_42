@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   free_data.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 21:05:08 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/11/27 18:19:41 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/17 18:00:09 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ void	cleanup_game(t_game_data *data)
 	free_map_grid(data);
 	free_texture_paths(&data->file_data);
 	destroy_textures(data);
-	sprite_sheet_destroy();
-	gun_destroy();
+	sprite_sheet_destroy(data);
+	gun_destroy(data);
 	destroy_mlx_resources(&data->mlx);
 }
