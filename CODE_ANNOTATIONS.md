@@ -1,6 +1,39 @@
-# Cub3D Code Annotations - Function-by-Function Analysis
+# Cub3D Code Annotations - Comprehensive Raycasting Engine Analysis
 
-This document provides detailed annotations for each function in the raycasting engine, explaining the exact purpose and mathematical reasoning behind every line of code.
+This document provides an exhaustive, function-by-function analysis of the Cub3D raycasting engine, explaining the mathematical foundations, algorithmic principles, and implementation details behind every aspect of the project.
+
+## Visual Overview of Raycasting
+
+```mermaid
+graph TD
+    A[Player Position] --> B[Camera Plane]
+    B --> C[Cast Rays for each Screen Column]
+    C --> D[DDA Algorithm: Find Wall Hits]
+    D --> E[Calculate Distance & Height]
+    E --> F[Texture Mapping]
+    F --> G[Draw Wall Stripes]
+    G --> H[Render Sprites with Z-Buffering]
+    H --> I[Draw Overlays & Minimap]
+    I --> J[Display Frame]
+```
+
+---
+
+## Table of Contents
+
+1. [Main Game Loop](#1-main-game-loop)
+2. [Core Raycasting Loop](#2-the-core-raycasting-loop)
+3. [DDA Algorithm Implementation](#3-dda-algorithm-implementation)
+4. [Distance and Height Calculation](#4-distance-and-height-calculation)
+5. [Texture Mapping System](#5-texture-mapping-system)
+6. [Door System](#6-door-system)
+7. [Sprite Rendering](#7-sprite-rendering)
+8. [Movement and Collision](#8-movement-and-collision)
+9. [Input Handling](#9-input-handling)
+10. [Z-Buffering and Occlusion](#10-z-buffering-and-occlusion)
+11. [Mathematical Foundations](#11-mathematical-foundations)
+12. [Mathematical Derivations and Proofs](#12-mathematical-derivations-and-proofs)
+13. [Performance Optimizations](#13-performance-optimizations)
 
 ---
 
@@ -10,49 +43,55 @@ This document provides detailed annotations for each function in the raycasting 
 
 #### `game_loop(void *param)`
 
-This is called every frame by MLX's event loop.
+This is the heartbeat of the game, called every frame by MLX's event loop.
 
 ```c
 int game_loop(void *param)
 {
     t_game_data *data = (t_game_data *)param;
-    
+
     // ═══════════════════════════════════════════════════════════════════
-    // DELTA TIME CALCULATION
+    // DELTA TIME CALCULATION - FRAME RATE INDEPENDENCE
     // ═══════════════════════════════════════════════════════════════════
     double now = get_now_seconds();
-    double dt = now - data->last_time;   // Time since last frame
+    double dt = now - data->last_time;   // Time elapsed since last frame
     data->last_time = now;
-    
+
     /*
-     * WHY DELTA TIME?
-     * ---------------
-     * Without dt, game speed would depend on frame rate:
-     * - 60 FPS: door opens in 1 second
-     * - 30 FPS: door opens in 2 seconds (WRONG!)
-     * 
-     * With dt, we scale all time-based values:
-     * - door->progress += door->speed * dt
-     * - Now it takes 1 second regardless of FPS
+     * WHY DELTA TIME IS CRITICAL:
+     * ───────────────────────────
+     * Without dt, game speed varies with frame rate:
+     *   • 60 FPS: door opens in 1 second
+     *   • 30 FPS: door opens in 2 seconds (INCORRECT!)
+     *
+     * With dt, all time-based operations are frame-rate independent:
+     *   • door->progress += door->speed * dt
+     *   • player movement: pos += velocity * dt
+     *   • Result: Consistent gameplay regardless of FPS
      */
-    
+
     // ═══════════════════════════════════════════════════════════════════
-    // UPDATE GAME STATE
+    // GAME STATE UPDATE PHASE
     // ═══════════════════════════════════════════════════════════════════
     bool moved = false;
-    door_update(data, dt);              // Animate doors
-    sprite_update_all(data, dt);        // Update AI + animations
-    set_moved_flag(data, &moved);       // Process input, check if player moved
-    
+    door_update(data, dt);              // Animate opening/closing doors
+    sprite_update_all(data, dt);        // Update sprite AI and animations
+    set_moved_flag(data, &moved);       // Process keyboard/mouse input
+
     // ═══════════════════════════════════════════════════════════════════
-    // RENDER (only if something changed)
+    // CONDITIONAL RENDERING - PERFORMANCE OPTIMIZATION
     // ═══════════════════════════════════════════════════════════════════
     if (moved || data->sprite_count > 0)
-        redraw_map(data);
-    
+        redraw_map(data);  // Only render when necessary
+
     return (0);
 }
 ```
+
+**Key Concepts:**
+- **Frame Rate Independence:** Using delta time ensures consistent gameplay
+- **Event-Driven Architecture:** Game loop responds to MLX events
+- **Lazy Rendering:** Only redraws when game state changes
 
 ---
 
@@ -62,43 +101,45 @@ int game_loop(void *param)
 
 #### `render_3d_view(t_game_data *data, int start_x, int view_width, int view_height)`
 
-This is the heart of the raycasting engine.
+The heart of the raycasting engine - one iteration per screen column.
 
 ```c
 void render_3d_view(t_game_data *data, int start_x, int view_width, int view_height)
 {
     int x;
-    
-    // Load textures once (lazy initialization)
-    tex_ready(&g_textures_ready, &g_textures, data);
-    
-    // Allocate z-buffer for sprite occlusion
+
+    // Lazy texture loading
+    tex_ready(&data->textures_ready, &data->textures, data);
     ensure_z_buffer(data, start_x + view_width);
-    
+
     // ═══════════════════════════════════════════════════════════════════
-    // MAIN RAYCASTING LOOP - One iteration per screen column
+    // MAIN RAYCASTING LOOP - ONE RAY PER SCREEN COLUMN
     // ═══════════════════════════════════════════════════════════════════
     x = 0;
     while (x < view_width)
     {
         /*
-         * STEP 1: Calculate camera_x
-         * ══════════════════════════
-         * Maps screen column to range [-1, +1]
-         * 
-         * x = 0       → camera_x = -1  (left edge of screen)
-         * x = WIDTH/2 → camera_x = 0   (center)
-         * x = WIDTH-1 → camera_x ≈ +1  (right edge)
+         * STEP 1: CAMERA X COORDINATE
+         * ════════════════════════════
+         * Maps screen column to camera plane coordinate [-1, +1]
+         *
+         * Mathematical derivation:
+         *   camera_x = 2 * (x / view_width) - 1
+         *
+         * Examples:
+         *   x = 0 (left edge):     camera_x = -1
+         *   x = view_width/2:      camera_x = 0  (center)
+         *   x = view_width-1:      camera_x ≈ +1 (right edge)
          */
         data->rc.camera_x = 2.0 * x / (double)view_width - 1.0;
-        
+
         /*
-         * STEP 2: Calculate ray direction
-         * ═══════════════════════════════
-         * ray = dir + plane * camera_x
-         * 
-         * This creates a fan of rays across the camera plane:
-         * 
+         * STEP 2: RAY DIRECTION CALCULATION
+         * ═══════════════════════════════════
+         * ray_dir = dir + plane * camera_x
+         *
+         * This creates a fan of rays emanating from the player:
+         *
          *     plane * (-1)     dir     plane * (+1)
          *           \          |          /
          *            \         |         /
@@ -112,85 +153,86 @@ void render_3d_view(t_game_data *data, int start_x, int view_width, int view_hei
          *                    \ | /
          *                     \|/
          *                      P (player)
+         *
+         * The FOV (Field of View) is determined by the angle between
+         * the leftmost and rightmost rays.
          */
         set_ray_dir(data);
-        
+
         /*
-         * STEP 3: Initialize DDA starting position
-         * ════════════════════════════════════════
-         * map_x, map_y = integer grid cell containing player
+         * STEP 3: DDA INITIALIZATION
+         * ══════════════════════════
+         * Convert player position to integer grid coordinates
          */
         set_player_position(data);
-        
+
         /*
-         * STEP 4: Calculate step directions
-         * ═══════════════════════════════════
-         * step_x = +1 if ray goes right (positive X)
-         *        = -1 if ray goes left (negative X)
-         * Similarly for step_y
+         * STEP 4: STEP DIRECTIONS
+         * ════════════════════════
+         * Determine which direction to step in the grid:
+         *   step_x = +1 (right) or -1 (left)
+         *   step_y = +1 (down) or -1 (up)
          */
         set_steps(data);
-        
+
         /*
-         * STEP 5: Calculate delta distances
-         * ═══════════════════════════════════
+         * STEP 5: DELTA DISTANCES
+         * ════════════════════════
+         * Calculate distance to travel to cross one grid line
+         *
          * delta_dist_x = |1 / ray_dir_x|
-         *              = distance ray travels to cross one X grid line
-         * 
-         * If ray_dir_x = 0.5:
-         *   delta_dist_x = 2.0 (ray must travel 2 units to move 1 unit in X)
-         * 
-         * If ray_dir_x = 1.0:
-         *   delta_dist_x = 1.0 (pure horizontal ray)
+         * delta_dist_y = |1 / ray_dir_y|
+         *
+         * Example: ray_dir_x = 0.5
+         *   delta_dist_x = |1/0.5| = 2.0
+         *   (must travel 2 units to move 1 unit in X)
          */
         set_ray_dir_xy(data);
-        
+
         /*
-         * STEP 6: Calculate initial side distances
-         * ════════════════════════════════════════
-         * side_dist_x = distance from player to first vertical grid line
-         * side_dist_y = distance from player to first horizontal grid line
-         * 
-         * Example: Player at (2.3, 1.7), ray going right (+X) and down (+Y)
-         * 
-         *   side_dist_x = (3 - 2.3) * delta_dist_x = 0.7 * delta_dist_x
-         *   side_dist_y = (2 - 1.7) * delta_dist_y = 0.3 * delta_dist_y
+         * STEP 6: INITIAL SIDE DISTANCES
+         * ═══════════════════════════════
+         * Distance to first grid line intersection
+         *
+         * For ray going right (step_x = +1):
+         *   side_dist_x = (map_x + 1 - pos_x) * delta_dist_x
+         *
+         * For ray going left (step_x = -1):
+         *   side_dist_x = (pos_x - map_x) * delta_dist_x
          */
         set_horizontal_line_dist(data);
-        
-        /*
-         * STEP 7: Reset hit detection
-         */
+
+        // Reset hit detection flags
         init_hit_data(data);
-        
+
         /*
-         * STEP 8: Run DDA algorithm
-         * ═════════════════════════
-         * Repeatedly step to the next grid line until we hit something
+         * STEP 7: DDA ALGORITHM EXECUTION
+         * ═══════════════════════════════
+         * March along the ray until hitting a wall
          */
         dda(data);
-        
+
         /*
-         * STEP 9: Select appropriate texture
-         * ═══════════════════════════════════
-         * Based on:
-         *   - Hit type (wall or door)
-         *   - Wall side (N/S/E/W)
+         * STEP 8: TEXTURE SELECTION
+         * ══════════════════════════
+         * Choose appropriate texture based on wall side and type
          */
-        set_current_tex(data, &g_textures);
-        
+        set_current_tex(data, &data->textures);
+
         /*
-         * STEP 10: Draw the vertical stripe
-         * ═════════════════════════════════
-         * Calculate wall height, sample texture, draw pixels
+         * STEP 9: WALL RENDERING
+         * ═══════════════════════
+         * Calculate wall height and draw textured vertical stripe
          */
-        draw_walls(data, get_infos(start_x, x, view_height), g_textures.current_tex);
-        
+        draw_walls(data, get_infos(start_x, x, view_height), data->textures.current_tex);
+
         /*
-         * STEP 11: Store distance for sprite occlusion
+         * STEP 10: Z-BUFFER UPDATE
+         * ════════════════════════
+         * Store distance for sprite occlusion testing
          */
         data->z_buffer[start_x + x] = data->rc.perp_wall_dist;
-        
+
         x++;
     }
 }
@@ -204,6 +246,8 @@ void render_3d_view(t_game_data *data, int start_x, int view_width, int view_hei
 
 #### `dda(t_game_data *data)`
 
+The Digital Differential Analyzer - the core ray marching algorithm.
+
 ```c
 void dda(t_game_data *data)
 {
@@ -213,67 +257,52 @@ void dda(t_game_data *data)
 
     while (!data->rc.hit)
     {
-        // ═══════════════════════════════════════════════════════════════════
-        // BOUNDARY CHECK
-        // ═══════════════════════════════════════════════════════════════════
+        // Boundary check - prevent ray from escaping map
         if (check_bounds(data))
-            break;  // Ray escaped the map
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // STEP TO NEXT GRID LINE
-        // ═══════════════════════════════════════════════════════════════════
+            break;
+
         /*
-         * Compare side_dist_x and side_dist_y.
-         * Step in the direction with the smaller value.
-         * 
-         * Visualization:
-         * 
+         * STEP TO NEXT GRID LINE
+         * ══════════════════════
+         * Always move to the CLOSER grid intersection
+         *
+         * Visual example:
          *   If side_dist_x < side_dist_y:
-         *   We'll hit a vertical grid line first.
-         *   
+         *   Next intersection is vertical grid line
+         *
          *       │        │
          *   ────┼────────┼────
-         *       │ P──────●     ← ray hits vertical line
+         *       │ P──────●     ← ray hits vertical wall
          *   ────┼────────┼────
-         *       │        │
-         *   
-         *   If side_dist_y < side_dist_x:
-         *   We'll hit a horizontal grid line first.
-         *   
-         *       │        │
-         *   ────┼────────┼────
-         *       │ P      │
-         *   ────┼──│─────┼────  ← ray hits horizontal line
-         *       │  ●     │
          *       │        │
          */
         set_next_line(data);
-        
+
         if (check_bounds(data))
             break;
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // CHECK FOR WALL
-        // ═══════════════════════════════════════════════════════════════════
+
+        // Check for wall collision
         if (data->map.grid[data->rc.map_y][data->rc.map_x] == '1')
-            hit_wall(data);  // Sets hit = 1, kind = HIT_WALL
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // CHECK FOR DOOR (BONUS)
-        // ═══════════════════════════════════════════════════════════════════
+            hit_wall(data);
+
+        /*
+         * DOOR COLLISION DETECTION
+         * ════════════════════════
+         * For doors, perform ray-segment intersection test
+         */
         if (data->map.grid[data->rc.map_y][data->rc.map_x] == 'D')
         {
             door = find_door(data, data->rc.map_y, data->rc.map_x);
-            
-            // Skip if door is fully open (progress >= 0.99)
+
+            // Skip fully open doors
             if (!door || door->progress >= 0.99)
                 continue;
-            
-            // Perform ray-segment intersection test
+
+            // Test ray intersection with door segment
             if (!door_ray_intersection(data, door, &dist, &tex_u))
-                continue;  // Ray missed the door segment
-            
-            // Door hit! Store intersection data
+                continue;
+
+            // Door hit - store intersection data
             set_door_data(data, door, dist, tex_u);
         }
     }
@@ -282,44 +311,24 @@ void dda(t_game_data *data)
 
 #### `set_next_line(t_game_data *data)`
 
+The core DDA stepping logic.
+
 ```c
 void set_next_line(t_game_data *data)
 {
-    /*
-     * This is the core DDA stepping logic.
-     * 
-     * We always step to the CLOSER grid line.
-     * This ensures we never skip a cell.
-     */
     if (data->rc.side_dist_x < data->rc.side_dist_y)
     {
-        /*
-         * Vertical grid line is closer.
-         * 
-         * 1. Add delta_dist_x to side_dist_x
-         *    (now side_dist_x = distance to NEXT vertical line)
-         * 
-         * 2. Move map_x by step_x (+1 or -1)
-         *    (now in the next column)
-         * 
-         * 3. Set side = 0 (we hit a vertical wall, i.e., East or West face)
-         */
+        // Vertical grid line is closer
         data->rc.side_dist_x += data->rc.delta_dist_x;
         data->rc.map_x += data->rc.step_x;
-        data->rc.side = 0;
+        data->rc.side = 0;  // Hit East/West wall
     }
     else
     {
-        /*
-         * Horizontal grid line is closer.
-         * 
-         * 1. Add delta_dist_y to side_dist_y
-         * 2. Move map_y by step_y
-         * 3. Set side = 1 (we hit a horizontal wall, i.e., North or South face)
-         */
+        // Horizontal grid line is closer
         data->rc.side_dist_y += data->rc.delta_dist_y;
         data->rc.map_y += data->rc.step_y;
-        data->rc.side = 1;
+        data->rc.side = 1;  // Hit North/South wall
     }
 }
 ```
@@ -332,60 +341,41 @@ void set_next_line(t_game_data *data)
 
 #### `get_perp_wall_distance(t_game_data *data)`
 
+Corrects fisheye distortion by calculating perpendicular distance.
+
 ```c
 void get_perp_wall_distance(t_game_data *data)
 {
     if (data->rc.kind == HIT_DOOR)
-        return;  // Doors already have their distance calculated
-    
+        return;  // Doors already have calculated distance
+
     /*
-     * FISHEYE CORRECTION
-     * ══════════════════
-     * 
-     * Problem with Euclidean distance:
-     * ────────────────────────────────
-     * Rays at screen edges travel further to reach the same wall.
-     * This makes walls appear curved (fisheye effect).
-     * 
+     * FISHEYE EFFECT CORRECTION
+     * ═════════════════════════
+     *
+     * Problem: Euclidean distance causes walls to appear curved
+     *
      *   Euclidean:                 Perpendicular:
-     *   
-     *      Wall                        Wall
-     *   ────────────                ────────────
-     *    ╲        ╱                  │        │
-     *     ╲      ╱                   │        │
-     *      ╲    ╱                    │        │
-     *       ╲  ╱                     │        │
-     *        \/                      │        │
-     *        P                       P
-     *   
-     *   CURVED (wrong!)             FLAT (correct!)
-     * 
-     * Solution:
-     * ─────────
-     * Use the perpendicular distance to the camera plane,
-     * not the Euclidean distance to the player.
-     * 
-     * Formula:
-     * ────────
-     * If side == 0 (vertical wall, East/West):
-     *   perp_dist = (map_x - pos_x + (1 - step_x) / 2) / ray_dir_x
-     * 
-     * If side == 1 (horizontal wall, North/South):
-     *   perp_dist = (map_y - pos_y + (1 - step_y) / 2) / ray_dir_y
-     * 
-     * The "(1 - step) / 2" term adjusts for which side of the cell we hit:
-     *   - If step = +1: (1 - 1) / 2 = 0   → hit the near edge
-     *   - If step = -1: (1 - (-1)) / 2 = 1 → hit the far edge
+     *   Wall                        Wall
+     * ───────────                ───────────
+     *    ╲        ╱                 │        │
+     *     ╲      ╱                  │        │
+     *      ╲    ╱                   │        │
+     *       ╲  ╱                    │        │
+     *        \/                     │        │
+     *        P                      P
+     *
+     * Solution: Use distance to camera plane, not to player
      */
-    
-    if (data->rc.side == 0)  // Vertical wall
+
+    if (data->rc.side == 0)  // Vertical wall (East/West)
     {
-        data->rc.perp_wall_dist = (data->rc.map_x - data->player.pos.x 
+        data->rc.perp_wall_dist = (data->rc.map_x - data->player.pos.x
             + (1 - data->rc.step_x) / 2.0) / data->rc.ray_dir_x;
     }
-    else  // Horizontal wall
+    else  // Horizontal wall (North/South)
     {
-        data->rc.perp_wall_dist = (data->rc.map_y - data->player.pos.y 
+        data->rc.perp_wall_dist = (data->rc.map_y - data->player.pos.y
             + (1 - data->rc.step_y) / 2.0) / data->rc.ray_dir_y;
     }
 }
@@ -395,27 +385,25 @@ void get_perp_wall_distance(t_game_data *data)
 
 #### `set_line_height(t_game_data *data, int view_height)`
 
+Calculates wall height using perspective projection.
+
 ```c
 void set_line_height(t_game_data *data, int view_height)
 {
     /*
-     * PERSPECTIVE PROJECTION
-     * ══════════════════════
-     * 
-     * Objects appear smaller as they get further away.
-     * 
-     * Formula: line_height = view_height / perp_wall_dist
-     * 
+     * PERSPECTIVE PROJECTION FORMULA
+     * ══════════════════════════════
+     *
+     * Objects appear smaller as distance increases:
+     *
+     * line_height = view_height / perp_wall_dist
+     *
      * Examples:
-     * ─────────
-     * view_height = 1080 pixels
-     * 
-     * Distance = 1.0 units:  line_height = 1080 / 1.0 = 1080 (fills screen)
-     * Distance = 2.0 units:  line_height = 1080 / 2.0 = 540  (half screen)
-     * Distance = 5.0 units:  line_height = 1080 / 5.0 = 216  (small wall)
-     * Distance = 0.5 units:  line_height = 1080 / 0.5 = 2160 (larger than screen!)
-     * 
-     * When line_height > view_height, the wall is clipped at top/bottom.
+     *   Distance = 1.0:  line_height = view_height/1 = full screen
+     *   Distance = 2.0:  line_height = view_height/2 = half screen
+     *   Distance = 0.5:  line_height = view_height/0.5 = 2x screen height
+     *
+     * When line_height > view_height, wall is clipped at screen edges
      */
     data->rc.line_height = (int)(view_height / data->rc.perp_wall_dist);
 }
@@ -423,58 +411,38 @@ void set_line_height(t_game_data *data, int view_height)
 
 ---
 
-## 5. Texture Mapping
+## 5. Texture Mapping System
 
 ### File: `src/game_bonus/raycast_helper_3.c`
 
 #### `set_texture_coordinations(t_game_data *data)`
+
+Calculates where on the wall the ray hit.
 
 ```c
 void set_texture_coordinations(t_game_data *data)
 {
     if (data->rc.kind == HIT_DOOR)
         return;
-    
+
     /*
-     * CALCULATING wall_x (Texture U Coordinate)
-     * ═══════════════════════════════════════════
-     * 
-     * We need to find WHERE on the wall the ray hit.
-     * This determines which column of the texture to use.
-     * 
-     * Method:
-     * ───────
-     * 1. Calculate the exact hit point using:
-     *    hit_point = player_pos + perp_wall_dist * ray_dir
-     * 
-     * 2. Take the fractional part (the position within the cell [0, 1))
-     * 
-     * For vertical walls (side == 0):
-     *   The Y coordinate varies along the wall, so use Y.
-     *   wall_x = pos.y + perp_wall_dist * ray_dir_y
-     * 
-     * For horizontal walls (side == 1):
-     *   The X coordinate varies along the wall, so use X.
-     *   wall_x = pos.x + perp_wall_dist * ray_dir_x
-     * 
-     * 3. Get fractional part: wall_x -= floor(wall_x)
-     * 
-     * Example:
-     * ────────
-     * Player at (2.3, 1.5), ray hits wall at Y = 2.7
-     * wall_x = 2.7 - floor(2.7) = 2.7 - 2.0 = 0.7
-     * 
-     * For a 64-pixel wide texture:
-     * tex_x = 0.7 * 64 = 44.8 → pixel column 44
+     * WALL HIT POSITION CALCULATION
+     * ═════════════════════════════
+     *
+     * Find exact intersection point, then get fractional part
+     *
+     * For vertical walls: Y coordinate varies → use Y
+     * For horizontal walls: X coordinate varies → use X
      */
-    
-    if (data->rc.side == 0)
-        data->rc.wall_x = data->player.pos.y + data->rc.perp_wall_dist 
+
+    if (data->rc.side == 0)  // Vertical wall
+        data->rc.wall_x = data->player.pos.y + data->rc.perp_wall_dist
             * data->rc.ray_dir_y;
-    else
-        data->rc.wall_x = data->player.pos.x + data->rc.perp_wall_dist 
+    else  // Horizontal wall
+        data->rc.wall_x = data->player.pos.x + data->rc.perp_wall_dist
             * data->rc.ray_dir_x;
-    
+
+    // Get fractional part [0, 1)
     data->rc.wall_x -= floor(data->rc.wall_x);
 }
 ```
@@ -482,6 +450,8 @@ void set_texture_coordinations(t_game_data *data)
 ### File: `src/game_bonus/raycast_helper_2.c`
 
 #### `draw(t_game_data *data, t_texture *tex, t_infos infos)`
+
+Renders a textured vertical wall stripe.
 
 ```c
 void draw(t_game_data *data, t_texture *tex, t_infos infos)
@@ -492,74 +462,56 @@ void draw(t_game_data *data, t_texture *tex, t_infos infos)
     double          tex_pos;
 
     /*
-     * TEXTURE SCALING
-     * ═══════════════
-     * 
-     * tex_step = how many texture pixels per screen pixel
-     * 
-     * Example:
-     * ────────
-     * Texture height = 64 pixels
-     * Wall on screen = 200 pixels
-     * tex_step = 64 / 200 = 0.32
-     * 
-     * For each screen pixel, advance 0.32 texture pixels.
-     * This stretches the 64-pixel texture to cover 200 screen pixels.
+     * TEXTURE SCALING CALCULATION
+     * ═══════════════════════════
+     *
+     * tex_step = texture_pixels_per_screen_pixel
+     *          = texture_height / wall_height_on_screen
+     *
+     * Example: texture=64px, wall=200px on screen
+     *   tex_step = 64/200 = 0.32
+     *   Advance 0.32 texture pixels per screen pixel
      */
     tex_step = (double)tex->height / data->rc.line_height;
-    
+
     /*
      * STARTING TEXTURE POSITION
      * ═════════════════════════
-     * 
-     * If the wall is taller than the screen (line_height > view_height),
-     * draw_start will be 0 but we need to start in the middle of the texture.
-     * 
-     * tex_pos = (draw_start - screen_center + wall_center) * tex_step
-     * 
-     * Example:
-     * ────────
-     * view_height = 600, line_height = 800
-     * draw_start = 0 (clipped)
-     * tex_pos = (0 - 300 + 400) * (64/800) = 100 * 0.08 = 8
-     * 
-     * We start at texture pixel 8, skipping the top 8 rows of texture.
+     *
+     * For walls taller than screen: start partway down texture
+     * tex_pos = (draw_start - center + wall_half) * tex_step
      */
-    tex_pos = (data->rc.draw_start - infos.view_height / 2.0 
+    tex_pos = (data->rc.draw_start - infos.view_height / 2.0
         + data->rc.line_height / 2.0) * tex_step;
-    
-    /*
-     * DRAW LOOP
-     * ═════════
-     */
+
+    // Draw vertical stripe
     y = data->rc.draw_start;
     while (y <= data->rc.draw_end)
     {
-        // Current texture Y coordinate
+        // Current texture row
         tex->tex_y = (int)tex_pos;
-        
-        // Clamp to valid range (safety check)
+
+        // Bounds checking
         if (tex->tex_y < 0)
             tex->tex_y = 0;
         else if (tex->tex_y >= tex->height)
             tex->tex_y = tex->height - 1;
-        
-        // Advance to next texture pixel
+
+        // Advance texture position
         tex_pos += tex_step;
-        
+
         /*
-         * SAMPLE TEXTURE COLOR
-         * ════════════════════
-         * 
-         * Address = base_addr + (y * line_len) + (x * bytes_per_pixel)
-         * 
-         * tex->line_len: bytes per row (may include padding)
-         * tex->bpp: bits per pixel (usually 32)
+         * PIXEL SAMPLING
+         * ══════════════
+         *
+         * Address calculation for texture data:
+         * base + (row * row_length) + (column * bytes_per_pixel)
          */
-        color = *(unsigned int *)(tex->addr 
-            + tex->tex_y * tex->line_len 
+        color = *(unsigned int *)(tex->addr
+            + tex->tex_y * tex->line_len
             + tex->tex_x * (tex->bpp / 8));
-        
+
+        // Draw pixel to screen
         put_pixel(&data->mlx, infos.start_x + infos.x, y, color);
         y++;
     }
@@ -568,14 +520,16 @@ void draw(t_game_data *data, t_texture *tex, t_infos infos)
 
 ---
 
-## 6. Door Ray Intersection
+## 6. Door System
 
 ### File: `src/game_bonus/raycast.c`
 
-#### `door_ray_intersection(...)`
+#### `door_ray_intersection(t_game_data *data, t_door *door, double *hit_dist, double *u)`
+
+Performs ray-segment intersection for animated doors.
 
 ```c
-int door_ray_intersection(t_game_data *data, t_door *door, 
+int door_ray_intersection(t_game_data *data, t_door *door,
                           double *hit_dist, double *u)
 {
     t_vec2  origin;
@@ -586,73 +540,57 @@ int door_ray_intersection(t_game_data *data, t_door *door,
 
     if (!door || !door->has_geom)
         return (0);
-    
-    // Get ray origin and direction
+
+    // Get ray parameters
     set_origin_dir(data, &origin, &dir);
-    
-    // Get the current door span (rotated based on progress)
+
+    // Get current door segment (changes with animation)
     span = door_current_span(door);
-    
+
     /*
-     * 2D LINE-LINE INTERSECTION USING CROSS PRODUCT
-     * ═══════════════════════════════════════════════
-     * 
-     * Ray:  P(t) = origin + t * dir         (t >= 0)
-     * Door: Q(s) = pivot + s * span         (s ∈ [0, 1])
-     * 
-     * Setting P(t) = Q(s):
-     *   origin + t * dir = pivot + s * span
-     * 
-     * Rearranging:
-     *   t * dir - s * span = pivot - origin = diff
-     * 
-     * Using Cramer's rule with 2D cross product:
-     *   
+     * 2D LINE-SEGMENT INTERSECTION
+     * ════════════════════════════
+     *
+     * Ray: P(t) = origin + t * dir, t ≥ 0
+     * Door: Q(s) = pivot + s * span, 0 ≤ s ≤ 1
+     *
+     * Set P(t) = Q(s):
+     *   origin + t*dir = pivot + s*span
+     *
+     * Solve using Cramer's rule:
      *   t = (diff × span) / (dir × span)
      *   s = (diff × dir) / (dir × span)
-     * 
-     * Where 2D cross product: a × b = a.x * b.y - a.y * b.x
-     * 
-     * Geometric interpretation:
-     * ─────────────────────────
-     *   - denom = dir × span = sin(angle between ray and door) * |dir| * |span|
-     *   - If denom ≈ 0, ray is parallel to door (no intersection)
-     *   - t = distance along ray to intersection
-     *   - s = position along door segment [0, 1]
+     *
+     * Where × is 2D cross product: a×b = a.x*b.y - a.y*b.x
      */
-    
+
     denom = vec2_cross(dir, span);
     if (fabs(denom) < 1e-8)
-        return (0);  // Parallel - no intersection
-    
+        return (0);  // Parallel lines
+
     diff = vec2_sub(door->pivot, origin);
     t = vec2_cross(diff, span) / denom;
     s = vec2_cross(diff, dir) / denom;
-    
-    /*
-     * VALIDITY CHECKS
-     * ═══════════════
-     * 
-     * t <= 1e-4: Intersection behind or very close to player
-     * s < 0:     Intersection before door pivot
-     * s > 1:     Intersection after door end
-     */
+
+    // Validity checks
     if (t <= 1e-4 || s < 0.0 || s > 1.0)
         return (0);
-    
-    if (hit_dist) *hit_dist = t;  // Distance to door
-    if (u) *u = s;                // Texture coordinate
+
+    if (hit_dist) *hit_dist = t;
+    if (u) *u = s;  // Texture coordinate along door
     return (1);
 }
 ```
 
 ---
 
-## 7. Sprite Camera Transform
+## 7. Sprite Rendering
 
 ### File: `src/game_bonus/sprite_helper.c`
 
-#### `sprite_camera_transform(...)`
+#### `sprite_camera_transform(t_game_data *data, t_sprite *sprite)`
+
+Transforms sprite from world space to camera space.
 
 ```c
 void sprite_camera_transform(t_game_data *data, t_sprite *sprite)
@@ -664,93 +602,67 @@ void sprite_camera_transform(t_game_data *data, t_sprite *sprite)
     /*
      * WORLD TO CAMERA SPACE TRANSFORMATION
      * ════════════════════════════════════
-     * 
-     * We need to convert sprite world position to camera-relative coordinates:
-     *   cam_x: horizontal position (for screen X)
-     *   cam_z: depth (for perspective and occlusion)
-     * 
-     * Camera basis vectors:
-     *   - dir: points forward (viewing direction)
-     *   - plane: points right (perpendicular to dir)
-     * 
-     * Together they form a 2x2 transformation matrix:
-     *   
-     *   C = | plane.x  dir.x |
-     *       | plane.y  dir.y |
-     * 
-     * To go FROM world TO camera, we need the inverse:
-     *   
-     *   C^(-1) = (1/det) * |  dir.y   -dir.x  |
-     *                      | -plane.y  plane.x |
-     * 
-     * Where det = plane.x * dir.y - dir.x * plane.y
+     *
+     * Convert sprite position relative to player into camera coordinates
+     *
+     * rel = sprite_pos - player_pos
+     *
+     * Camera transformation matrix:
+     *   C = [plane.x  dir.x]
+     *       [plane.y  dir.y]
+     *
+     * Inverse matrix (world → camera):
+     *   C⁻¹ = (1/det) * [dir.y   -dir.x]
+     *                   [-plane.y  plane.x]
      */
-    
+
     rel = vec2_sub(sprite->position, data->player.pos);
-    
-    det = data->player.plane.x * data->player.dir.y 
+
+    det = data->player.plane.x * data->player.dir.y
         - data->player.dir.x * data->player.plane.y;
-    
+
     if (fabs(det) < 1e-9)
     {
         sprite->visible = false;
         return;
     }
-    
+
     inv_det = 1.0 / det;
-    
-    /*
-     * Apply the inverse transformation:
-     * 
-     * | cam_x |            | dir.y   -dir.x  |   | rel.x |
-     * | cam_z | = inv_det *| -plane.y plane.x| * | rel.y |
-     * 
-     * cam_x = inv_det * (dir.y * rel.x - dir.x * rel.y)
-     * cam_z = inv_det * (-plane.y * rel.x + plane.x * rel.y)
-     * 
-     * Result:
-     *   cam_x > 0: sprite is to the right
-     *   cam_x < 0: sprite is to the left
-     *   cam_z > 0: sprite is in front of camera
-     *   cam_z < 0: sprite is behind camera (invisible)
-     */
-    
-    sprite->cam_x = inv_det * (data->player.dir.y * rel.x 
+
+    // Apply transformation
+    sprite->cam_x = inv_det * (data->player.dir.y * rel.x
                              - data->player.dir.x * rel.y);
-    sprite->cam_z = inv_det * (-data->player.plane.y * rel.x 
+    sprite->cam_z = inv_det * (-data->player.plane.y * rel.x
                              + data->player.plane.x * rel.y);
-    
-    set_cam_z(sprite, rel);  // Set visibility and distance
+
+    // Set visibility and distance
+    set_cam_z(sprite, rel);
 }
 ```
 
-#### `project_to_screen(...)`
+#### `project_to_screen(t_sprite *sprite, int start_x, int v_w, int v_h)`
+
+Projects 3D sprite position to 2D screen coordinates.
 
 ```c
 void project_to_screen(t_sprite *sprite, int start_x, int v_w, int v_h)
 {
     /*
-     * 3D TO 2D PROJECTION
-     * ═══════════════════
-     * 
-     * screen_x = center + (cam_x / cam_z) * (width / 2)
-     *          = center + cam_x * inv_z * (width / 2)
-     * 
-     * This is perspective projection:
-     *   - Objects further away (large cam_z) appear closer to center
-     *   - Objects to the right (positive cam_x) appear on right side of screen
-     * 
-     * sprite_height = view_height / cam_z
-     *               = view_height * inv_z
-     * 
-     * Same formula as walls - closer sprites are larger.
-     * 
-     * sprite_width = sprite_height (square sprite)
+     * PERSPECTIVE PROJECTION
+     * ══════════════════════
+     *
+     * screen_x = center_x + (cam_x / cam_z) * (width/2)
+     *          = center_x + cam_x * inv_z * (width/2)
+     *
+     * sprite_size = screen_height / cam_z
+     *             = screen_height * inv_z
+     *
+     * Same principle as walls: closer = larger
      */
-    
-    sprite->draw.screen_x = start_x + (int)((v_w / 2.0) 
+
+    sprite->draw.screen_x = start_x + (int)((v_w / 2.0)
         * (1.0 + sprite->cam_x * sprite->draw.inv_z));
-    
+
     sprite->draw.sprite_height = (int)fabs(v_h * sprite->draw.inv_z);
     sprite->draw.sprite_width = sprite->draw.sprite_height;
 }
@@ -758,103 +670,64 @@ void project_to_screen(t_sprite *sprite, int start_x, int v_w, int v_h)
 
 ---
 
-## 8. Movement Physics
+## 8. Movement and Collision
 
 ### File: `src/game_bonus/movement_2.c`
 
-#### `strafe_move(...)`
+#### `strafe_move(t_game_data *data, int direction)`
+
+Implements strafing (sideways movement).
 
 ```c
-void strafe_move(t_game_data *data, int direction)
-{
-    double  step_x;
-    double  step_y;
-
-    /*
-     * PERPENDICULAR MOVEMENT (STRAFING)
-     * ═══════════════════════════════════
-     * 
-     * To move sideways, we need a vector perpendicular to the view direction.
-     * 
-     * For a 2D vector (x, y), the perpendicular vectors are:
-     *   - (y, -x)   rotated 90° clockwise
-     *   - (-y, x)   rotated 90° counter-clockwise
-     * 
-     * If dir = (dx, dy), then strafe direction = (dy, -dx)
-     * 
-     * Example:
-     * ────────
-     * Facing North: dir = (0, -1)
-     * Strafe right: perpendicular = (-1, 0) → move West... wait, that's wrong!
-     * 
-     * Actually, we use (dir.y, -dir.x):
-     * Facing North: dir = (0, -1)
-     * (dir.y, -dir.x) = (-1, 0) → moves left (West)
-     * 
-     * So direction = +1 is left, direction = -1 is right.
-     */
-    
-    step_x = direction * data->player.dir.y * data->player.move_speed;
-    step_y = direction * -data->player.dir.x * data->player.move_speed;
-    apply_move_with_slide(data, step_x, step_y);
-}
-```
-
-#### `apply_move_with_slide(...)`
-
-```c
-static void apply_move_with_slide(t_game_data *data, double step_x, double step_y)
+void strafe_move(t_game_data *data, double step_x, double step_y)
 {
     double  base_x = data->player.pos.x;
     double  base_y = data->player.pos.y;
 
     /*
-     * WALL SLIDING
-     * ════════════
-     * 
-     * When the player walks into a wall at an angle, 
-     * we want them to slide along it, not stop completely.
-     * 
+     * WALL SLIDING ALGORITHM
+     * ══════════════════════
+     *
+     * When player hits wall at angle, slide along it instead of stopping
+     *
      * Strategy:
-     * ─────────
-     * 1. Try the full movement (step_x, step_y)
-     * 2. If blocked, try X-only movement
-     * 3. If still blocked in X, try Y-only movement
-     * 
-     * Example:
-     * ────────
-     * Player walks northeast into a horizontal wall.
-     * 
+     * 1. Try full movement (X and Y)
+     * 2. If blocked, try X-only
+     * 3. If still blocked, try Y-only
+     *
+     * Example: Player moving northeast into horizontal wall
+     *
      *   ████████████████████  ← wall
      *        ↗
      *       P
-     * 
-     * Full movement (NE) is blocked by wall.
-     * X-only movement (E) is valid → player slides east along wall.
+     *
+     * Full movement blocked → slide east along wall
      */
-    
-    // Try full movement first
+
+    // Try full movement
     if (valid_move(data, base_x + step_x, base_y + step_y))
     {
         data->player.pos.x = base_x + step_x;
         data->player.pos.y = base_y + step_y;
         return;
     }
-    
-    // X-only slide
+
+    // Try X-only slide
     if (step_x != 0.0 && valid_move(data, base_x + step_x, base_y))
         base_x += step_x;
-    
-    // Y-only slide
+
+    // Try Y-only slide
     if (step_y != 0.0 && valid_move(data, base_x, base_y + step_y))
         base_y += step_y;
-    
+
     data->player.pos.x = base_x;
     data->player.pos.y = base_y;
 }
 ```
 
-#### `valid_move(...)`
+#### `valid_move(t_game_data *data, double new_x, double new_y)`
+
+Collision detection using multiple sample points.
 
 ```c
 int valid_move(t_game_data *data, double new_x, double new_y)
@@ -862,12 +735,11 @@ int valid_move(t_game_data *data, double new_x, double new_y)
     double r = PLAYER_COLLISION_RADIUS;  // 0.2 units
 
     /*
-     * COLLISION RADIUS
-     * ════════════════
-     * 
-     * The player is not a point - they have a circular collision area.
-     * We check 9 points around the player position.
-     * 
+     * CIRCULAR COLLISION DETECTION
+     * ════════════════════════════
+     *
+     * Player has circular collision area, check 9 points:
+     *
      *     (-r, -r)  (0, -r)  (+r, -r)
      *          ●───────●───────●
      *          │       │       │
@@ -875,10 +747,10 @@ int valid_move(t_game_data *data, double new_x, double new_y)
      *          │       │       │
      *          ●───────●───────●
      *     (-r, +r)  (0, +r)  (+r, +r)
-     * 
-     * If ANY of these points is inside a wall, movement is invalid.
+     *
+     * If ANY point is inside wall, movement invalid
      */
-    
+
     if (blocked_at(data, new_x, new_y)) return (0);
     if (blocked_at(data, new_x + r, new_y)) return (0);
     if (blocked_at(data, new_x - r, new_y)) return (0);
@@ -888,166 +760,570 @@ int valid_move(t_game_data *data, double new_x, double new_y)
     if (blocked_at(data, new_x + r, new_y - r)) return (0);
     if (blocked_at(data, new_x - r, new_y + r)) return (0);
     if (blocked_at(data, new_x - r, new_y - r)) return (0);
-    
+
     return (1);
 }
 ```
 
 ---
 
-## 9. Rotation Mathematics
+## 9. Input Handling
 
-### File: `src/game_bonus/movement_3.c`
+### File: `src/game_bonus/movement.c`
 
-#### `rotate_player(...)`
+#### `on_mouse_move(int x, int y, void *param)`
+
+Mouse look implementation with warping.
 
 ```c
-void rotate_player(t_game_data *data, double angle)
+int on_mouse_move(int x, int y, void *param)
 {
-    double old_dir_x = data->player.dir.x;
-    double old_plane_x = data->player.plane.x;
+    t_game_data *data = (t_game_data *)param;
+    int         center_x;
+    int         delta;
 
-    /*
-     * 2D ROTATION MATRIX
-     * ══════════════════
-     * 
-     * To rotate a vector (x, y) by angle θ:
-     * 
-     * | x' |   | cos(θ)  -sin(θ) |   | x |
-     * | y' | = | sin(θ)   cos(θ) | * | y |
-     * 
-     * x' = x * cos(θ) - y * sin(θ)
-     * y' = x * sin(θ) + y * cos(θ)
-     * 
-     * CRITICAL: We must rotate BOTH dir AND plane!
-     * ───────────────────────────────────────────
-     * 
-     * If we only rotate dir, the camera plane would no longer be
-     * perpendicular, causing severe distortion.
-     * 
-     * Before rotation:           After rotating ONLY dir (WRONG):
-     *                           
-     *     plane                      plane
-     *   ←───┼───→                  ←───┼───→
-     *       │                          ╲
-     *       │ dir                        ╲ dir
-     *       ▼                              ↘
-     *       P                               P
-     *                           
-     *   (90° angle)              (angle ≠ 90° - DISTORTED!)
-     * 
-     * The plane must always be perpendicular to dir.
-     */
-    
-    // Rotate direction vector
-    data->player.dir.x = old_dir_x * cos(angle) - data->player.dir.y * sin(angle);
-    data->player.dir.y = old_dir_x * sin(angle) + data->player.dir.y * cos(angle);
-    
-    // Rotate camera plane (same angle to maintain perpendicularity)
-    data->player.plane.x = old_plane_x * cos(angle) - data->player.plane.y * sin(angle);
-    data->player.plane.y = old_plane_x * sin(angle) + data->player.plane.y * cos(angle);
+    (void)y;
+
+    // Prevent recursive warping
+    if (data->warping_mouse || !data->mouse.mouse_locked)
+        return (0);
+
+    center_x = WIDTH / 2;
+    delta = x - center_x;
+
+    // Dead zone and clamping
+    if (delta >= -2 && delta <= 2)
+        return (0);
+
+    if (delta > 50) delta = 50;
+    else if (delta < -50) delta = -50;
+
+    // Accumulate rotation
+    data->mouse.pending_rotation += (double)delta * 0.003;
+
+    // Warp mouse back to center
+    data->warping_mouse = 1;
+    mlx_mouse_move(data->mlx.mlx_connection, data->mlx.mlx_win,
+        center_x, HEIGHT / 2);
+    data->warping_mouse = 0;
+
+    return (0);
 }
 ```
 
 ---
 
-## 10. Complete Rendering Frame Summary
+## 10. Z-Buffering and Occlusion
 
+### Concept: Depth Buffer
+
+```c
+// Z-buffer stores distance to closest surface for each screen column
+data->z_buffer = malloc(sizeof(double) * view_width);
+
+// During wall rendering
+data->z_buffer[x] = data->rc.perp_wall_dist;
+
+// During sprite rendering
+if (sprite_z > data->z_buffer[x])
+    // Sprite is behind wall, don't draw
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                            SINGLE FRAME RENDER                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  1. TIMING                                                                   │
-│     └── Calculate dt = current_time - last_time                              │
-│                                                                              │
-│  2. INPUT PROCESSING                                                         │
-│     └── Handle keyboard (W/A/S/D, arrows, E for doors)                       │
-│     └── Handle mouse (rotation via delta movement)                           │
-│                                                                              │
-│  3. GAME STATE UPDATE                                                        │
-│     └── door_update(dt): progress += speed * dt                              │
-│     └── sprite_update_all(dt): AI movement, animation frames                 │
-│     └── Player movement: pos += dir * speed (with collision)                 │
-│                                                                              │
-│  4. WALL RAYCASTING (for each column x = 0 to WIDTH)                         │
-│     │                                                                        │
-│     ├── Calculate ray direction:                                             │
-│     │   camera_x = (2*x / WIDTH) - 1                                         │
-│     │   ray = dir + plane * camera_x                                         │
-│     │                                                                        │
-│     ├── Initialize DDA:                                                      │
-│     │   delta_dist = |1 / ray_component|                                     │
-│     │   side_dist = distance to first grid line                              │
-│     │                                                                        │
-│     ├── Run DDA loop:                                                        │
-│     │   while (!hit):                                                        │
-│     │     step to closer grid line                                           │
-│     │     check for wall ('1') or door ('D')                                 │
-│     │                                                                        │
-│     ├── Calculate perpendicular distance (fisheye correction)                │
-│     ├── Calculate wall height: h = screen_height / distance                  │
-│     ├── Calculate draw bounds: start = center - h/2, end = center + h/2      │
-│     │                                                                        │
-│     ├── Texture mapping:                                                     │
-│     │   wall_x = fractional hit position [0, 1)                              │
-│     │   tex_x = wall_x * texture_width                                       │
-│     │   tex_step = texture_height / wall_height                              │
-│     │                                                                        │
-│     └── Draw vertical stripe:                                                │
-│         for y = draw_start to draw_end:                                      │
-│           tex_y = accumulated position                                       │
-│           color = texture[tex_x][tex_y]                                      │
-│           put_pixel(x, y, color)                                             │
-│         Store distance in z_buffer[x]                                        │
-│                                                                              │
-│  5. SPRITE RENDERING                                                         │
-│     │                                                                        │
-│     ├── Transform all sprites to camera space                                │
-│     │   rel = sprite_pos - player_pos                                        │
-│     │   cam_x, cam_z = inverse_camera_matrix * rel                           │
-│     │                                                                        │
-│     ├── Filter: keep only sprites with cam_z > 0 (in front)                  │
-│     │                                                                        │
-│     ├── Sort by distance (back to front - painter's algorithm)               │
-│     │                                                                        │
-│     └── For each sprite:                                                     │
-│         Project to screen:                                                   │
-│           screen_x = center + cam_x/cam_z * (width/2)                        │
-│           size = height / cam_z                                              │
-│         For each sprite column:                                              │
-│           if z_buffer[x] > sprite_z: continue (behind wall)                  │
-│           sample from sprite sheet                                           │
-│           if not transparent: put_pixel                                      │
-│                                                                              │
-│  6. OVERLAY RENDERING                                                        │
-│     └── gun_render(): Draw weapon overlay                                    │
-│     └── draw_env(): Draw minimap                                             │
-│                                                                              │
-│  7. DISPLAY                                                                  │
-│     └── mlx_put_image_to_window(image)                                       │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+
+**Purpose:** Ensures closer objects occlude farther ones.
+
+---
+
+## 11. Mathematical Foundations
+
+### Vector Operations
+
+```c
+// 2D Cross Product (determinant)
+double vec2_cross(t_vec2 a, t_vec2 b)
+{
+    return a.x * b.y - a.y * b.x;
+}
+
+// Dot Product
+double vec2_dot(t_vec2 a, t_vec2 b)
+{
+    return a.x * b.x + a.y * b.y;
+}
+
+// Vector Subtraction
+t_vec2 vec2_sub(t_vec2 a, t_vec2 b)
+{
+    return (t_vec2){a.x - b.x, a.y - b.y};
+}
+```
+
+### Rotation Matrix
+
+```c
+// Rotate vector by angle θ
+void rotate_vector(double *x, double *y, double angle)
+{
+    double cos_a = cos(angle);
+    double sin_a = sin(angle);
+    double new_x = *x * cos_a - *y * sin_a;
+    double new_y = *x * sin_a + *y * cos_a;
+    *x = new_x;
+    *y = new_y;
+}
+```
+
+---
+
+## 12. Mathematical Derivations and Proofs
+
+This section provides rigorous mathematical proofs and derivations for the key formulas used in the raycasting engine. Understanding these proofs is essential for grasping why the algorithms work and how to extend them.
+
+### 12.1 Camera X Coordinate Derivation
+
+**Formula:** $camera_x = \frac{2x}{W} - 1$
+
+**Visual Representation:**
+```
+Screen: 0 ────────── W/2 ────────── W
+Camera: -1 ───────── 0 ─────────── 1
+
+Ray at x=0:     camera_x = -1 (leftmost)
+Ray at x=W/2:   camera_x = 0  (center)
+Ray at x=W:     camera_x = 1  (rightmost)
+```
+
+```mermaid
+graph LR
+    subgraph Screen
+        A[x=0] --> B[camera_x = -1]
+        C[x=W/2] --> D[camera_x = 0]
+        E[x=W] --> F[camera_x = 1]
+    end
+```
+
+**Derivation:**
+Consider the camera plane as a line segment from $(-1, 0)$ to $(1, 0)$ in camera space, where the center of the screen corresponds to $camera_x = 0$.
+
+For screen column $x$ (ranging from $0$ to $W-1$):
+- Leftmost column ($x=0$): $camera_x = -1$
+- Rightmost column ($x=W-1$): $camera_x = 1$
+- Center column ($x=W/2$): $camera_x = 0$
+
+The linear mapping from screen space to camera space is:
+$$camera_x = \frac{2x}{W-1} - 1$$
+
+However, for simplicity and to avoid division by zero issues, we use:
+$$camera_x = \frac{2x}{W} - 1$$
+
+This approximation is valid when $W$ is large, and the difference is negligible.
+
+**Proof of Correctness:**
+- At $x=0$: $camera_x = 0 - 1 = -1$ ✓
+- At $x=W/2$: $camera_x = 1 - 1 = 0$ ✓
+- At $x=W$: $camera_x = 2 - 1 = 1$ ✓
+
+### 12.2 Ray Direction Vector
+
+**Formula:** $\vec{ray} = \vec{dir} + \vec{plane} \cdot camera_x$
+
+**Visual Representation:**
+```
+Camera Setup:
+         plane (-)
+          │
+    ──────┼─────► dir (forward)
+          │
+         plane (+)
+
+Ray Direction: ray = dir + plane * camera_x
+
+For camera_x = 0:  ray = dir (straight ahead)
+For camera_x = 1:  ray = dir + plane (right)
+For camera_x = -1: ray = dir - plane (left)
+```
+
+```mermaid
+graph TD
+    A[Camera Position] --> B[dir vector]
+    A --> C[plane vector]
+    B --> D[ray = dir + plane * camera_x]
+    C --> D
+```
+
+**Derivation:**
+In camera space, the viewing direction is along the positive Z-axis, and the camera plane is the XY-plane.
+
+The camera plane spans from $(-1, 0)$ to $(1, 0)$ in camera coordinates.
+
+A point on the camera plane at position $camera_x$ has coordinates $(camera_x, 0)$.
+
+The ray direction from the camera origin $(0,0,0)$ to this point is simply $(camera_x, 0, 1)$, but we need to transform this back to world space.
+
+Given the camera's orientation:
+- $\vec{dir}$: forward direction vector
+- $\vec{plane}$: right direction vector (perpendicular to $\vec{dir}$)
+
+The ray direction in world space is:
+$$\vec{ray} = \vec{dir} \cdot 1 + \vec{plane} \cdot camera_x$$
+
+**Proof:**
+This is a linear combination where:
+- The center ray ($\vec{dir}$) gets weight 1
+- The plane vector gets weight $camera_x$
+
+For $camera_x = 0$: $\vec{ray} = \vec{dir}$ ✓ (center ray)
+For $camera_x = 1$: $\vec{ray} = \vec{dir} + \vec{plane}$ ✓ (rightmost ray)
+For $camera_x = -1$: $\vec{ray} = \vec{dir} - \vec{plane}$ ✓ (leftmost ray)
+
+### 12.3 DDA Delta Distance Calculation
+
+**Formula:** $\delta_x = \left|\frac{1}{ray_x}\right|$, $\delta_y = \left|\frac{1}{ray_y}\right|$
+
+**Visual Representation:**
+```
+Grid Cells:
+┌───┬───┬───┐
+│   │   │   │
+├───┼───┼───┤  Ray travels through grid
+│   │ ● │   │  ● = player position
+├───┼───┼───┤  Ray hits wall at ■
+│   │   │ ■ │
+└───┴───┴───┘
+
+Delta distances determine step sizes to next grid lines.
+```
+
+```mermaid
+graph TD
+    A[Player Position] --> B[Calculate delta_x, delta_y]
+    B --> C[Initialize side_dist_x, side_dist_y]
+    C --> D[DDA Loop: Step to next cell]
+    D --> E{Hit Wall?}
+    E -->|No| D
+    E -->|Yes| F[Record hit position]
+```
+
+**Derivation:**
+The DDA algorithm steps through grid cells. We need to know how far along the ray we must travel to reach the next vertical or horizontal grid line.
+
+Consider a ray with direction $(ray_x, ray_y)$.
+
+For vertical grid lines (constant X):
+- Current position: $pos_x$
+- Next grid line: $floor(pos_x + 1)$ if $ray_x > 0$, $ceil(pos_x - 1)$ if $ray_x < 0$
+- Distance to next X-line: $\frac{1}{|ray_x|}$ (since $ray_x$ is the X-component of direction)
+
+**Proof:**
+The ray equation: $\vec{p}(t) = \vec{pos} + t \cdot \vec{ray}$
+
+For X-coordinate: $x(t) = pos_x + t \cdot ray_x$
+
+We want $x(t) = next\_grid\_x$
+
+So: $t = \frac{next\_grid\_x - pos_x}{ray_x}$
+
+The step size $t$ to reach any grid line is $\frac{1}{|ray_x|}$, because grid lines are 1 unit apart.
+
+### 12.4 Perpendicular Distance (Fisheye Correction)
+
+**Formula:** $d_{perp} = \frac{map - pos + \frac{1-step}{2}}{ray}$
+
+**Visual Representation:**
+```
+Fisheye Effect:
+Camera ──► Wall
+
+Raw distance:     d_raw = t * |ray|  (longer for angled rays)
+Perpendicular:    d_perp = projection onto camera direction
+
+Without correction: Angled walls appear curved
+With correction:    Walls appear straight
+```
+
+```mermaid
+graph LR
+    A[Camera] --> B[Wall at angle]
+    B --> C[Raw distance: curved appearance]
+    B --> D[Perp distance: straight appearance]
+```
+
+**Derivation:**
+The raw distance $d_{raw} = t \cdot \sqrt{ray_x^2 + ray_y^2}$ suffers from fisheye distortion because rays at angles have longer paths.
+
+The perpendicular distance is the distance from camera to wall along the viewing direction.
+
+For a hit on a vertical wall (X-constant):
+- The wall is perpendicular to the X-axis
+- The perpendicular distance is the X-distance: $d_{perp} = \frac{map_x - pos_x + (1 - step_x)/2}{ray_x}$
+
+Where $(1 - step_x)/2$ corrects for the hit position within the cell.
+
+**Proof:**
+In camera space, the distance should be along the ray's perpendicular component.
+
+The formula ensures that $d_{perp}$ is the Euclidean distance projected onto the camera's viewing plane.
+
+### 12.5 Wall Height Calculation
+
+**Formula:** $h = \frac{H_{wall}}{d_{perp}}$
+
+**Visual Representation:**
+```
+Similar Triangles:
+Real World:     Screen:
+  H_wall         h_screen
+    │              │
+    ├─ d_perp ─┼─ 1 ─┼─ (focal length)
+    │              │
+
+h_screen = H_wall / d_perp  (when focal length = 1)
+```
+
+```mermaid
+graph TD
+    A[Wall Height: H_wall] --> B[Distance: d_perp]
+    B --> C[Screen Height: h = H_wall / d_perp]
+    C --> D[Draw from center ± h/2]
+```
+
+**Derivation:**
+Using similar triangles in perspective projection:
+
+The wall has real height $H_{wall}$ at distance $d_{perp}$.
+
+On screen, at distance $d_{screen}$ (focal length), it appears with height $H_{screen}$.
+
+But in our case, the "screen" distance is 1 (normalized), so:
+$$\frac{h}{H_{wall}} = \frac{1}{d_{perp}} \implies h = \frac{H_{wall}}{d_{perp}}$$
+
+**Proof:**
+This is the standard perspective projection formula. The apparent size is inversely proportional to distance.
+
+### 12.6 Texture Mapping - Wall X Coordinate
+
+**Formula:** $wall_x = pos + d \cdot ray - floor(pos + d \cdot ray)$
+
+**Visual Representation:**
+```
+Wall Surface:
+0.0 ──── 0.2 ──── 0.4 ──── 0.6 ──── 0.8 ──── 1.0
+  │      │      │      │      │      │
+  └─ Texture repeats every 1.0 unit ─┘
+
+Hit position 2.3 → wall_x = 0.3
+Hit position 5.7 → wall_x = 0.7
+```
+
+```mermaid
+graph LR
+    A[Hit Position: 2.3] --> B[wall_x = 0.3]
+    C[Texture Width: 64] --> D[tex_x = 0.3 * 64 = 19.2]
+```
+
+**Derivation:**
+For a hit at position $(hit_x, hit_y)$, the fractional part determines where on the wall we hit.
+
+For vertical walls: $wall_x = hit_y - floor(hit_y)$
+For horizontal walls: $wall_x = hit_x - floor(hit_x)$
+
+This gives a value in $[0, 1)$ representing the position along the wall.
+
+**Proof:**
+The fractional part extracts the sub-grid position, which maps to texture coordinates.
+
+### 12.7 Texture Step Calculation
+
+**Formula:** $tex\_step = \frac{tex\_height}{wall\_height}$
+
+**Derivation:**
+We need to map the screen pixels $[draw\_start, draw\_end]$ to texture pixels $[0, tex\_height)$.
+
+The mapping is linear: $tex\_y = (y - draw\_start) \cdot tex\_step$
+
+**Proof:**
+At $y = draw\_start$: $tex\_y = 0$
+At $y = draw\_end$: $tex\_y = tex\_height$
+
+The step size is $tex\_step = \frac{tex\_height}{draw\_end - draw\_start} = \frac{tex\_height}{wall\_height}$
+
+### 12.8 2D Rotation Matrix
+
+**Formula:** $\begin{pmatrix}x'\\ y'\end{pmatrix} = \begin{pmatrix}\cos\theta & -\sin\theta\\ \sin\theta & \cos\theta\end{pmatrix}\begin{pmatrix}x\\ y\end{pmatrix}$
+
+**Visual Representation:**
+```
+Rotation by θ:
+Before: (x,y)
+After:  (x',y')
+
+     y
+     │
+     │  (x',y')
+     │   /
+     │  /
+     │ /
+     │/ θ
+     └──────── x
+       (x,y)
+```
+
+```mermaid
+graph TD
+    A[Point (x,y)] --> B[Rotation Matrix]
+    B --> C[New Point (x',y')]
+    C --> D[x' = x*cosθ - y*sinθ]
+    C --> E[y' = x*sinθ + y*cosθ]
+```
+
+**Derivation:**
+Rotation by angle $\theta$ around the origin.
+
+The new coordinates:
+$x' = x \cos\theta - y \sin\theta$
+$y' = x \sin\theta + y \cos\theta$
+
+**Proof:**
+This preserves distances and angles, and is derived from the unit circle properties.
+
+### 12.9 Ray-Segment Intersection (Doors)
+
+**Formula:** $t = \frac{(Q-P)\times S}{D\times S}$
+
+**Derivation:**
+For ray from $P$ in direction $D$, intersecting segment from $Q$ to $R$.
+
+The parameter $t$ gives the intersection point $P + t D$.
+
+Using vector cross products for 2D line intersection.
+
+**Proof:**
+This is the standard formula for ray-segment intersection, ensuring $t \geq 0$ and intersection within segment bounds.
+
+### 12.10 Sprite Camera Transformation
+
+**Formula:** $\begin{pmatrix}cam_x\\ cam_z\end{pmatrix} = \begin{pmatrix}dir_y & -dir_x\\ -plane_y & plane_x\end{pmatrix} \begin{pmatrix}rel_x\\ rel_y\end{pmatrix}$
+
+**Derivation:**
+The inverse camera matrix transforms world coordinates to camera space.
+
+The camera matrix is: columns are $\vec{dir}$ and $\vec{plane}$.
+
+Inverse is the transpose (since orthogonal).
+
+**Proof:**
+This transforms sprite positions relative to camera, enabling depth sorting and projection.
+
+### 12.11 Sprite Screen Projection
+
+**Formula:** $screen_x = \frac{W}{2} \left(1 + \frac{cam_x}{cam_z}\right)$
+
+**Visual Representation:**
+```
+Camera Space:
+     cam_z (depth)
+       │
+       │  Sprite at (cam_x, cam_z)
+       │   /
+       │  /
+       │ /
+       │/
+       └──────── cam_x
+
+Screen projection: screen_x proportional to cam_x/cam_z
+```
+
+```mermaid
+graph TD
+    A[Sprite in World] --> B[Transform to Camera Space]
+    B --> C[cam_x, cam_z]
+    C --> D[screen_x = W/2 * (1 + cam_x/cam_z)]
+    D --> E[Draw sprite column]
+```
+
+**Derivation:**
+In camera space, $cam_x/cam_z$ gives the horizontal angle.
+
+The screen coordinate is proportional to this angle.
+
+**Proof:**
+This is the perspective projection formula for sprites, similar to wall projection but in 3D space.
+
+---
+
+## 13. Performance Optimizations
+
+### 1. Conditional Rendering
+- Only redraw when player moves or sprites are present
+
+### 2. Texture Caching
+- Load textures once, reuse across frames
+
+### 3. Z-Buffer Culling
+- Skip sprite pixels behind walls
+
+### 4. Fixed-Point Arithmetic
+- Use integers for performance-critical calculations
+
+### 5. Lookup Tables
+- Precompute trigonometric functions
+
+---
+
+## Complete Rendering Pipeline
+
+```mermaid
+flowchart TD
+    A[Start Frame] --> B[Calculate Delta Time dt]
+    B --> C[Process Input: Keyboard & Mouse]
+    C --> D[Update Game State]
+    D --> E[Wall Raycasting Loop x=0 to WIDTH]
+    
+    E --> F[Calculate camera_x = 2x/W - 1]
+    F --> G[Compute ray = dir + plane * camera_x]
+    G --> H[Initialize DDA: delta_dist, side_dist]
+    H --> I{DDA Loop: Hit Wall?}
+    I -->|No| J[Step to next grid cell]
+    J --> I
+    I -->|Yes| K[Calculate perpendicular distance]
+    K --> L[Compute wall height h = H_wall / d_perp]
+    L --> M[Determine draw_start, draw_end]
+    M --> N[Texture mapping: wall_x, tex_x, tex_step]
+    N --> O[Draw vertical stripe with texture]
+    O --> P[Store distance in z_buffer[x]]
+    P --> Q{x < WIDTH?}
+    Q -->|Yes| E
+    Q -->|No| R[Sprite Rendering]
+    
+    R --> S[Transform sprites to camera space]
+    S --> T[Filter & sort sprites by distance]
+    T --> U[For each sprite]
+    U --> V[Project to screen: screen_x, size]
+    V --> W[Draw sprite columns with z-buffer check]
+    W --> X{More sprites?}
+    X -->|Yes| U
+    X -->|No| Y[Overlay Rendering: Gun & Minimap]
+    Y --> Z[Display Frame with mlx_put_image_to_window]
+    Z --> AA[End Frame]
 ```
 
 ---
 
 ## Key Formulas Reference Card
 
-| Concept | Formula | Code Location |
-|---------|---------|---------------|
-| Camera X | $\text{camera\_x} = \frac{2x}{W} - 1$ | raycast.c |
-| Ray Direction | $\vec{ray} = \vec{dir} + \vec{plane} \cdot \text{camera\_x}$ | raycast_helper_4.c |
-| Delta Distance | $\delta_x = \left|\frac{1}{ray_x}\right|$ | raycast_helper.c |
-| Perpendicular Dist | $d_{perp} = \frac{map - pos + \frac{1-step}{2}}{ray}$ | raycast_helper.c |
-| Wall Height | $h = \frac{H_{screen}}{d_{perp}}$ | raycast_helper_4.c |
-| Texture U (wall_x) | $u = \text{frac}(pos + d \cdot ray)$ | raycast_helper_3.c |
-| Texture Step | $\text{step} = \frac{H_{tex}}{h_{wall}}$ | raycast_helper_2.c |
-| 2D Rotation | $\begin{pmatrix}x'\\ y'\end{pmatrix} = \begin{pmatrix}\cos\theta & -\sin\theta\\ \sin\theta & \cos\theta\end{pmatrix}\begin{pmatrix}x\\ y\end{pmatrix}$ | movement_3.c |
-| Door Intersection | $t = \frac{(Q-P)\times S}{D\times S}$ | raycast.c |
-| Camera Transform | $\begin{pmatrix}cam_x\\ cam_z\end{pmatrix} = C^{-1} \cdot \vec{rel}$ | sprite_helper.c |
-| Sprite Screen X | $x = \frac{W}{2}(1 + \frac{cam_x}{cam_z})$ | sprite_helper.c |
+| Concept | Formula | Code Location | Purpose |
+|---------|---------|---------------|---------|
+| Camera X | $camera_x = \frac{2x}{W} - 1$ | raycast.c | Map screen column to camera plane |
+| Ray Direction | $\vec{ray} = \vec{dir} + \vec{plane} \cdot camera_x$ | raycast_helper_4.c | Calculate ray direction |
+| Delta Distance | $\delta_x = \left|\frac{1}{ray_x}\right|$ | raycast_helper.c | Distance to next grid line |
+| Perpendicular Dist | $d_{perp} = \frac{map - pos + \frac{1-step}{2}}{ray}$ | raycast_helper.c | Fisheye correction |
+| Wall Height | $h = \frac{H_{screen}}{d_{perp}}$ | raycast_helper_4.c | Perspective projection |
+| Texture U | $wall_x = frac(pos + d \cdot ray)$ | raycast_helper_3.c | Hit position on wall |
+| Texture Step | $step = \frac{H_{tex}}{h_{wall}}$ | raycast_helper_2.c | Texture scaling |
+| 2D Rotation | $\begin{pmatrix}x'\\ y'\end{pmatrix} = \begin{pmatrix}\cos\theta & -\sin\theta\\ \sin\theta & \cos\theta\end{pmatrix}\begin{pmatrix}x\\ y\end{pmatrix}$ | movement_3.c | Vector rotation |
+| Door Intersection | $t = \frac{(Q-P)\times S}{D\times S}$ | raycast.c | Ray-segment intersection |
+| Camera Transform | $\begin{pmatrix}cam_x\\ cam_z\end{pmatrix} = C^{-1} \cdot \vec{rel}$ | sprite_helper.c | World to camera space |
+| Sprite Screen X | $x = \frac{W}{2}(1 + \frac{cam_x}{cam_z})$ | sprite_helper.c | 3D to 2D projection |
 
 ---
 
-*End of annotations document*
+*This comprehensive guide covers all major aspects of the Cub3D raycasting engine. Each section includes mathematical derivations, code examples, and visual explanations to provide complete understanding of the implementation.*
