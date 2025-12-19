@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/24 16:57:41 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/17 18:00:09 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/19 18:10:57 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,8 +88,6 @@ void	render_3d_view(t_game_data *data, int start_x, int view_width,
 
 void	destroy_textures(t_game_data *data)
 {
-	if (!data->textures_ready)
-		return ;
 	destroy_texture_image(&data->mlx, &data->textures.tex_no);
 	destroy_texture_image(&data->mlx, &data->textures.tex_so);
 	destroy_texture_image(&data->mlx, &data->textures.tex_we);
