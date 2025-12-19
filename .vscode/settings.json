@@ -1,5 +1,16 @@
 {
     "files.associations": {
-        "cub3d.h": "c"
+        "cub3d.h": "c",
+        "libft.h": "c",
+<<<<<<< HEAD
+        "get_next_line.h": "c"
+=======
+        "get_next_line.h": "c",
+        "stdio.h": "c",
+        "vec.h": "c",
+        "sprite.h": "c",
+        "stdbool.h": "c",
+        "door.h": "c"
+>>>>>>> reda
     }
 }

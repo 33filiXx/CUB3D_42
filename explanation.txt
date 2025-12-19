@@ -1,0 +1,104 @@
+Enemy & Sprite System – Change Log and Rationale
+==============================================
+
+Overview
+--------
+During this iteration we introduced an animated enemy sprite system and made sure
+all sprite and wall textures load correctly regardless of the working directory.
+The work spans three main areas:
+
+1. `src/game/sprite.c` + `inc/sprite.h`: new sprite data model, loading,
+   animation, movement, visibility testing, sorting, and rendering.
+2. `src/game/game.c` + `inc/cub3d.h`: wiring sprites into the main loop and
+   ensuring the shared state (z-buffer, MLX handles, etc.) exposes everything
+   sprites need.
+3. `src/game/render_3d.c`: texture bootstrap tweaks so doors/walls load from the
+   correct relative path when launching the demo from `src/game`.
+
+Details per component
+---------------------
+1. Sprite data structures (`inc/sprite.h` & `inc/cub3d.h`)
+   • Added `t_sprite`, `t_sprite_state`, and `t_draw_sprite` structs to describe
+     per-enemy metadata (map position, velocity, animation timing, camera-space
+     projection results, and a cached pointer to the shared sprite texture).
+   • Extended `t_game_data` to track the dynamic sprite array, its size, and a
+     working set of visible sprites for rendering.
+
+2. Sprite lifecycle (`src/game/sprite.c`)
+   • Texture management: `sprite_sheet_init` now owns a single static
+     `t_texture` that loads `../../textures/spritesheet.xpm` once (guarded by a
+     `loaded` flag) and hands out a pointer to every sprite. This keeps memory
+     usage low and avoids crashes from uninitialized pointers.
+   • Map ingestion: `sprite_load_map` scans the character grid for `'S'` tiles
+     and calls `append_to_sprite`, which reallocates the `data->sprite` array,
+     seeds each sprite with default animation/movement values, and centers it in
+     its map cell (`vec2_new(x + 0.5, y + 0.5)`).
+   • Animation & chasing: `sprite_update_one` advances frames via
+     `sprite_animate`, computes a normalized vector toward the player, and feeds
+     it to `sprite_try_move` (which attempts axis-separated moves while
+     respecting `valid_move` collisions).
+   • Visibility & sorting: `sprite_camera_transform` projects sprites into the
+     player’s camera plane and toggles the `visible` flag when they are in front
+     of the camera (`cam_z > 0.1`). We gather visible sprites with
+     `collect_visible_sprites`, then depth-sort them (furthest first) to enforce
+     correct overdraw.
+   • Rendering: `sprite_draw` computes screen-space bounds, clips against the
+     viewport, derives the correct animation frame (column/row inside the
+     sheet), samples texels with `texel()`, discards fully transparent pixels,
+     and blends onto the main framebuffer while honoring the per-column
+     `z_buffer`. `sprite_render_all` drives the full loop for every visible
+     sprite each frame.
+
+3. Game integration (`src/game/game.c`)
+   • `init_example_file_data` now points wall textures to
+     `../../textures/wall_*.xpm`, matching the relative path required when the
+     executable is run from `src/game`.
+   • After the map/doors are initialized we call `sprite_load_map` and a first
+     `sprite_update_all` before the initial `redraw_map`, guaranteeing that the
+     sprite array and camera data are populated before the render loop starts.
+   • The `game_loop` refreshes enemies every frame via `sprite_update_all` and
+     triggers `redraw_map` whenever the player moves or sprites exist, so both
+     walls and enemies stay synchronized.
+
+4. Rendering bootstrap (`src/game/render_3d.c`)
+   • The shared texture loader (`tex_ready`) now loads the door texture from
+     `"../../textures/door.xpm"`, matching the wall and sprite relative paths so
+     that all assets resolve correctly under `src/game`.
+
+5. Runtime/build notes
+   • `game_demo` is built into `src/game/` so you can run it in-place with
+     `./game_demo`. Because every texture path now starts with `../../`, all
+     assets load successfully without changing directories.
+   • When running from the project root you can still launch it with
+     `./src/game/game_demo`; in that case every relative path collapses to the
+     same absolute directory (`/home/rhafidi/Desktop/CUB3D_42/textures/...`).
+
+Impact
+------
+• Enemies (“S” tiles) animate, chase the player, respect collisions, and render
+  in depth-sorted order with transparency support.
+• Texture loading is deterministic regardless of working directory, eliminating
+  the previous `Texture load failed` / segmentation fault issues.
+• The new structure paves the way for future behavior states (e.g., ATTACK,
+  PATROL) since animation state/timekeeping is already in place.
+
+Usage summary
+-------------
+1. Build from the repo root:
+   ```sh
+   cd /home/rhafidi/Desktop/CUB3D_42
+   cc -g -Wall -Wextra -Werror src/game/game.c src/game/door.c src/game/render_3d.c \
+      src/game/sprite.c src/vectorslib/vec.c libft/libft.a -Iinc -Ilibft \
+      -Iminilibx-linux -Lminilibx-linux -lmlx -lXext -lX11 -lm -lz \
+      -o src/game/game_demo
+   ```
+2. Run from `src/game` (textures resolve automatically):
+   ```sh
+   cd /home/rhafidi/Desktop/CUB3D_42/src/game
+   ./game_demo
+   ```
+3. Add enemies by placing `'S'` in the map description; sprites auto-load on
+   the next run.
+
+This file should serve as a reference for what changed where, and how the new
+sprite/enemy pipeline works end-to-end.

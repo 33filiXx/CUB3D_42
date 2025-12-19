@@ -6,101 +6,113 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 14:36:09 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2024/11/16 21:26:25 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/11/27 06:04:17 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static char	*ft_checklenght(const char *s, char sep, int *j)
+static size_t	countwords(const char *s, char c)
+{
+	int		inside_word;
+	size_t	found;
+
+	found = 0;
+	while (*s)
+	{
+		inside_word = 0;
+		while (*s == c && *s)
+			s++;
+		while (*s != c && *s)
+		{
+			if (!inside_word)
+			{
+				found++;
+				inside_word = 1;
+			}
+			s++;
+		}
+	}
+	return (found);
+}
+
+static int	safemalloc(char **str, int i, size_t len)
+{
+	int	j;
+
+	j = 0;
+	str[i] = malloc(sizeof(char) * (len + 1));
+	if (!str[i])
+	{
+		while (j <= i)
+		{
+			free(str[j]);
+			j++;
+		}
+		return (1);
+	}
+	return (0);
+}
+
+static void	copy(char *dst, const char *src, size_t len)
+{
+	while (len)
+	{
+		*dst = *src;
+		dst++;
+		src++;
+		len--;
+	}
+	*dst = '\0';
+}
+
+static int	fill(char **str, const char *s, char c)
 {
 	int		i;
-	char	*p;
-	int		k;
+	size_t	len;
 
-	k = *j;
 	i = 0;
-	while (s[k] == sep && s[k])
-		k++;
-	while (s[i + k] && s[i + k] != sep)
-		i++;
-	p = (char *)malloc((i + 1) * sizeof(char));
-	if (!p)
-		return (NULL);
-	i = 0;
-	while (s[k] && s[k] != sep)
+	while (*s)
 	{
-		p[i] = s[k];
-		i++;
-		k++;
-	}
-	p[i] = '\0';
-	*j = k;
-	return (p);
-}
-
-static int	ft_countword(char const *str, char c)
-{
-	int	i;
-	int	count;
-	int	check;
-
-	i = 0;
-	count = 0;
-	check = 1;
-	while (str[i])
-	{
-		if (str[i] != c && check == 1)
+		len = 0;
+		while (*s == c && *s)
+			s++;
+		while (*s != c && *s)
 		{
-			count++;
-			check = 0;
+			s++;
+			len++;
 		}
-		else if (str[i] == c)
-			check = 1;
-		i++;
-	}
-	return (count);
-}
-
-static void	ft_free(char **ptr)
-{
-	int	i;
-
-	i = 0;
-	while (ptr[i])
-	{
-		free(ptr[i]);
-		i++;
-	}
-	free(ptr);
-	ptr = NULL;
-}
-
-char	**ft_split(char const *s, char c)
-{
-	char	**splitted;
-	int		k;
-	int		count;
-	int		check;
-
-	if (!s)
-		return (NULL);
-	count = ft_countword(s, c);
-	splitted = (char **)malloc((count + 1) * sizeof(char *));
-	if (!splitted)
-		return (NULL);
-	k = 0;
-	check = 0;
-	while (k < count)
-	{
-		splitted[k] = ft_checklenght(s, c, &check);
-		if (!splitted[k])
+		if (len > 0)
 		{
-			ft_free(splitted);
-			return (NULL);
+			if (!safemalloc(str, i, len))
+				copy(str[i], s - len, len);
+			else
+				return (1);
+			i++;
 		}
-		k++;
 	}
-	splitted[k] = NULL;
-	return (splitted);
+	return (0);
 }
+
+char	**ft_split(const char *s, char c)
+{
+	size_t	words;
+	char	**str;
+	size_t	i;
+
+	if (s == NULL)
+		return (NULL);
+	i = 0;
+	words = countwords(s, c);
+	str = malloc(sizeof(char *) * (words + 1));
+	if (str == NULL)
+		return (NULL);
+	str[words] = NULL;
+	if (!fill(str, s, c))
+		return (str);
+	while (i <= words)
+		free(str[i++]);
+	free(str);
+	return (NULL);
+}
+

@@ -1,35 +1,135 @@
 NAME = cub3D
+NAME_BONUS = cub3D_bonus
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
-LIB = ./libft/libft.a
+CFLAGS = -Wall -Wextra -Werror #-fsanitize=address -g
 
+SRCS = \
+	src/main_no_bonus.c \
+	src/main_helper.c \
+	src/main_helper_one.c \
+	src/main_helper_two.c \
+	src/pars/parsing.c \
+	src/pars/pasring_one.c \
+	src/pars/store_data_one.c \
+	src/pars/store_data_two.c \
+	src/pars/store_data_three.c \
+	src/pars/store_data_four.c \
+	src/pars/store_data_five.c \
+	src/pars/store_data.c \
+	src/pars/valid_map.c \
+	src/pars/valid_map_one.c \
+	src/pars/valid_map_two.c \
+	src/vectorslib/vec.c \
+	src/vectorslib/vec_1.c \
+	src/vectorslib/vec_2.c \
+	src/game/dda_n_helpers.c \
+	src/game/drawing.c \
+	src/game/drawing_1.c \
+	src/game/drawing_2.c \
+	src/game/drawing_3.c \
+	src/game/free_data.c \
+	src/game/free_data_1.c \
+	src/game/game.c \
+	src/game/movement.c \
+	src/game/movement_1.c \
+	src/game/movement_2.c \
+	src/game/movement_3.c \
+	src/game/raycast.c \
+	src/game/raycast_helper.c \
+	src/game/raycast_helper_2.c \
+	src/game/raycast_helper_3.c \
+	src/game/raycast_helper_4.c \
+	src/game/raycast_helper_5.c
 
-SRCS =  
+SRCS_BONUS = \
+	src/main.c \
+	src/main_helper.c \
+	src/main_helper_one.c \
+	src/main_helper_two.c \
+	src/pars_bonus/parsing.c \
+	src/pars_bonus/pasring_one.c \
+	src/pars_bonus/store_data_one.c \
+	src/pars_bonus/store_data_two.c \
+	src/pars_bonus/store_data_three.c \
+	src/pars_bonus/store_data_four.c \
+	src/pars_bonus/store_data_five.c \
+	src/pars_bonus/store_data.c \
+	src/pars_bonus/valid_map.c \
+	src/pars_bonus/valid_map_one.c \
+	src/pars_bonus/valid_map_two.c \
+	src/vectorslib/vec.c \
+	src/vectorslib/vec_1.c \
+	src/vectorslib/vec_2.c \
+	src/game_bonus/dda_n_helpers.c \
+	src/game_bonus/door.c \
+	src/game_bonus/door_geo.c \
+	src/game_bonus/door_helpers.c \
+	src/game_bonus/door_helpers1.c \
+	src/game_bonus/drawing.c \
+	src/game_bonus/drawing_1.c \
+	src/game_bonus/drawing_2.c \
+	src/game_bonus/drawing_3.c \
+	src/game_bonus/free_data.c \
+	src/game_bonus/free_data_1.c \
+	src/game_bonus/game.c \
+	src/game_bonus/gun.c \
+	src/game_bonus/minimap_sprite.c \
+	src/game_bonus/movement.c \
+	src/game_bonus/movement_1.c \
+	src/game_bonus/movement_2.c \
+	src/game_bonus/movement_3.c \
+	src/game_bonus/raycast.c \
+	src/game_bonus/raycast_helper.c \
+	src/game_bonus/raycast_helper_2.c \
+	src/game_bonus/raycast_helper_3.c \
+	src/game_bonus/raycast_helper_4.c \
+	src/game_bonus/raycast_helper_5.c \
+	src/game_bonus/sprite.c \
+	src/game_bonus/sprite_helper.c \
+	src/game_bonus/sprite_helper1.c \
+	src/game_bonus/sprite_helper2.c \
+	src/game_bonus/sprite_helper3.c \
+	src/game_bonus/sprite_helper4.c
 
+SRCS_get = libft/get_next_line/get_next_line.c libft/get_next_line/get_next_line_utils.c
 OBJS = $(SRCS:.c=.o)
+OBJS_BONUS = $(SRCS_BONUS:.c=.o)
+OBJS_get = $(SRCS_get:.c=.o)
+
+LIBFT_DIR = ./libft
+GNL_DIR = $(LIBFT_DIR)/get_next_line
+LIBFT = $(LIBFT_DIR)/libft.a
+MLX_DIR = ./minilibx-linux
+
+INC_FLAGS = -I./inc -I$(LIBFT_DIR) -I$(MLX_DIR) -I$(GNL_DIR)
+LDFLAGS = -L$(MLX_DIR) -lmlx -lX11 -lXext -lm
+
+CFLAGS += $(INC_FLAGS)
 
 all: $(NAME)
 
-$(LIB):
-	$(MAKE) -C libft/
+$(LIBFT):
+	$(MAKE) -C $(LIBFT_DIR)
 
+$(NAME): $(OBJS) $(OBJS_get) $(LIBFT)
+	$(CC) $(OBJS) $(CFLAGS) $(OBJS_get) $(LIBFT) $(LDFLAGS) -o $(NAME)
 
-$(NAME): $(OBJS) $(LIB)
-	$(CC) $(OBJS) -L./minilibx-linux -lmlx -L/usr/lib -lXext -lX11 -lm -lz $(LIB)  -o $(NAME)
+bonus: $(OBJS_BONUS) $(OBJS_get) $(LIBFT)
+	$(CC) $(OBJS_BONUS) $(CFLAGS) $(OBJS_get) $(LIBFT) $(LDFLAGS) -o $(NAME_BONUS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -Iminilibx-linux -O3 -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS)
-	$(MAKE) clean -C libft/ 
+	rm -f $(OBJS) $(OBJS_BONUS) $(OBJS_get)
+	$(MAKE) clean -C $(LIBFT_DIR)
 
 fclean: clean
-	$(MAKE) fclean -C libft/
-	rm -f $(NAME)
+	$(MAKE) fclean -C $(LIBFT_DIR)
+	rm -f $(NAME) $(NAME_BONUS)
 
-re: fclean all 
+re: fclean all
 
-.PHONY: all clean fclean re
+re_bonus: fclean bonus
 
-.SECONDARY: $(OBJS)
+.PHONY: all clean fclean re bonus re_bonus

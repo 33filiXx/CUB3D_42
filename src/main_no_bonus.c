@@ -1,0 +1,41 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main_no_bonus.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/28 10:19:29 by wel-mjiy          #+#    #+#             */
+/*   Updated: 2025/12/10 16:05:47 by rhafidi          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../inc/cub3d.h"
+
+int	main(int ac, char **av)
+{
+	t_game_data	game_data;
+
+	if (ac != 2)
+		return (report_error("Usage: ./cub3D <map.cub>"));
+	ft_bzero(&game_data, sizeof(t_game_data));
+	if (parse_and_merge(&game_data, av))
+		return (1);
+	initiate(&game_data.mlx, &game_data);
+	redraw_map(&game_data);
+	mlx_hook(game_data.mlx.mlx_win, KeyPress, KeyPressMask, key_press,
+		&game_data);
+	mlx_hook(game_data.mlx.mlx_win, KeyRelease, KeyReleaseMask, key_release,
+		&game_data);
+	mlx_loop_hook(game_data.mlx.mlx_connection, game_loop, &game_data);
+	mlx_hook(game_data.mlx.mlx_win, DestroyNotify, StructureNotifyMask,
+		close_window, &game_data);
+	mlx_put_image_to_window(game_data.mlx.mlx_connection, game_data.mlx.mlx_win,
+		game_data.mlx.img, 0, 0);
+	init_mouse(&game_data);
+	mlx_hook(game_data.mlx.mlx_win, MotionNotify, PointerMotionMask,
+		on_mouse_move, &game_data);
+	mlx_loop(game_data.mlx.mlx_connection);
+	cleanup_game(&game_data);
+	return (0);
+}
