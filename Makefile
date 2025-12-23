@@ -114,8 +114,10 @@ $(LIBFT):
 $(NAME): $(OBJS) $(OBJS_get) $(LIBFT)
 	$(CC) $(OBJS) $(CFLAGS) $(OBJS_get) $(LIBFT) $(LDFLAGS) -o $(NAME)
 
-bonus: $(OBJS_BONUS) $(OBJS_get) $(LIBFT)
+$(NAME_BONUS): $(OBJS_BONUS) $(OBJS_get) $(LIBFT)
 	$(CC) $(OBJS_BONUS) $(CFLAGS) $(OBJS_get) $(LIBFT) $(LDFLAGS) -o $(NAME_BONUS)
+
+bonus: $(NAME_BONUS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@

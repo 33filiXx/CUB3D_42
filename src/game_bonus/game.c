@@ -6,7 +6,7 @@
 /*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:04:52 by rhafidi           #+#    #+#             */
-/*   Updated: 2025/12/10 21:02:02 by rhafidi          ###   ########.fr       */
+/*   Updated: 2025/12/19 20:35:27 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,6 @@ void	initiate(t_mlx *mlx, t_game_data *game_data)
 	}
 	mlx->addr = mlx_get_data_addr(mlx->img, &mlx->bits_per_pixel,
 			&mlx->line_length, &mlx->endian);
-	printf("framebuffer bpp=%d endian=%d line_len=%d\n", mlx->bits_per_pixel,
-		mlx->endian, mlx->line_length);
 }
 
 void	redraw_map(t_game_data *data)

@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 01:51:35 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/09 04:38:27 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/23 17:26:58 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ int	next_one(char *str)
 	i = 0;
 	while (str[i])
 	{
-		if (str[i] == ',')
+		if (str[i] == ','|| str[i] == '\n')
 			return (1);
 		else if ((str[i] >= '0' && str[i] <= '9'))
 			return (0);

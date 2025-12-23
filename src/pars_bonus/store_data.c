@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/07 17:05:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/09 04:24:11 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/23 17:26:38 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ void	fill_map(char *line, t_file_data *file_data, int *update_map_arr)
 	int	i;
 
 	i = 0;
+	if (skip_empty_line(line) && *update_map_arr > file_data->map_size - 5)
+		return ;
 	if (skip_empty_line(line) && *update_map_arr == 0)
 		return ;
 	file_data->map[*update_map_arr] = malloc(file_data->element_size);

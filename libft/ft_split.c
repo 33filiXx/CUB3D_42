@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rhafidi <rhafidi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 14:36:09 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/11/27 06:04:17 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/19 20:36:03 by rhafidi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,4 +115,3 @@ char	**ft_split(const char *s, char c)
 	free(str);
 	return (NULL);
 }
-

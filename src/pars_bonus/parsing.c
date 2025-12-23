@@ -6,7 +6,7 @@
 /*   By: wel-mjiy <wel-mjiy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 10:18:41 by wel-mjiy          #+#    #+#             */
-/*   Updated: 2025/12/09 02:19:54 by wel-mjiy         ###   ########.fr       */
+/*   Updated: 2025/12/23 17:26:13 by wel-mjiy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,10 @@ void	get_size(int fd, t_file_data *file_data)
 		buffer = get_next_line(fd);
 		if (buffer && ft_strlen(buffer) > element_length)
 			element_length = ft_strlen(buffer);
-		map_length++;
 		if (!buffer)
 			break ;
+		if(!skip_empty_line(buffer))
+			map_length++;
 		if (buffer)
 			free(buffer);
 	}
